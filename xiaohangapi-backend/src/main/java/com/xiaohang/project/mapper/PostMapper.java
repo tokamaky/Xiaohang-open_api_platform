@@ -1,7 +1,7 @@
-package generator.mapper;
+package com.xiaohang.project.mapper;
 
-import com.xiaohang.project.model.entity.Post;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.xiaohang.project.model.entity.Post;
 
 /**
 * @author 14711

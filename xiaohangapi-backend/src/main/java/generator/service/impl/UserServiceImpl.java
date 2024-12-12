@@ -1,7 +1,7 @@
 package generator.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import generator.domain.User;
+import com.xiaohang.project.model.entity.User;
 import generator.service.UserService;
 import generator.mapper.UserMapper;
 import org.springframework.stereotype.Service;

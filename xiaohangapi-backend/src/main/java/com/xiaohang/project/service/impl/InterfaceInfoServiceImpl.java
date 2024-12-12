@@ -1,9 +1,9 @@
-package generator.service.impl;
+package com.xiaohang.project.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaohang.project.model.entity.InterfaceInfo;
-import generator.service.InterfaceInfoService;
 import generator.mapper.InterfaceInfoMapper;
+import generator.service.InterfaceInfoService;
 import org.springframework.stereotype.Service;
 
 /**

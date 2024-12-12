@@ -1,9 +1,9 @@
-package generator.service.impl;
+package com.xiaohang.project.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaohang.project.model.entity.Post;
-import generator.service.PostService;
 import generator.mapper.PostMapper;
+import generator.service.PostService;
 import org.springframework.stereotype.Service;
 
 /**

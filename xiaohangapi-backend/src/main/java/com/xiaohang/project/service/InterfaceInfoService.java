@@ -1,7 +1,7 @@
-package generator.service;
+package com.xiaohang.project.service;
 
-import com.xiaohang.project.model.entity.InterfaceInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xiaohang.project.model.entity.InterfaceInfo;
 
 /**
 * @author 14711

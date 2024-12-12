@@ -1,6 +1,6 @@
 package generator.service;
 
-import generator.domain.User;
+import com.xiaohang.project.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
