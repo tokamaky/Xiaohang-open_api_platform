@@ -9,5 +9,12 @@ import com.xiaohang.project.model.entity.Post;
 * @createDate 2024-12-12 10:01:16
 */
 public interface PostService extends IService<Post> {
+    /**
+     * valid
+     *
+     * @param post
+     * @param add valid it's post or not
+     */
+    void validPost(Post post, boolean add);
 
 }
