@@ -1,7 +1,7 @@
 # 第一次执行
-create database my_db;
+create database xiaohangapi;
 
-use my_db;
+use xiaohangapi;
 
 # 用户表
 create table user
