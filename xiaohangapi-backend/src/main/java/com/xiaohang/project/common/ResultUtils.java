@@ -1,62 +1,52 @@
 package com.xiaohang.project.common;
 
-/**
- * 返回工具类
- *
- * @author xiaohang
- */
+/*
+        * Utility class for returning responses.
+        *
+        * Author: Xiaohang Ji
+        */
 public class ResultUtils {
 
     /**
-     * 成功
+     * Success response
      *
-     * @param data
-     * @param <T>
-     * @return
+     * @param data The data to return
+     * @param <T> The type of the data
+     * @return A successful response
      */
     public static <T> BaseResponse<T> success(T data) {
         return new BaseResponse<>(0, data, "ok");
     }
 
     /**
-     * 失败
+     * Error response
      *
-     * @param errorCode
-     * @return
+     * @param errorCode The error code
+     * @return A failure response
      */
     public static BaseResponse error(ErrorCode errorCode) {
         return new BaseResponse<>(errorCode);
     }
 
     /**
-     * 失败
+     * Error response with custom code and message
      *
-     * @param code
-     * @param message
-     * @param description
-     * @return
+     * @param code The error code
+     * @param message The error message
+     * @return A failure response
      */
-    public static BaseResponse error(int code, String message, String description) {
-        return new BaseResponse(code, null, message, description);
+    public static BaseResponse error(int code, String message) {
+        return new BaseResponse(code, null, message);
     }
 
     /**
-     * 失败
+     * Error response with custom error code and message
      *
-     * @param errorCode
-     * @return
+     * @param errorCode The error code
+     * @param message The error message
+     * @return A failure response
      */
-    public static BaseResponse error(ErrorCode errorCode, String message, String description) {
-        return new BaseResponse(errorCode.getCode(), null, message, description);
-    }
-
-    /**
-     * 失败
-     *
-     * @param errorCode
-     * @return
-     */
-    public static BaseResponse error(ErrorCode errorCode, String description) {
-        return new BaseResponse(errorCode.getCode(), errorCode.getMessage(), description);
+    public static BaseResponse error(ErrorCode errorCode, String message) {
+        return new BaseResponse(errorCode.getCode(), null, message);
     }
 }
