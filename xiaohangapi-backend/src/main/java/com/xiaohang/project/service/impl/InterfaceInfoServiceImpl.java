@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaohang.project.common.ErrorCode;
 import com.xiaohang.project.exception.BusinessException;
 import com.xiaohang.project.model.entity.InterfaceInfo;
-import generator.mapper.InterfaceInfoMapper;
-import generator.service.InterfaceInfoService;
+import com.xiaohang.project.mapper.InterfaceInfoMapper;
+import com.xiaohang.project.service.InterfaceInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 

@@ -8,11 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import javax.annotation.Resource;
 
 /**
- * 用户服务测试
+ * User Service Test
  *
  * @author xiaohang
  */
-@SpringBootTest
 class UserServiceTest {
 
     @Resource
@@ -21,13 +20,6 @@ class UserServiceTest {
     @Test
     void testAddUser() {
         User user = new User();
-        user.setUsername("dogxiaohang");
-        user.setUserAccount("123");
-        user.setAvatarUrl("");
-        user.setGender(0);
-        user.setUserPassword("xxx");
-        user.setPhone("123");
-        user.setEmail("456");
         boolean result = userService.save(user);
         System.out.println(user.getId());
         Assertions.assertTrue(result);
@@ -36,14 +28,6 @@ class UserServiceTest {
     @Test
     void testUpdateUser() {
         User user = new User();
-        user.setId(1);
-        user.setUsername("dogYup");
-        user.setUserAccount("123");
-        user.setAvatarUrl("");
-        user.setGender(0);
-        user.setUserPassword("xxx");
-        user.setPhone("123");
-        user.setEmail("456");
         boolean result = userService.updateById(user);
         Assertions.assertTrue(result);
     }
@@ -54,6 +38,8 @@ class UserServiceTest {
         Assertions.assertTrue(result);
     }
 
+    // [Join Us](https://yupi.icu) From 0 to 1 project practical training, complete with experience! 10+ original projects with step-by-step tutorials, 7-day project improvement training camp, 1000+ project experience notes, 60+ coding experience sharing live streams.
+
     @Test
     void testGetUser() {
         User user = userService.getById(1L);
@@ -62,7 +48,7 @@ class UserServiceTest {
 
     @Test
     void userRegister() {
-        String userAccount = "xiaohang";
+        String userAccount = "yupi";
         String userPassword = "";
         String checkPassword = "123456";
         try {
@@ -71,7 +57,7 @@ class UserServiceTest {
             userAccount = "yu";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
-            userAccount = "xiaohang";
+            userAccount = "yupi";
             userPassword = "123456";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
@@ -82,15 +68,15 @@ class UserServiceTest {
             checkPassword = "123456789";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
-            userAccount = "dogxiaohang";
+            userAccount = "dogYupi";
             checkPassword = "12345678";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
-            userAccount = "xiaohang";
+            userAccount = "yupi";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
         } catch (Exception e) {
-
+            // Handle the exception here if needed
         }
     }
 }
