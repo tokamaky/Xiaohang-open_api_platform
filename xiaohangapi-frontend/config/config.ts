@@ -153,8 +153,8 @@ export default defineConfig({
     },
     {
       requestLibPath: "import { request } from '@umijs/max'",
-      schemaPath: 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
-      projectName: 'swagger',
+      schemaPath: 'http://localhost:7529/api//v2/api-docs?group=2.X%E7%89%88%E6%9C%AC',
+      projectName: 'xiaohangapi-backend',
     },
   ],
   /**
