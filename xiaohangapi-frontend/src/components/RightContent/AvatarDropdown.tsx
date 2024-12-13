@@ -8,6 +8,7 @@ import { stringify } from 'querystring';
 import React from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
+import { userLogoutUsingPost } from '@/services/xiaohangapi-backend/userController';
 
 export type GlobalHeaderRightProps = {
   menu?: boolean;
@@ -68,7 +69,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
       flushSync(() => {
         setInitialState((s) => ({ ...s, currentUser: undefined }));
       });
-      loginOut();
+      userLogoutUsingPost();
       return;
     }
     history.push(`/account/${key}`);

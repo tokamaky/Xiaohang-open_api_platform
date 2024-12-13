@@ -1,3 +1,5 @@
+import InitialStateProvider from "./.umi/plugin-initialState/Provider";
+
 declare module 'slash2';
 declare module '*.css';
 declare module '*.less';
@@ -18,3 +20,7 @@ declare module 'react-fittext';
 declare module 'bizcharts-plugin-slider';
 
 declare const REACT_APP_ENV: 'test' | 'dev' | 'pre' | false;
+
+interface InitialState{
+    loginUser?: API.UserVo;
+}
