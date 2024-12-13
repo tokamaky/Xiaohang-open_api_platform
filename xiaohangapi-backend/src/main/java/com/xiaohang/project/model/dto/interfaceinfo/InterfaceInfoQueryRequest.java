@@ -1,23 +1,23 @@
-package com.xiaohang.project.model.entity;
+package com.xiaohang.project.model.dto.interfaceinfo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.xiaohang.project.common.PageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
- * Interface Information
+ * request for query
  *
  * @author xiaohang
  */
-@TableName(value ="interface_info")
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class InterfaceInfo implements Serializable {
+public class InterfaceInfoQueryRequest extends PageRequest implements Serializable {
+
     /**
      * Primary Key
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -38,7 +38,7 @@ public class InterfaceInfo implements Serializable {
     /**
      * Request Parameters
      * [
-     *   {"name": "username", "type": "string"}
+     * {"name": "username", "type": "string"}
      * ]
      */
     private String requestParams;
@@ -68,22 +68,4 @@ public class InterfaceInfo implements Serializable {
      */
     private Long userId;
 
-    /**
-     * Creation Time
-     */
-    private Date createTime;
-
-    /**
-     * Update Time
-     */
-    private Date updateTime;
-
-    /**
-     * Is Deleted (0 - Not Deleted, 1 - Deleted)
-     */
-    @TableLogic
-    private Integer isDelete;
-
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

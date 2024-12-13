@@ -1,23 +1,22 @@
-package com.xiaohang.project.model.entity;
+package com.xiaohang.project.model.dto.interfaceinfo;
 
-import com.baomidou.mybatisplus.annotation.*;
+
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
- * Interface Information
+ * Update Request
  *
  * @author xiaohang
+ *  
  */
-@TableName(value ="interface_info")
 @Data
-public class InterfaceInfo implements Serializable {
+public class InterfaceInfoUpdateRequest implements Serializable {
+
     /**
      * Primary Key
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -63,27 +62,5 @@ public class InterfaceInfo implements Serializable {
      */
     private String method;
 
-    /**
-     * Creator User ID
-     */
-    private Long userId;
-
-    /**
-     * Creation Time
-     */
-    private Date createTime;
-
-    /**
-     * Update Time
-     */
-    private Date updateTime;
-
-    /**
-     * Is Deleted (0 - Not Deleted, 1 - Deleted)
-     */
-    @TableLogic
-    private Integer isDelete;
-
-    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

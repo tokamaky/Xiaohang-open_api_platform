@@ -1,3 +1,20 @@
 using Mysql
 using Mybatis:
-       generate the entity from sql
+        MyBatis-Plus, a popular ORM (Object-Relational Mapping) library for Java.
+        generate the entity from sql
+
+entity folder:
+        @TableId:
+            annotated field is the primary key of the database table.
+        type = IdType.AUTO:
+            Specifies that the primary key will be auto-incremented by the database
+                Benefits:
+                    Reduces the need for manual ID management in your code.
+                    Ensures that IDs are unique and sequential (depending on the database configuration).
+        @TableLogic:
+            Used to enable logical deletion in MyBatis-Plus.
+            Instead of physically deleting a record from the database,
+            MyBatis-Plus updates the value of this field to indicate that the record is "deleted."
+            Implements soft (logical) deletion, modifying the behavior of DELETE operations.
+        @TableField(exist = false):
+             Excludes a field from being mapped to the database, typically used for transient fields or constants.
