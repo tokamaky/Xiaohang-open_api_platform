@@ -8,20 +8,27 @@ package com.xiaohang.project.constant;
 public interface UserConstant {
 
     /**
-     * 用户登录态键
+     * Key used for storing the user login state in session.
      */
     String USER_LOGIN_STATE = "userLoginState";
 
-    //  ------- 权限 --------
+    /**
+     * System user ID for a virtual/system-level user.
+     */
+    long SYSTEM_USER_ID = 0;
+
+    //  region Permissions
 
     /**
-     * 默认权限
+     * Default role assigned to a regular user.
      */
-    int DEFAULT_ROLE = 0;
+    String DEFAULT_ROLE = "user";
 
     /**
-     * 管理员权限
+     * Role assigned to administrators with higher privileges.
      */
-    int ADMIN_ROLE = 1;
+    String ADMIN_ROLE = "admin";
 
+    // endregion
 }
+

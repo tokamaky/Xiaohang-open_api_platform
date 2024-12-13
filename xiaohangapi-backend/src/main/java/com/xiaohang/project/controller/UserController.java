@@ -1,19 +1,27 @@
 package com.xiaohang.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.xiaohang.project.common.BaseResponse;
+import com.xiaohang.project.common.DeleteRequest;
 import com.xiaohang.project.common.ErrorCode;
 import com.xiaohang.project.common.ResultUtils;
 import com.xiaohang.project.exception.BusinessException;
+import com.xiaohang.project.model.dto.user.UserAddRequest;
+import com.xiaohang.project.model.dto.user.UserQueryRequest;
+import com.xiaohang.project.model.dto.user.UserUpdateRequest;
 import com.xiaohang.project.model.entity.User;
 import com.xiaohang.project.model.request.UserLoginRequest;
 import com.xiaohang.project.model.request.UserRegisterRequest;
 import com.xiaohang.project.service.UserService;
+import com.xiaohang.project.model.vo.UserVO;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 用户接口
+ * user controller
  *
  * @author xiaohang
  */
@@ -32,6 +40,14 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    // region Login-related
+
+    /**
+     * User registration
+     *
+     * @param userRegisterRequest
+     * @return
+     */
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
@@ -47,6 +63,13 @@ public class UserController {
         return ResultUtils.success(result);
     }
 
+    /**
+     * User login
+     *
+     * @param userLoginRequest
+     * @param request
+     * @return
+     */
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
@@ -61,44 +84,163 @@ public class UserController {
         return ResultUtils.success(user);
     }
 
+    /**
+     * User logout
+     *
+     * @param request
+     * @return
+     */
     @PostMapping("/logout")
-    public BaseResponse<Integer> userLogout(HttpServletRequest request) {
+    public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
         if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        int result = userService.userLogout(request);
+        boolean result = userService.userLogout(request);
         return ResultUtils.success(result);
     }
 
-    @GetMapping("/current")
-    public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
-        long userId = loginUser.getId();
-        User user = userService.getById(userId);
-        User safetyUser = userService.getSafetyUser(user);
-        return ResultUtils.success(safetyUser);
+    /**
+     * Get current logged-in user
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("/get/login")
+    public BaseResponse<UserVO> getLoginUser(HttpServletRequest request) {
+        User user = userService.getLoginUser(request);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return ResultUtils.success(userVO);
     }
 
-    @GetMapping("/search")
-    public BaseResponse<List<User>> searchUser(String username, HttpServletRequest request) {
-        userService.assertAdmin(request);
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if (StringUtils.isNotBlank(username)) {
-            queryWrapper.like("username", username);
-        }
-        List<User> userList = userService.list(queryWrapper);
-        List<User> list = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
-        return ResultUtils.success(list);
-    }
+    // endregion
 
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
-        userService.assertAdmin(request);
-        if (id <= 0) {
+    // region CRUD operations
+
+    /**
+     * Add user
+     *
+     * @param userAddRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/add")
+    public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest, HttpServletRequest request) {
+        if (userAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean b = userService.removeById(id);
+        User user = new User();
+        BeanUtils.copyProperties(userAddRequest, user);
+        boolean result = userService.save(user);
+        if (!result) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        }
+        return ResultUtils.success(user.getId());
+    }
+
+    /**
+     * Delete user
+     *
+     * @param deleteRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean b = userService.removeById(deleteRequest.getId());
         return ResultUtils.success(b);
     }
 
+    /**
+     * Update user
+     *
+     * @param userUpdateRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update")
+    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request) {
+        if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = new User();
+        BeanUtils.copyProperties(userUpdateRequest, user);
+        boolean result = userService.updateById(user);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * Get user by ID
+     *
+     * @param id
+     * @param request
+     * @return
+     */
+    @GetMapping("/get")
+    public BaseResponse<UserVO> getUserById(int id, HttpServletRequest request) {
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getById(id);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return ResultUtils.success(userVO);
+    }
+
+    /**
+     * Get user list
+     *
+     * @param userQueryRequest
+     * @param request
+     * @return
+     */
+    @GetMapping("/list")
+    public BaseResponse<List<UserVO>> listUser(UserQueryRequest userQueryRequest, HttpServletRequest request) {
+        User userQuery = new User();
+        if (userQueryRequest != null) {
+            BeanUtils.copyProperties(userQueryRequest, userQuery);
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
+        List<User> userList = userService.list(queryWrapper);
+        List<UserVO> userVOList = userList.stream().map(user -> {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return userVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(userVOList);
+    }
+
+    /**
+     * Get user list with pagination
+     *
+     * @param userQueryRequest
+     * @param request
+     * @return
+     */
+    @GetMapping("/list/page")
+    public BaseResponse<Page<UserVO>> listUserByPage(UserQueryRequest userQueryRequest, HttpServletRequest request) {
+        long current = 1;
+        long size = 10;
+        User userQuery = new User();
+        if (userQueryRequest != null) {
+            BeanUtils.copyProperties(userQueryRequest, userQuery);
+            current = userQueryRequest.getCurrent();
+            size = userQueryRequest.getPageSize();
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
+        Page<User> userPage = userService.page(new Page<>(current, size), queryWrapper);
+        Page<UserVO> userVOPage = new PageDTO<>(userPage.getCurrent(), userPage.getSize(), userPage.getTotal());
+        List<UserVO> userVOList = userPage.getRecords().stream().map(user -> {
+            UserVO userVO = new UserVO();
+            BeanUtils.copyProperties(user, userVO);
+            return userVO;
+        }).collect(Collectors.toList());
+        userVOPage.setRecords(userVOList);
+        return ResultUtils.success(userVOPage);
+    }
+
+    // endregion
 }

@@ -6,77 +6,53 @@ import com.xiaohang.project.model.entity.User;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * 用户服务
+ * user service
  *
  * @author xiaohang
  */
 public interface UserService extends IService<User> {
 
     /**
-     * 用户注册
+     * User registration
      *
-     * @param userAccount 用户账户
-     * @param userPassword 用户密码
-     * @param checkPassword 校验密码
-     * @return 新用户 id
+     * @param userAccount   User account
+     * @param userPassword  User password
+     * @param checkPassword Password confirmation
+     * @return ID of the newly created user
      */
     long userRegister(String userAccount, String userPassword, String checkPassword);
 
     /**
-     * 用户登录
+     * User login
      *
-     * @param userAccount 用户账户
-     * @param userPassword 用户密码
-     * @param request
-     * @return 脱敏后的用户信息
+     * @param userAccount  User account
+     * @param userPassword User password
+     * @param request      HTTP request object
+     * @return User information with sensitive data masked
      */
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
 
     /**
-     * 用户脱敏
+     * Get the currently logged-in user
      *
-     * @param originUser
-     * @return
+     * @param request HTTP request object
+     * @return The current logged-in user's information
      */
-    User getSafetyUser(User originUser);
+    User getLoginUser(HttpServletRequest request);
 
     /**
-     * 用户注销
+     * Check if the current user is an admin
      *
-     * @param request
-     * @return
-     */
-    int userLogout(HttpServletRequest request);
-
-    /**
-     * 是否为管理员
-     *
-     * @param request
-     * @return
+     * @param request HTTP request object
+     * @return true if the user is an admin, false otherwise
      */
     boolean isAdmin(HttpServletRequest request);
 
     /**
-     * 是否为管理员
+     * User logout
      *
-     * @param user
-     * @return
+     * @param request HTTP request object
+     * @return true if logout is successful, false otherwise
      */
-    boolean isAdmin(User user);
-
-    /**
-     * 断言是管理员
-     *
-     * @param request
-     */
-    void assertAdmin(HttpServletRequest request);
-
-    /**
-     * 获取登录用户（查缓存）
-     *
-     * @param request
-     * @return
-     * @throws BusinessException 未登录则抛异常
-     */
-    User getLoginUser(HttpServletRequest request);
+    boolean userLogout(HttpServletRequest request);
 }

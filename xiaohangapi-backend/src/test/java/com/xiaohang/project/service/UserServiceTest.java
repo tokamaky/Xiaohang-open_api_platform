@@ -38,7 +38,7 @@ class UserServiceTest {
         Assertions.assertTrue(result);
     }
 
-    // [Join Us](https://yupi.icu) From 0 to 1 project practical training, complete with experience! 10+ original projects with step-by-step tutorials, 7-day project improvement training camp, 1000+ project experience notes, 60+ coding experience sharing live streams.
+    // [Join Us](https://xiaohang.icu) From 0 to 1 project practical training, complete with experience! 10+ original projects with step-by-step tutorials, 7-day project improvement training camp, 1000+ project experience notes, 60+ coding experience sharing live streams.
 
     @Test
     void testGetUser() {
@@ -48,7 +48,7 @@ class UserServiceTest {
 
     @Test
     void userRegister() {
-        String userAccount = "yupi";
+        String userAccount = "xiaohang";
         String userPassword = "";
         String checkPassword = "123456";
         try {
@@ -57,7 +57,7 @@ class UserServiceTest {
             userAccount = "yu";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
-            userAccount = "yupi";
+            userAccount = "xiaohang";
             userPassword = "123456";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
@@ -72,7 +72,7 @@ class UserServiceTest {
             checkPassword = "12345678";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
-            userAccount = "yupi";
+            userAccount = "xiaohang";
             result = userService.userRegister(userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
         } catch (Exception e) {
