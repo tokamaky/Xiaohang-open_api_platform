@@ -7,6 +7,7 @@ import React from 'react';
 
 import { requestConfig } from './requestConfig';
 import { InitialState } from './typings';
+import { getLoginUserUsingGet } from './services/xiaohangapi-backend/userController';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -20,7 +21,7 @@ export async function getInitialState(): Promise<InitialState> {
     loginUser:undefined,
   }
     try {
-      const res = await getLoginUserUsingGET();
+      const res = await getLoginUserUsingGet();
       if(res.data) {
         state.loginUser = res.data;
       }

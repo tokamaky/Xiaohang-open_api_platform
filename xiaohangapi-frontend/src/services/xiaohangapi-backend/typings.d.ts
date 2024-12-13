@@ -5,12 +5,6 @@ declare namespace API {
     message?: string;
   };
 
-  type BaseResponseInt_ = {
-    code?: number;
-    data?: number;
-    message?: string;
-  };
-
   type BaseResponseInterfaceInfo_ = {
     code?: number;
     data?: InterfaceInfo;
@@ -29,9 +23,9 @@ declare namespace API {
     message?: string;
   };
 
-  type BaseResponseListUser_ = {
+  type BaseResponseListUserVO_ = {
     code?: number;
-    data?: User[];
+    data?: UserVO[];
     message?: string;
   };
 
@@ -53,6 +47,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponsePageUserVO_ = {
+    code?: number;
+    data?: PageUserVO_;
+    message?: string;
+  };
+
   type BaseResponsePost_ = {
     code?: number;
     data?: Post;
@@ -62,6 +62,12 @@ declare namespace API {
   type BaseResponseUser_ = {
     code?: number;
     data?: User;
+    message?: string;
+  };
+
+  type BaseResponseUserVO_ = {
+    code?: number;
+    data?: UserVO;
     message?: string;
   };
 
@@ -75,6 +81,11 @@ declare namespace API {
   };
 
   type getPostByIdUsingGETParams = {
+    /** id */
+    id?: number;
+  };
+
+  type getUserByIdUsingGETParams = {
     /** id */
     id?: number;
   };
@@ -185,6 +196,36 @@ declare namespace API {
     userId?: number;
   };
 
+  type listUserByPageUsingGETParams = {
+    createTime?: string;
+    current?: number;
+    gender?: number;
+    id?: number;
+    pageSize?: number;
+    sortField?: string;
+    sortOrder?: string;
+    updateTime?: string;
+    userAccount?: string;
+    userAvatar?: string;
+    userName?: string;
+    userRole?: string;
+  };
+
+  type listUserUsingGETParams = {
+    createTime?: string;
+    current?: number;
+    gender?: number;
+    id?: number;
+    pageSize?: number;
+    sortField?: string;
+    sortOrder?: string;
+    updateTime?: string;
+    userAccount?: string;
+    userAvatar?: string;
+    userName?: string;
+    userRole?: string;
+  };
+
   type OrderItem = {
     asc?: boolean;
     column?: string;
@@ -211,6 +252,19 @@ declare namespace API {
     orders?: OrderItem[];
     pages?: number;
     records?: Post[];
+    searchCount?: boolean;
+    size?: number;
+    total?: number;
+  };
+
+  type PageUserVO_ = {
+    countId?: string;
+    current?: number;
+    maxLimit?: number;
+    optimizeCountSql?: boolean;
+    orders?: OrderItem[];
+    pages?: number;
+    records?: UserVO[];
     searchCount?: boolean;
     size?: number;
     total?: number;
@@ -264,11 +318,6 @@ declare namespace API {
     reviewStatus?: number;
   };
 
-  type searchUserUsingGETParams = {
-    /** username */
-    username?: string;
-  };
-
   type User = {
     avatarUrl?: string;
     createTime?: string;
@@ -285,6 +334,15 @@ declare namespace API {
     username?: string;
   };
 
+  type UserAddRequest = {
+    gender?: number;
+    userAccount?: string;
+    userAvatar?: string;
+    userName?: string;
+    userPassword?: string;
+    userRole?: string;
+  };
+
   type UserLoginRequest = {
     userAccount?: string;
     userPassword?: string;
@@ -294,5 +352,26 @@ declare namespace API {
     checkPassword?: string;
     userAccount?: string;
     userPassword?: string;
+  };
+
+  type UserUpdateRequest = {
+    gender?: number;
+    id?: number;
+    userAccount?: string;
+    userAvatar?: string;
+    userName?: string;
+    userPassword?: string;
+    userRole?: string;
+  };
+
+  type UserVO = {
+    createTime?: string;
+    gender?: number;
+    id?: number;
+    updateTime?: string;
+    userAccount?: string;
+    userAvatar?: string;
+    userName?: string;
+    userRole?: string;
   };
 }

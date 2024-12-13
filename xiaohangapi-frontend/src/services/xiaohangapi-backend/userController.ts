@@ -2,22 +2,82 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** getCurrentUser GET /api/user/current */
-export async function getCurrentUserUsingGet(options?: { [key: string]: any }) {
-  return request<API.BaseResponseUser_>('/api/user/current', {
-    method: 'GET',
+/** addUser POST /api/user/add */
+export async function addUserUsingPost(body: API.UserAddRequest, options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/user/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }
 
 /** deleteUser POST /api/user/delete */
-export async function deleteUserUsingPost(body: number, options?: { [key: string]: any }) {
+export async function deleteUserUsingPost(
+  body: API.DeleteRequest,
+  options?: { [key: string]: any },
+) {
   return request<API.BaseResponseBoolean_>('/api/user/delete', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     data: body,
+    ...(options || {}),
+  });
+}
+
+/** getUserById GET /api/user/get */
+export async function getUserByIdUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getUserByIdUsingGETParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseUserVO_>('/api/user/get', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+/** getLoginUser GET /api/user/get/login */
+export async function getLoginUserUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseUserVO_>('/api/user/get/login', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** listUser GET /api/user/list */
+export async function listUserUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.listUserUsingGETParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseListUserVO_>('/api/user/list', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+/** listUserByPage GET /api/user/list/page */
+export async function listUserByPageUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.listUserByPageUsingGETParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponsePageUserVO_>('/api/user/list/page', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
     ...(options || {}),
   });
 }
@@ -39,7 +99,7 @@ export async function userLoginUsingPost(
 
 /** userLogout POST /api/user/logout */
 export async function userLogoutUsingPost(options?: { [key: string]: any }) {
-  return request<API.BaseResponseInt_>('/api/user/logout', {
+  return request<API.BaseResponseBoolean_>('/api/user/logout', {
     method: 'POST',
     ...(options || {}),
   });
@@ -60,17 +120,17 @@ export async function userRegisterUsingPost(
   });
 }
 
-/** searchUser GET /api/user/search */
-export async function searchUserUsingGet(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.searchUserUsingGETParams,
+/** updateUser POST /api/user/update */
+export async function updateUserUsingPost(
+  body: API.UserUpdateRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseListUser_>('/api/user/search', {
-    method: 'GET',
-    params: {
-      ...params,
+  return request<API.BaseResponseBoolean_>('/api/user/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
+    data: body,
     ...(options || {}),
   });
 }
