@@ -17,7 +17,6 @@ import lombok.Data;
 @TableName(value = "user")
 @Data
 public class User implements Serializable {
-
     /**
      * id
      */
@@ -27,7 +26,7 @@ public class User implements Serializable {
     /**
      * 用户昵称
      */
-    private String username;
+    private String userName;
 
     /**
      * 账号
@@ -37,7 +36,7 @@ public class User implements Serializable {
     /**
      * 用户头像
      */
-    private String avatarUrl;
+    private String userAvatar;
 
     /**
      * 性别
@@ -45,24 +44,14 @@ public class User implements Serializable {
     private Integer gender;
 
     /**
+     * 用户角色: user, admin
+     */
+    private String userRole;
+
+    /**
      * 密码
      */
     private String userPassword;
-
-    /**
-     * 电话
-     */
-    private String phone;
-
-    /**
-     * 邮箱
-     */
-    private String email;
-
-    /**
-     * 状态 0 - 正常
-     */
-    private Integer userStatus;
 
     /**
      * 创建时间
@@ -70,7 +59,7 @@ public class User implements Serializable {
     private Date createTime;
 
     /**
-     *
+     * 更新时间
      */
     private Date updateTime;
 
@@ -80,10 +69,6 @@ public class User implements Serializable {
     @TableLogic
     private Integer isDelete;
 
-    /**
-     * 用户角色 0 - 普通用户 1 - 管理员
-     */
-    private Integer userRole;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

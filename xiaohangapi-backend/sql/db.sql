@@ -14,8 +14,6 @@ CREATE TABLE IF NOT EXISTS user
     gender       TINYINT                                NULL COMMENT 'Gender',
     userRole     VARCHAR(256) DEFAULT 'user'            NOT NULL COMMENT 'User Role: user / admin',
     userPassword VARCHAR(512)                           NOT NULL COMMENT 'Password',
-    `accessKey`  VARCHAR(512)                           NOT NULL COMMENT 'Access Key',
-    `secretKey`  VARCHAR(512)                           NOT NULL COMMENT 'Secret Key',
     createTime   DATETIME     DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT 'Creation Time',
     updateTime   DATETIME     DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update Time',
     isDelete     TINYINT      DEFAULT 0                 NOT NULL COMMENT 'Is Deleted',
