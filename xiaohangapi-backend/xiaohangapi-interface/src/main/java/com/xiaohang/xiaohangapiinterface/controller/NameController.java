@@ -1,6 +1,6 @@
 package com.xiaohang.xiaohangapiinterface.controller;
 
-import com.xiaohang.xiaohangapiinterface.model.User;
+import com.xiaohang.xiaohangapiclientsdk.model.User;
 import org.springframework.web.bind.annotation.*;
 
 /**

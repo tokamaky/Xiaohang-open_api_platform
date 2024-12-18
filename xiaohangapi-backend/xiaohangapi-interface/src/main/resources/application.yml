@@ -1,4 +1,8 @@
 server:
   port:8123
-  servlet:
+servlet:
     context-path: /api
+xiaohangapi:
+  client:
+    access-key: xiaohang
+    secret-key: abcdefgh

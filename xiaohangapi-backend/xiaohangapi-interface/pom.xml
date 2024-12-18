@@ -47,6 +47,11 @@
             <version>5.8.16</version>
         </dependency>
         <dependency>
+            <groupId>com.xiaohang</groupId>
+            <artifactId>xiaohangapi-client-sdk</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
