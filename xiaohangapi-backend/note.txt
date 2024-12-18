@@ -18,3 +18,8 @@ entity folder:
             Implements soft (logical) deletion, modifying the behavior of DELETE operations.
         @TableField(exist = false):
              Excludes a field from being mapped to the database, typically used for transient fields or constants.
+
+
+
+
+             why we should use Enum
