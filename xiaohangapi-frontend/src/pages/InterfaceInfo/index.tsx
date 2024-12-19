@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import {Button, Card, Descriptions, Form, message, Input, Spin, Divider} from 'antd';
 import {
   getInterfaceInfoByIdUsingGet,
-  invokeInterfaceInfoUsingPOST,
+  invokeInterfaceInfoUsingPost,
 } from '@/services/xiaohangapi-backend/interfaceInfoController';
 import { useParams } from '@@/exports';
 
@@ -47,7 +47,7 @@ const Index: React.FC = () => {
     }
     setInvokeLoading(true);
     try {
-      const res = await getInterfaceInfoByIdUsingGet({
+      const res = await invokeInterfaceInfoUsingPost({
         id: params.id,
         ...values,
       });

@@ -153,7 +153,7 @@ export default defineConfig({
     },
     {
       requestLibPath: "import { request } from '@umijs/max'",
-      schemaPath: 'http://localhost:7529/api//v2/api-docs?group=2.X%E7%89%88%E6%9C%AC',
+      schemaPath: 'http://localhost:7529/api/v2/api-docs?group=2.X%E7%89%88%E6%9C%AC',
       projectName: 'xiaohangapi-backend',
     },
   ],
