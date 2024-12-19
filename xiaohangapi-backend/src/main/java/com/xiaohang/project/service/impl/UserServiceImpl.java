@@ -2,6 +2,8 @@ package com.xiaohang.project.service.impl;
 
 import static com.xiaohang.project.constant.UserConstant.USER_LOGIN_STATE;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaohang.project.common.ErrorCode;
@@ -68,7 +70,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
 
             // 3. Generate accessKey and secretKey
-
+            String accessKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(5));
+            String secretKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
             // 4. Save user information to the database
             User user = new User();
             user.setUserAccount(userAccount);
