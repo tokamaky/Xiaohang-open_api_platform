@@ -90,6 +90,10 @@ declare namespace API {
     id?: number;
   };
 
+  type IdRequest = {
+    id?: number;
+  };
+
   type InterfaceInfo = {
     createTime?: string;
     description?: string;
@@ -319,19 +323,16 @@ declare namespace API {
   };
 
   type User = {
-    avatarUrl?: string;
     createTime?: string;
-    email?: string;
     gender?: number;
     id?: number;
     isDelete?: number;
-    phone?: string;
     updateTime?: string;
     userAccount?: string;
+    userAvatar?: string;
+    userName?: string;
     userPassword?: string;
-    userRole?: number;
-    userStatus?: number;
-    username?: string;
+    userRole?: string;
   };
 
   type UserAddRequest = {
