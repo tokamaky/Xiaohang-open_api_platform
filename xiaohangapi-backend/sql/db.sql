@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS xiaohangapi.`interface_info`
     `name`           VARCHAR(256)                       NOT NULL COMMENT 'Name',
     `description`    VARCHAR(256)                       NULL COMMENT 'Description',
     `url`            VARCHAR(512)                       NOT NULL COMMENT 'Interface URL',
+    `requestParams`  TEXT                               NULL COMMENT 'Request Params',
     `requestHeader`  TEXT                               NULL COMMENT 'Request Header',
     `responseHeader` TEXT                               NULL COMMENT 'Response Header',
     `status`         INT      DEFAULT 0                 NOT NULL COMMENT 'Interface Status (0-Disabled, 1-Enabled)',
