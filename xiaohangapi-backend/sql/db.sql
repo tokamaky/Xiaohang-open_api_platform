@@ -64,6 +64,19 @@ CREATE TABLE IF NOT EXISTS xiaohangapi.`interface_info`
     `isDelete`       TINYINT  DEFAULT 0                 NOT NULL COMMENT 'Is Deleted (0-Not Deleted, 1-Deleted)'
 ) COMMENT 'Interface Information';
 
+CREATE TABLE IF NOT EXISTS xiaohangapi.`user_interface_info`
+(
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Primary key'  primary key,
+    `userId` BIGINT NOT NULL COMMENT 'User ID who is making the API call',
+    `interfaceInfoId` BIGINT NOT NULL COMMENT 'API ID',
+    `totalNum` INT DEFAULT 0 NOT NULL COMMENT 'Total number of calls',
+    `leftNum` INT DEFAULT 0 NOT NULL COMMENT 'Remaining number of calls',
+    `status` INT DEFAULT 0 NOT NULL COMMENT '0 - Active, 1 - Disabled',
+    `createTime` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT 'Creation time',
+    `updateTime` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+    `isDelete` TINYINT DEFAULT 0 NOT NULL COMMENT 'Deletion status (0 - Not deleted, 1 - Deleted)'
+) COMMENT 'User-API relationship';
+
 
 -- Insert Sample Data
 INSERT INTO xiaohangapi.`interface_info` (`name`, `description`, `url`, `requestHeader`, `responseHeader`, `status`,
