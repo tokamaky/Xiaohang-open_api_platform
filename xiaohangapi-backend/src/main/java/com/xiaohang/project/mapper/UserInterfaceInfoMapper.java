@@ -1,7 +1,8 @@
-package generator.mapper;
+package com.xiaohang.project.mapper;
 
-import generator.domain.UserInterfaceInfo;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.xiaohang.project.model.entity.UserInterfaceInfo;
 
 /**
 * @author 14711

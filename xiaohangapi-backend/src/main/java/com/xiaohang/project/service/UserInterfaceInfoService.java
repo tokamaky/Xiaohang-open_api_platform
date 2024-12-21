@@ -1,7 +1,8 @@
-package generator.service;
+package com.xiaohang.project.service;
 
-import generator.domain.UserInterfaceInfo;
+
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xiaohang.project.model.entity.UserInterfaceInfo;
 
 /**
 * @author 14711
