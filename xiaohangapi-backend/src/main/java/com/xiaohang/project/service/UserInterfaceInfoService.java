@@ -11,4 +11,13 @@ import com.xiaohang.project.model.entity.UserInterfaceInfo;
 */
 public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
 
+    void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add);
+
+    /**
+     * API Call Statistics
+     * @param interfaceInfoId
+     * @param userId
+     * @return
+     */
+    boolean invokeCount(long interfaceInfoId, long userId);
 }
