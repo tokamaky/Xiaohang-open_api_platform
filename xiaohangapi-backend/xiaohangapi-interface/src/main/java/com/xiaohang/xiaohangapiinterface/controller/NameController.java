@@ -44,7 +44,7 @@ public class NameController {
 //
        //  }
         // todo 实际情况中是从数据库中查出 secretKey
-        String serverSign = SignUtils.genSign(body, "abcdefgh");
+        String serverSign = SignUtils.getSign(body, "abcdefgh");
         if (!sign.equals(serverSign)) {
           throw new RuntimeException("无权限");
         }
