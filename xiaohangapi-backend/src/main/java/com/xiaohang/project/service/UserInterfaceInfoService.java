@@ -2,7 +2,7 @@ package com.xiaohang.project.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xiaohang.project.model.entity.UserInterfaceInfo;
+import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 
 /**
 * @author 14711

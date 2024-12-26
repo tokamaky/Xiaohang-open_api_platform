@@ -15,7 +15,7 @@ import com.xiaohang.project.model.dto.post.PostUpdateRequest;
 import com.xiaohang.project.model.entity.Post;
 import com.xiaohang.project.service.PostService;
 import com.xiaohang.project.service.UserService;
-import com.xiaohang.project.model.entity.User;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

@@ -11,7 +11,7 @@ import com.xiaohang.project.exception.BusinessException;
 import com.xiaohang.project.model.dto.user.UserAddRequest;
 import com.xiaohang.project.model.dto.user.UserQueryRequest;
 import com.xiaohang.project.model.dto.user.UserUpdateRequest;
-import com.xiaohang.project.model.entity.User;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import com.xiaohang.project.model.request.UserLoginRequest;
 import com.xiaohang.project.model.request.UserRegisterRequest;
 import com.xiaohang.project.service.UserService;

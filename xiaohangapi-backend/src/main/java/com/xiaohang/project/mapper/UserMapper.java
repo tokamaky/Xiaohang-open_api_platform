@@ -1,6 +1,6 @@
 package com.xiaohang.project.mapper;
 
-import com.xiaohang.project.model.entity.User;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

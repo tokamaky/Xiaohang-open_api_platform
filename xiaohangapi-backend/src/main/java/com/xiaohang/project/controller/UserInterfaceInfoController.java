@@ -13,8 +13,8 @@ import com.xiaohang.project.exception.BusinessException;
 import com.xiaohang.project.model.dto.userinterfaceinfo.UserInterfaceInfoAddRequest;
 import com.xiaohang.project.model.dto.userinterfaceinfo.UserInterfaceInfoQueryRequest;
 import com.xiaohang.project.model.dto.userinterfaceinfo.UserInterfaceInfoUpdateRequest;
-import com.xiaohang.project.model.entity.User;
-import com.xiaohang.project.model.entity.UserInterfaceInfo;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
+import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 import com.xiaohang.project.service.UserInterfaceInfoService;
 import com.xiaohang.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +42,6 @@ public class UserInterfaceInfoController {
 
     @Resource
     private UserService userService;
-
-    // region 增删改查
 
     /**
      * 创建

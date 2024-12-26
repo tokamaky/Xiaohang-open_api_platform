@@ -12,7 +12,7 @@ import com.xiaohang.xiaohangapiclientsdk.model.User;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.genSign;
+import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.getSign;
 
 /**
  * 调用第三方接口的客户端
@@ -58,7 +58,7 @@ public class XiaohangApiClient {
         hashMap.put("nonce", RandomUtil.randomNumbers(4));
         hashMap.put("body", body);
         hashMap.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        hashMap.put("sign", genSign(body, secretKey));
+        hashMap.put("sign", getSign(body, secretKey));
         return hashMap;
     }
 

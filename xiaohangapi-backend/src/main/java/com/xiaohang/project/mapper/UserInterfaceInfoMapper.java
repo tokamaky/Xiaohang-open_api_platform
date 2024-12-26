@@ -2,7 +2,7 @@ package com.xiaohang.project.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xiaohang.project.model.entity.UserInterfaceInfo;
+import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 
 /**
 * @author 14711

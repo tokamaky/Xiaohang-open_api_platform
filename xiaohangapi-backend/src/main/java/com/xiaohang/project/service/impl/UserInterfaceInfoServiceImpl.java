@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaohang.project.common.ErrorCode;
 import com.xiaohang.project.exception.BusinessException;
-import com.xiaohang.project.model.entity.UserInterfaceInfo;
+import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 import com.xiaohang.project.service.UserInterfaceInfoService;
 import com.xiaohang.project.mapper.UserInterfaceInfoMapper;
 import org.springframework.stereotype.Service;

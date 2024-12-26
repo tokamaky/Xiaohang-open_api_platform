@@ -1,6 +1,6 @@
 package com.xiaohang.project.service;
 
-import com.xiaohang.project.model.entity.User;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

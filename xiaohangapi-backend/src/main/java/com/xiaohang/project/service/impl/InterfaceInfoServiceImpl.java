@@ -3,7 +3,7 @@ package com.xiaohang.project.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaohang.project.common.ErrorCode;
 import com.xiaohang.project.exception.BusinessException;
-import com.xiaohang.project.model.entity.InterfaceInfo;
+import com.xiaohang.xiaohangapicommon.model.entity.InterfaceInfo;
 import com.xiaohang.project.mapper.InterfaceInfoMapper;
 import com.xiaohang.project.service.InterfaceInfoService;
 import org.apache.commons.lang3.StringUtils;

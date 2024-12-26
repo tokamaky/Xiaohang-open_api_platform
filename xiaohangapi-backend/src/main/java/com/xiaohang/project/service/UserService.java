@@ -2,7 +2,7 @@ package com.xiaohang.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xiaohang.project.exception.BusinessException;
-import com.xiaohang.project.model.entity.User;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import javax.servlet.http.HttpServletRequest;
 
 /**
