@@ -1,4 +1,4 @@
-package com.xiaohang.project.model.enums;
+package com.xiaohang.xiaohangapicommon.model.enums;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.xiaohang.project.model.vo;
+package com.xiaohang.xiaohangapicommon.model.vo;
 
 import lombok.Data;
 

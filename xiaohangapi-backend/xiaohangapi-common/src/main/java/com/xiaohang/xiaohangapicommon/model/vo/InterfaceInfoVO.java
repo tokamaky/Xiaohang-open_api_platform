@@ -1,6 +1,7 @@
-package com.xiaohang.project.model.vo;
+package com.xiaohang.xiaohangapicommon.model.vo;
 
-import com.xiaohang.project.model.entity.InterfaceInfo;
+
+import com.xiaohang.xiaohangapicommon.model.entity.InterfaceInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
