@@ -29,6 +29,7 @@ const TableList: React.FC = () => {
    * @zh-CN 新建窗口的弹窗
    *  */
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
   /**
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
@@ -389,16 +390,11 @@ const TableList: React.FC = () => {
           />
         )}
       </Drawer>
-      <CreateModal
-        columns={columns}
-        onCancel={() => {
-          handleModalVisible(false);
-        }}
-        onSubmit={(values) => {
-           handleAdd(values);
-        }}
-        visible={createModalVisible}
-      />
+      <CreateModal columns={columns} onCancel={() => {
+        handleModalVisible(false)
+      }} onSubmit={(values) => {
+        handleAdd(values)
+      }} visible={createModalVisible}/>
     </PageContainer>
   );
 };

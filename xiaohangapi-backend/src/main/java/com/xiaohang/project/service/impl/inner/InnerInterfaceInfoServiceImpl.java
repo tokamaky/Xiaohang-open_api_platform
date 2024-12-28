@@ -23,7 +23,7 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService 
     private InterfaceInfoMapper interfaceInfoMapper;
 
     @Override
-    public InterfaceInfo getInterfaceInfo(String url, String method) {
+    public InterfaceInfo getInvokeInterfaceInfo(String url, String method) {
         if (StringUtils.isAnyBlank(url, method)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

@@ -7,23 +7,17 @@ import React from 'react';
 export type Props = {
   columns: ProColumns<API.InterfaceInfo>[];
   onCancel: () => void;
-  onSubmit: (values: API.InterfaceInfo) => Promise<void>;
-  visible: boolean;
+  onSubmit: (values: API.InterfaceInfo) => Promise<boolean>;
+  open: boolean;
 };
 
 const CreateModal: React.FC<Props> = (props) => {
-  const { visible, columns, onCancel, onSubmit } = props;
-
+  const { columns, open, onCancel, onSubmit } = props;
   return (
-    <Modal visible={visible} footer={null} onCancel={() => onCancel?.()}>
-      <ProTable
-        type="form"
-        columns={columns}
-        onSubmit={async (value) => {
-          onSubmit?.(value);
-        }}
-      />
+    <Modal title={'新建接口'} open={open} onCancel={() => onCancel?.()}>
+      <ProTable columns={columns} type={'form'} onSubmit={async (value) => onSubmit?.(value)} />
     </Modal>
   );
 };
+
 export default CreateModal;
