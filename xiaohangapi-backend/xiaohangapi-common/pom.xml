@@ -13,12 +13,11 @@
 
         <groupId>com.xiaohang</groupId>
         <artifactId>xiaohangapi-common</artifactId>
-        <version>0.01</version>
+        <version>0.0.1</version>
 
         <properties>
-            <maven.compiler.source>8</maven.compiler.source>
-            <maven.compiler.target>8</maven.compiler.target>
-            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+            <maven.compiler.source>17</maven.compiler.source>
+            <maven.compiler.target>17</maven.compiler.target>
         </properties>
 
         <dependencies>
@@ -62,8 +61,8 @@
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <scope>test</scope>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <optional>true</optional>
             </dependency>
             <!-- https://mvnrepository.com/artifact/junit/junit -->
             <dependency>

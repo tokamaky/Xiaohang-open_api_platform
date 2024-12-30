@@ -38,7 +38,9 @@ xiaohangapi:
     access-key: abcdefgh
 dubbo:
   application:
-    name: dubbo-springboot-demo-provider
+    name: xiaohangapi-provider
+  qos:
+      enable: false
   protocol:
     name: dubbo
     port: -1

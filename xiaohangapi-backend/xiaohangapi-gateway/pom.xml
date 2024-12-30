@@ -26,13 +26,14 @@
         <dependency>
             <groupId>com.xiaohang</groupId>
             <artifactId>xiaohangapi-common</artifactId>
-            <version>0.01</version>
+            <version>0.0.1</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
-            <version>3.0.9</version>
+            <version>3.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
