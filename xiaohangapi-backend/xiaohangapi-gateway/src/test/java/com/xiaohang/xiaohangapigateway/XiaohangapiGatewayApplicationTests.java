@@ -16,4 +16,9 @@ class XiaohangapiGatewayApplicationTests {
     void testRpc() {
         System.out.println(DemoService.sayHello("world"));
     }
+
+    @Test
+    void testRpc2() {
+        System.out.println(DemoService.sayHello2("world"));
+    }
 }
