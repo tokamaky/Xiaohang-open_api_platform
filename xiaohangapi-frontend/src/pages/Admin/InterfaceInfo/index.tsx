@@ -164,7 +164,7 @@ const TableList: React.FC = () => {
 
   const columns: ProColumns<API.InterfaceInfo>[] = [
     {
-      title: '接口名称',
+      title: 'Interface Name',
       dataIndex: 'name',
       valueType: 'text',
       formItemProps: {
@@ -174,12 +174,12 @@ const TableList: React.FC = () => {
       }
     },
     {
-      title: '描述',
+      title: 'Description',
       dataIndex: 'description',
       valueType: 'textarea',
     },
     {
-      title: '请求方法',
+      title: 'Request Method',
       dataIndex: 'method',
       valueType: 'text',
     },
@@ -189,37 +189,37 @@ const TableList: React.FC = () => {
       valueType: 'text',
     },
     {
-      title: '请求参数',
+      title: 'Request Params',
       dataIndex: 'requestParams',
       valueType: 'jsonCode',
     },
     {
-      title: '请求头',
+      title: 'Request Header',
       dataIndex: 'requestHeader',
       valueType: 'jsonCode',
     },
     {
-      title: '响应头',
+      title: 'Response Header',
       dataIndex: 'responseHeader',
       valueType: 'jsonCode',
     },
     {
-      title: '状态',
+      title: 'Status',
       dataIndex: 'status',
       hideInForm: true,
       valueEnum: {
         0: {
-          text: '关闭',
+          text: 'Closed',
           status: 'Default',
         },
         1: {
-          text: '开启',
+          text: 'Started',
           status: 'Processing',
         },
       },
     },
     {
-      title: '操作',
+      title: 'Operation',
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
@@ -230,7 +230,7 @@ const TableList: React.FC = () => {
             setCurrentRow(record);
           }}
         >
-          修改
+          Modify
         </a>,
         record.status === 0 ? <a
           key="config"
@@ -238,7 +238,7 @@ const TableList: React.FC = () => {
             handleOnline(record);
           }}
         >
-          发布
+          Publish
         </a> : null,
         record.status === 1 ? <Button
           type="text"
@@ -248,7 +248,7 @@ const TableList: React.FC = () => {
             handleOffline(record);
           }}
         >
-          下线
+          Offline
         </Button> : null,
         <Button
           type="text"
@@ -258,7 +258,7 @@ const TableList: React.FC = () => {
             handleRemove(record);
           }}
         >
-          删除
+          Delete
         </Button>,
       ],
     },
@@ -267,7 +267,7 @@ const TableList: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<API.RuleListItem, API.PageParams>
-        headerTitle={'查询表格'}
+        headerTitle={'Query Table'}
         actionRef={actionRef}
         rowKey="key"
         search={{
@@ -281,7 +281,7 @@ const TableList: React.FC = () => {
               handleModalVisible(true);
             }}
           >
-            <PlusOutlined /> 新建
+            <PlusOutlined /> Create New
           </Button>,
         ]}
         request={async (
