@@ -32,6 +32,11 @@ public class NameController {
         String timestamp = request.getHeader("timestamp");
         String sign = request.getHeader("sign");
         String body = request.getHeader("body");
+        boolean hasBlank = StrUtil.hasBlank(accessKey, body, sign, nonce, timestamp);
+        // 判断是否有空
+        if (hasBlank) {
+            return "无权限";
+        }
         // todo 实际情况应该是去数据库中查是否已分配给用户
         if (!accessKey.equals("xiaohang")) {
             throw new RuntimeException("无权限");
@@ -40,9 +45,9 @@ public class NameController {
             throw new RuntimeException("无权限");
         }
         // todo 时间和当前时间不能超过 5 分钟
-      //  if (timestamp) {
-//
-       //  }
+        if (System.currentTimeMillis() - Long.parseLong(timestamp) > 5 * 60 * 1000) {
+            return "无权限";
+        }
         // todo 实际情况中是从数据库中查出 secretKey
         String serverSign = SignUtils.getSign(body, "abcdefgh");
         if (!sign.equals(serverSign)) {

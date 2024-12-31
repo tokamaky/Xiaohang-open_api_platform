@@ -54,7 +54,7 @@ const Index: React.FC = () => {
       setInvokeRes(res.data);
       message.success('请求成功');
     } catch (error: any) {
-      message.error('操作失败，' + error.message);
+      message.error('Operation failed，' + error.message);
     }
     setInvokeLoading(false);
   };

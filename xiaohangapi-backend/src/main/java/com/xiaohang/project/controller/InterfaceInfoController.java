@@ -214,12 +214,12 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // 判断该接口是否可以调用
-        com.xiaohang.xiaohangapiclientsdk.model.User user = new com.xiaohang.xiaohangapiclientsdk.model.User();
-        user.setUsername("test");
-        String username = xiaohangApiClient.getUsernameByPost(user);
-        if (StringUtils.isBlank(username)) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
-        }
+//        com.xiaohang.xiaohangapiclientsdk.model.User user = new com.xiaohang.xiaohangapiclientsdk.model.User();
+//        user.setUsername("test");
+//        String username = xiaohangApiClient.getUsernameByPost(user);
+//        if (StringUtils.isBlank(username)) {
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+//        }
         // 仅本人或管理员可修改
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);

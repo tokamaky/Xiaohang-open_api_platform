@@ -29,7 +29,6 @@ const TableList: React.FC = () => {
    * @zh-CN 新建窗口的弹窗
    *  */
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
   /**
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
@@ -46,18 +45,18 @@ const TableList: React.FC = () => {
    * @param fields
    */
   const handleAdd = async (fields: API.InterfaceInfo) => {
-    const hide = message.loading('正在添加');
+    const hide = message.loading('Adding');
     try {
       await addInterfaceInfoUsingPost({
         ...fields,
       });
       hide();
-      message.success('创建成功');
+      message.success('Created successfully.');
       handleModalVisible(false);
       return true;
     } catch (error: any) {
       hide();
-      message.error('创建失败，' + error.message);
+      message.error('Created failed，' + error.message);
       return false;
     }
   };
@@ -72,18 +71,18 @@ const TableList: React.FC = () => {
     if (!currentRow) {
       return;
     }
-    const hide = message.loading('修改中');
+    const hide = message.loading('In progress');
     try {
       await updateInterfaceInfoUsingPost({
         id: currentRow.id,
         ...fields,
       });
       hide();
-      message.success('操作成功');
+      message.success('Operation successful');
       return true;
     } catch (error: any) {
       hide();
-      message.error('操作失败，' + error.message);
+      message.error('Operation failed，' + error.message);
       return false;
     }
   };
@@ -94,19 +93,19 @@ const TableList: React.FC = () => {
    * @param record
    */
   const handleOnline = async (record: API.IdRequest) => {
-    const hide = message.loading('发布中');
+    const hide = message.loading('Publishing');
     if (!record) return true;
     try {
       await onlineInterfaceInfoUsingPost({
         id: record.id
       });
       hide();
-      message.success('操作成功');
+      message.success('Operation successful');
       actionRef.current?.reload();
       return true;
     } catch (error: any) {
       hide();
-      message.error('操作失败，' + error.message);
+      message.error('Operation failed，' + error.message);
       return false;
     }
   };
@@ -117,19 +116,19 @@ const TableList: React.FC = () => {
    * @param record
    */
   const handleOffline = async (record: API.IdRequest) => {
-    const hide = message.loading('发布中');
+    const hide = message.loading('Publishing');
     if (!record) return true;
     try {
       await offlineInterfaceInfoUsingPost({
         id: record.id
       });
       hide();
-      message.success('操作成功');
+      message.success('Operation successful');
       actionRef.current?.reload();
       return true;
     } catch (error: any) {
       hide();
-      message.error('操作失败，' + error.message);
+      message.error('Operation failed，' + error.message);
       return false;
     }
   };
@@ -390,11 +389,12 @@ const TableList: React.FC = () => {
           />
         )}
       </Drawer>
-      <CreateModal columns={columns} onCancel={() => {
-        handleModalVisible(false)
-      }} onSubmit={(values) => {
-        handleAdd(values)
-      }} visible={createModalVisible}/>
+      <CreateModal
+        columns={columns}
+        onCancel={() => { handleModalVisible(false)}}
+        onSubmit={(values) => handleAdd(values)}
+        open={createModalVisible}
+      />
     </PageContainer>
   );
 };

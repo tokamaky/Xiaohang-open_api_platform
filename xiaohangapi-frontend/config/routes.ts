@@ -1,6 +1,6 @@
-﻿export default [
-  { path: '/', name: '主页', icon: 'smile', component: './Index' },
-  { path: '/interface_info/:id', name: '查看接口', icon: 'smile', component: './InterfaceInfo', hideInMenu: true },
+export default [
+  { path: '/', name: 'Homepage', icon: 'smile', component: './Index' },
+  { path: '/interface_info/:id', name: 'View Interface', icon: 'smile', component: './InterfaceInfo', hideInMenu: true },
   {
     path: '/user',
     layout: false,
@@ -8,11 +8,12 @@
   },
   {
     path: '/admin',
-    name: '管理页',
+    name: 'Admin Page',
     icon: 'crown',
     access: 'canAdmin',
     routes: [
-      { name: '接口管理', icon: 'table', path: '/admin/interface_info', component: './Admin/InterfaceInfo' },
+      { name: 'Interface Management', icon: 'table', path: '/admin/interface_info', component: './Admin/InterfaceInfo' },
+      { name: 'Interface Analysis', icon: 'analysis', path: '/admin/interface_analysis', component: './Admin/InterfaceAnalysis' },
     ],
   },
 
