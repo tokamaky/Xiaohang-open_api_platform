@@ -33,7 +33,7 @@ const TableList: React.FC = () => {
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
    * */
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
+  const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<API.InterfaceInfo>();
@@ -92,7 +92,7 @@ const TableList: React.FC = () => {
    *
    * @param record
    */
-  const handleOnline = async (record: API.IdRequest) => {
+  const handleOnlineInterface = async (record: API.IdRequest) => {
     const hide = message.loading('Publishing');
     if (!record) return true;
     try {
@@ -115,7 +115,7 @@ const TableList: React.FC = () => {
    *
    * @param record
    */
-  const handleOffline = async (record: API.IdRequest) => {
+  const handleOfflineInterface = async (record: API.IdRequest) => {
     const hide = message.loading('Publishing');
     if (!record) return true;
     try {
@@ -139,7 +139,7 @@ const TableList: React.FC = () => {
    *
    * @param record
    */
-  const handleRemove = async (record: API.InterfaceInfo) => {
+  const handleRemoveInterfaceInfo = async (record: API.InterfaceInfo) => {
     const hide = message.loading('正在删除');
     if (!record) return true;
     try {
@@ -223,42 +223,47 @@ const TableList: React.FC = () => {
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
-        <a
+        <Button
           key="config"
+          type={"link"}
           onClick={() => {
-            handleUpdateModalVisible(true);
+            handleUpdateModalOpen(true);
             setCurrentRow(record);
           }}
         >
           Modify
-        </a>,
-        record.status === 0 ? <a
-          key="config"
-          onClick={() => {
-            handleOnline(record);
-          }}
-        >
-          Publish
-        </a> : null,
-        record.status === 1 ? <Button
-          type="text"
-          key="config"
-          danger
-          onClick={() => {
-            handleOffline(record);
-          }}
-        >
-          Offline
-        </Button> : null,
+        </Button>,
+        record.status === 0 ? (
+          <Button
+            key="online"
+            type={'link'}
+            onClick={() => {
+              handleOnlineInterface(record);
+            }}
+          >
+            Online
+          </Button>
+        ) : (
+          <Button
+            key="offline"
+            type={'text'}
+            // danger={true}
+            onClick={() => {
+              handleOfflineInterface(record);
+            }}
+          >
+            Offline
+          </Button>
+        ),
         <Button
-          type="text"
-          key="config"
-          danger
+          key="delete"
+          type={'text'}
+          danger={true}
           onClick={() => {
-            handleRemove(record);
+            handleRemoveInterfaceInfo(record);
           }}
         >
-          Delete
+          delete
         </Button>,
       ],
     },
@@ -269,6 +274,8 @@ const TableList: React.FC = () => {
       <ProTable<API.RuleListItem, API.PageParams>
         headerTitle={'Query Table'}
         actionRef={actionRef}
+        //tableLayout ="fixed"
+        scroll={{ x: 'max-content' }}
         rowKey="key"
         search={{
           labelWidth: 120,
@@ -317,7 +324,6 @@ const TableList: React.FC = () => {
         <FooterToolbar
           extra={
             <div>
-              已选择{' '}
               <a
                 style={{
                   fontWeight: 600,
@@ -325,16 +331,13 @@ const TableList: React.FC = () => {
               >
                 {selectedRowsState.length}
               </a>{' '}
-              项 &nbsp;&nbsp;
-              <span>
-                服务调用次数总计 {selectedRowsState.reduce((pre, item) => pre + item.callNo!, 0)} 万
-              </span>
+              items selected &nbsp;&nbsp;
             </div>
           }
         >
           <Button
             onClick={async () => {
-              await handleRemove(selectedRowsState);
+              await handleRemoveInterfaceInfo(selectedRowsState);
               setSelectedRows([]);
               actionRef.current?.reloadAndRest?.();
             }}
@@ -349,7 +352,7 @@ const TableList: React.FC = () => {
         onSubmit={async (value) => {
           const success = await handleUpdate(value);
           if (success) {
-            handleUpdateModalVisible(false);
+            handleUpdateModalOpen(false);
             setCurrentRow(undefined);
             if (actionRef.current) {
               actionRef.current.reload();
@@ -357,18 +360,18 @@ const TableList: React.FC = () => {
           }
         }}
         onCancel={() => {
-          handleUpdateModalVisible(false);
+          handleUpdateModalOpen(false);
           if (!showDetail) {
             setCurrentRow(undefined);
           }
         }}
-        visible={updateModalVisible}
+        visible={updateModalOpen}
         values={currentRow || {}}
       />
 
       <Drawer
         width={600}
-        visible={showDetail}
+        open={showDetail}
         onClose={() => {
           setCurrentRow(undefined);
           setShowDetail(false);

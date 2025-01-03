@@ -21,5 +21,12 @@ entity folder:
 
 
 
-
+startup.cmd -m standalone
              why we should use Enum
+ Client sdk:
+        The client project acts as a bridge between the developer’s application and the API, reducing development effort,
+        ensuring security, and providing a standardized way to interact with the API.
+        It ensures that the API is as easy to use as calling a local method.
+
+ Interface:
+        Mock API
