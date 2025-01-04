@@ -1,4 +1,4 @@
-package com.xiaohang.project.constant;
+package com.xiaohang.xiaohangapicommon.constant;
 
 /**
  * 用户常量

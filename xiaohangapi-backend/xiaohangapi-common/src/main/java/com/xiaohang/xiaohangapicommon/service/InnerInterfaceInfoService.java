@@ -4,18 +4,20 @@ package com.xiaohang.xiaohangapicommon.service;
 import com.xiaohang.xiaohangapicommon.model.entity.InterfaceInfo;
 
 /**
- * 内部接口信息服务
+ * Internal Interface Information Service
  *
  * @author Xiaohang
  */
 public interface InnerInterfaceInfoService {
 
     /**
-     * 根据path、method查询接口信息
+     * Retrieve information about a mock interface from the database
+     * based on the request path, method, and parameters.
      *
-     * @param path   请求路径
-     * @param method 请求方法
-     * @return InterfaceInfo
+     * @param path   The request path.
+     * @param method The request method.
+     * @return InterfaceInfo The interface information.
      */
-    InterfaceInfo getInvokeInterfaceInfo(String path, String method);
+    InterfaceInfo getInterfaceInfo(String path, String method);
+
 }

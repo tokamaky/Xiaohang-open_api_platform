@@ -6,15 +6,14 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * User View
- *
- * @TableName user
- */
+ * Logged-in User View (De-identified)
+ * @author xiaohang
+ **/
 @Data
-public class UserVO implements Serializable {
+public class LoginUserVO implements Serializable {
 
     /**
-     * ID
+     * User ID
      */
     private Long id;
 
@@ -24,17 +23,12 @@ public class UserVO implements Serializable {
     private String userName;
 
     /**
-     * User account
-     */
-    private String userAccount;
-
-    /**
      * User avatar
      */
     private String userAvatar;
 
     /**
-     * User profile
+     * User profile description
      */
     private String userProfile;
 
@@ -44,19 +38,14 @@ public class UserVO implements Serializable {
     private String userRole;
 
     /**
-     * AccessKey
-     */
-    private String accessKey;
-
-    /**
-     * SecretKey
-     */
-    private String secretKey;
-
-    /**
      * Creation time
      */
     private Date createTime;
+
+    /**
+     * Update time
+     */
+    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 }
