@@ -105,7 +105,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
             return handleInvokeError(response);
         }
         String secretKey = invokeUser.getSecretKey();
-        String sign1 = SignUtils.getSign(body, secretKey);
+        String sign1 = SignUtils.genSign(body, secretKey);
         if (!StrUtil.equals(sign, sign1)) {
             return handleInvokeError(response);
         }
