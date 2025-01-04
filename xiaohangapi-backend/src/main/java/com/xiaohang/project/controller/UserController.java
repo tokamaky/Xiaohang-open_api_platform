@@ -3,11 +3,9 @@ package com.xiaohang.project.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.xiaohang.project.common.BaseResponse;
-import com.xiaohang.project.common.DeleteRequest;
-import com.xiaohang.project.common.ErrorCode;
-import com.xiaohang.project.common.ResultUtils;
+import com.xiaohang.project.common.*;
 import com.xiaohang.project.exception.BusinessException;
+import com.xiaohang.project.exception.ThrowUtils;
 import com.xiaohang.project.model.dto.user.UserAddRequest;
 import com.xiaohang.project.model.dto.user.UserQueryRequest;
 import com.xiaohang.project.model.dto.user.UserUpdateRequest;
@@ -242,5 +240,21 @@ public class UserController {
         return ResultUtils.success(userVOPage);
     }
 
-    // endregion
+    /**
+     * 更新用户 secretKey
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update/secret_key")
+    public BaseResponse<Boolean> updateSecretKey(@RequestBody IdRequest idRequest,
+                                                 HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = userService.updateSecretKey(idRequest.getId());
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
 }

@@ -134,3 +134,18 @@ export async function updateUserUsingPost(
     ...(options || {}),
   });
 }
+
+/** updateSecretKey POST /api/user/update/secret_key */
+export async function updateSecretKeyUsingPost(
+  body: API.IdRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/update/secret_key', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
