@@ -50,12 +50,17 @@ public class NameController {
             return "无权限";
         }
         // todo 实际情况中是从数据库中查出 secretKey
-        String serverSign = SignUtils.getSign(body, "abcdefgh");
+        String serverSign = SignUtils.genSign(body, "abcdefgh");
         if (!sign.equals(serverSign)) {
           throw new RuntimeException("无权限");
         }
         // todo 调用次数 + 1 invokeCount
         String result = "POST 用户名字是" + user.getUsername();
         return result;
+    }
+
+    @PostMapping("/api/name/user")
+    public String getUserNameByPost(@RequestBody User user, HttpServletRequest request) {
+        return "POST 你的用户名字是：" + user.getUsername();
     }
 }

@@ -1,7 +1,9 @@
 package com.xiaohang.xiaohangapiclientsdk.Client;
 
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
@@ -9,19 +11,20 @@ import cn.hutool.json.JSONUtil;
 import com.xiaohang.xiaohangapiclientsdk.model.User;
 
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.getSign;
+import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.genSign;
 
 /**
- * 调用第三方接口的客户端
+ * API 调用
  *
  * @author xiaohang
  */
 public class XiaohangApiClient {
 
-    private static final String GATEWAY_HOST = "http://localhost:8090";
+    private static String GATEWAY_HOST = "http://localhost:8090";
 
     private String accessKey;
 
@@ -30,6 +33,10 @@ public class XiaohangApiClient {
     public XiaohangApiClient(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
+    }
+
+    public void setGatewayHost(String gatewayHost) {
+        GATEWAY_HOST = gatewayHost;
     }
 
     public String getNameByGet(String name) {
@@ -61,16 +68,13 @@ public class XiaohangApiClient {
         map.put("method", method);
         return map;
     }
-    
-    public String getUsernameByPost(User user) {
-        String json = JSONUtil.toJsonStr(user);
-        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/api/name/user")
-                .addHeaders(getHeaderMap(json))
-                .body(json)
+
+    public String invokeInterface(String params, String url, String method) throws UnsupportedEncodingException {
+        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + url)
+                .header("Accept-Charset", CharsetUtil.UTF_8)
+                .addHeaders(getHeaderMap(params, method))
+                .body(params)
                 .execute();
-        System.out.println(httpResponse.getStatus());
-        String result = httpResponse.body();
-        System.out.println(result);
-        return result;
+        return JSONUtil.formatJsonStr(httpResponse.body());
     }
 }
