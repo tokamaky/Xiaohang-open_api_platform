@@ -1,57 +1,24 @@
-//package com.xiaohang.project.manager;
+//package com.xiaohang.project.utils;
 //
 //import com.aliyun.oss.OSS;
+//import com.aliyun.oss.OSSClientBuilder;
 //import com.aliyun.oss.model.ObjectMetadata;
 //import com.aliyun.oss.model.PutObjectResult;
 //import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.stereotype.Component;
 //
-//import javax.annotation.Resource;
 //import java.io.IOException;
 //import java.io.InputStream;
 //import java.net.URLEncoder;
 //
-///**
-// * Cos 对象存储操作
-// *
-// */
 //@Component
-//public class CosManager {
-////
-////    @Resource
-////    private CosClientConfig cosClientConfig;
-////
-////    @Resource
-////    private COSClient cosClient;
-////
-////    /**
-////     * 上传对象
-////     *
-////     * @param key 唯一键
-////     * @param localFilePath 本地文件路径
-////     * @return
-////     */
-////    public PutObjectResult putObject(String key, String localFilePath) {
-////        PutObjectRequest putObjectRequest = new PutObjectRequest(cosClientConfig.getBucket(), key,
-////                new File(localFilePath));
-////        return cosClient.putObject(putObjectRequest);
-////    }
-////
-////    /**
-////     * 上传对象
-////     *
-////     * @param key 唯一键
-////     * @param file 文件
-////     * @return
-////     */
-////    public PutObjectResult putObject(String key, File file) {
-////        PutObjectRequest putObjectRequest = new PutObjectRequest(cosClientConfig.getBucket(), key,
-////                file);
-////        return cosClient.putObject(putObjectRequest);
-////    }
+//public class OssService {
 //
-//    @Resource
-//    private OSS ossClient;
+//    @Value("${aliyun.oss.accessKeyId}")
+//    private String key;
+//
+//    @Value("${aliyun.oss.accessKeySecret}")
+//    private String secret;
 //
 //    @Value("${aliyun.oss.endpoint}")
 //    private String endpoint;
@@ -59,6 +26,7 @@
 //    @Value("${aliyun.oss.bucketName}")
 //    private String bucketName;
 //
+//    private OSS ossClient;
 //
 //    /**
 //     * 上传到OSS服务器 如果同名文件会覆盖服务器上的
@@ -69,6 +37,14 @@
 //     */
 //    public String uploadFile2OSS(InputStream instream, String fileName) {
 //
+//        // 云账号AccessKey有所有API访问权限，建议遵循阿里云安全最佳实践，创建并使用RAM子账号进行API访问或日常运维，请登录 https://ram.console.aliyun.com 创建。
+//        String accessKeyId = key;
+//        String accessKeySecret = secret;
+//
+//        // 创建OSSClient实例。
+//        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+//
+//
 //        String ret = "";
 //        try {
 //            // 创建上传Object的Metadata
@@ -76,7 +52,7 @@
 //            objectMetadata.setContentLength(instream.available());
 //            objectMetadata.setCacheControl("no-cache");
 //            objectMetadata.setHeader("Pragma", "no-cache");
-//            objectMetadata.setContentType(getContentType(fileName.substring(fileName.lastIndexOf("."))));
+//            objectMetadata.setContentType(getcontentType(fileName.substring(fileName.lastIndexOf("."))));
 //            objectMetadata.setContentDisposition("attachment; filename=" + URLEncoder.encode(fileName, "UTF-8"));
 //            // 上传文件
 //            PutObjectResult putResult = ossClient.putObject(bucketName, fileName, instream, objectMetadata);
@@ -102,7 +78,7 @@
 //     * @param filenameExtension 文件后缀
 //     * @return String
 //     */
-//    public static String getContentType(String filenameExtension) {
+//    public static String getcontentType(String filenameExtension) {
 //        if (filenameExtension.equalsIgnoreCase("bmp")) {
 //            return "image/bmp";
 //        }
@@ -133,18 +109,6 @@
 //        }
 //        return "application/octet-stream";
 //    }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //}

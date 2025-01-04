@@ -32,13 +32,13 @@ export async function deleteInterfaceInfoUsingPost(
   });
 }
 
-/** getInterfaceInfoById GET /api/interfaceInfo/get */
-export async function getInterfaceInfoByIdUsingGet(
+/** getInterfaceInfoVOById GET /api/interfaceInfo/get/vo */
+export async function getInterfaceInfoVoByIdUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getInterfaceInfoByIdUsingGETParams,
+  params: API.getInterfaceInfoVOByIdUsingGETParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseInterfaceInfo_>('/api/interfaceInfo/get', {
+  return request<API.BaseResponseInterfaceInfoVO_>('/api/interfaceInfo/get/vo', {
     method: 'GET',
     params: {
       ...params,
@@ -62,32 +62,32 @@ export async function invokeInterfaceInfoUsingPost(
   });
 }
 
-/** listInterfaceInfo GET /api/interfaceInfo/list */
-export async function listInterfaceInfoUsingGet(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.listInterfaceInfoUsingGETParams,
+/** listInterfaceInfoVOByPage POST /api/interfaceInfo/list/page/vo */
+export async function listInterfaceInfoVoByPageUsingPost(
+  body: API.InterfaceInfoQueryRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseListInterfaceInfo_>('/api/interfaceInfo/list', {
-    method: 'GET',
-    params: {
-      ...params,
+  return request<API.BaseResponsePageInterfaceInfoVO_>('/api/interfaceInfo/list/page/vo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
+    data: body,
     ...(options || {}),
   });
 }
 
-/** listInterfaceInfoByPage GET /api/interfaceInfo/list/page */
-export async function listInterfaceInfoByPageUsingGet(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.listInterfaceInfoByPageUsingGETParams,
+/** listInterfaceInfoVOByUserIdPage POST /api/interfaceInfo/my/list/page/vo */
+export async function listInterfaceInfoVoByUserIdPageUsingPost(
+  body: API.InterfaceInfoQueryRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponsePageInterfaceInfo_>('/api/interfaceInfo/list/page', {
-    method: 'GET',
-    params: {
-      ...params,
+  return request<API.BaseResponsePageInterfaceInfoVO_>('/api/interfaceInfo/my/list/page/vo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
+    data: body,
     ...(options || {}),
   });
 }
@@ -109,7 +109,7 @@ export async function offlineInterfaceInfoUsingPost(
 
 /** onlineInterfaceInfo POST /api/interfaceInfo/online */
 export async function onlineInterfaceInfoUsingPost(
-  body: API.IdRequest,
+  body: API.InterfaceInfoInvokeRequest,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResponseBoolean_>('/api/interfaceInfo/online', {
