@@ -17,68 +17,70 @@ import lombok.Data;
 @TableName(value = "user")
 @Data
 public class User implements Serializable {
+
     /**
-     * id
+     * ID
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
-     * 用户昵称
-     */
-    private String userName;
-
-    /**
-     * 账号
+     * User account
      */
     private String userAccount;
 
     /**
-     * 用户头像
+     * User password
+     */
+    private String userPassword;
+
+
+    /**
+     * User nickname
+     */
+    private String userName;
+
+    /**
+     * User avatar
      */
     private String userAvatar;
 
     /**
-     * 性别
+     * User profile
      */
-    private Integer gender;
+    private String userProfile;
 
     /**
-     * 用户角色: user, admin
+     * User role: user/admin/ban
      */
     private String userRole;
 
     /**
-     * 密码
-     */
-    private String userPassword;
-    /**
-     * accessKey
+     * Access key
      */
     private String accessKey;
 
     /**
-     *  secretKey
+     * Secret key
      */
     private String secretKey;
 
     /**
-     * 创建时间
+     * Creation time
      */
     private Date createTime;
 
     /**
-     * 更新时间
+     * Update time
      */
     private Date updateTime;
 
     /**
-     * 是否删除
+     * Is deleted (0-not deleted, 1-deleted)
      */
     @TableLogic
     private Integer isDelete;
 
-
     @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -7572280859051489820L;
 }
