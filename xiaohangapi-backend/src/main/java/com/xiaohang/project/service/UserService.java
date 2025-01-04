@@ -55,4 +55,11 @@ public interface UserService extends IService<User> {
      * @return true if logout is successful, false otherwise
      */
     boolean userLogout(HttpServletRequest request);
+
+    /**
+     * 更新 secretKey
+     * @param id 用户id
+     * @return boolean
+     */
+    boolean updateSecretKey(Long id);
 }

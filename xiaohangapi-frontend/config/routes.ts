@@ -18,5 +18,7 @@ export default [
   },
 
   // { path: '/', redirect: '/welcome' },
+  { name: '个人中心', icon: 'UserOutlined', path: '/profile', component: './User/Profile' },
   { path: '*', layout: false, component: './404' },
 ];
+
