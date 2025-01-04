@@ -50,18 +50,18 @@ public class XiaohangApiClient {
         return result;
     }
 
-    private Map<String, String> getHeaderMap(String body) {
-        Map<String, String> hashMap = new HashMap<>();
-        hashMap.put("accessKey", accessKey);
-        // 一定不能直接发送
-//        hashMap.put("secretKey", secretKey);
-        hashMap.put("nonce", RandomUtil.randomNumbers(4));
-        hashMap.put("body", body);
-        hashMap.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        hashMap.put("sign", getSign(body, secretKey));
-        return hashMap;
+    private Map<String, String> getHeaderMap(String body, String method) throws UnsupportedEncodingException {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("accessKey", accessKey);
+        map.put("nonce", RandomUtil.randomNumbers(10));
+        map.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        map.put("sign", genSign(body, secretKey));
+        body = URLUtil.encode(body, CharsetUtil.CHARSET_UTF_8);
+        map.put("body", body);
+        map.put("method", method);
+        return map;
     }
-
+    
     public String getUsernameByPost(User user) {
         String json = JSONUtil.toJsonStr(user);
         HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/api/name/user")
