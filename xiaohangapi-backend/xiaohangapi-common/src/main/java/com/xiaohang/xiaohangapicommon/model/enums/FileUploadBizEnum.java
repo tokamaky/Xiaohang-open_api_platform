@@ -7,30 +7,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Interface Status Enum Class
+ * File Upload Business Type Enum
  */
-public enum InterfaceInfoStatusEnum {
+public enum FileUploadBizEnum {
 
-    /**
-     * Interface Status Enum Values
-     */
-    OFFLINE("Closed", 0),
-    ONLINE("Online", 1);
+    USER_AVATAR("User Avatar", "user_avatar");
 
     private final String text;
-    private final Integer value;
+    private final String value;
 
-    InterfaceInfoStatusEnum(String text, Integer value) {
+    FileUploadBizEnum(String text, String value) {
         this.text = text;
         this.value = value;
     }
 
     /**
-     * Get list of values
+     * Get a list of values
      *
      * @return List of values
      */
-    public static List<Integer> getValues() {
+    public static List<String> getValues() {
         return Arrays.stream(values())  // Stream through all enum values
                 .map(item -> item.value)  // Extract the 'value' from each enum
                 .collect(Collectors.toList());  // Collect into a list
@@ -42,11 +38,11 @@ public enum InterfaceInfoStatusEnum {
      * @param value The value of the enum
      * @return The corresponding enum, or null if not found
      */
-    public static InterfaceInfoStatusEnum getEnumByValue(String value) {
+    public static FileUploadBizEnum getEnumByValue(String value) {
         if (ObjectUtils.isEmpty(value)) {  // Check if the value is null or empty
             return null;
         }
-        for (InterfaceInfoStatusEnum anEnum : InterfaceInfoStatusEnum.values()) {
+        for (FileUploadBizEnum anEnum : FileUploadBizEnum.values()) {
             if (anEnum.value.equals(value)) {  // Compare the enum value
                 return anEnum;  // Return the enum that matches the value
             }
@@ -54,7 +50,7 @@ public enum InterfaceInfoStatusEnum {
         return null;  // Return null if no match found
     }
 
-    public Integer getValue() {
+    public String getValue() {
         return value;  // Return the value of the enum
     }
 

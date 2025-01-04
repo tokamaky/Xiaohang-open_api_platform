@@ -1,11 +1,10 @@
 package com.xiaohang.project.service.impl.inner;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.xiaohang.project.common.ErrorCode;
+
 import com.xiaohang.project.exception.BusinessException;
-import com.xiaohang.project.mapper.UserInterfaceInfoMapper;
 import com.xiaohang.project.service.UserInterfaceInfoService;
+import com.xiaohang.project.service.UserService;
+import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 import com.xiaohang.xiaohangapicommon.service.InnerUserInterfaceInfoService;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -13,45 +12,66 @@ import org.apache.dubbo.config.annotation.DubboService;
 import javax.annotation.Resource;
 
 /**
- * 内部用户接口信息服务实现类
+ * Inner User Interface Info Service
  *
  * @author xiaohang
  */
 @DubboService
 public class InnerUserInterfaceInfoServiceImpl implements InnerUserInterfaceInfoService {
 
+    @Resource
+    private UserInterfaceInfoService userInterfaceInfoService;
 
     @Resource
-    private UserInterfaceInfoMapper userInterfaceInfoMapper;
+    private UserService userService;
 
     @Override
-    public boolean hasInvokeNum(long userId, long interfaceInfoId) {
-        if (userId <= 0 || interfaceInfoId <= 0) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
-        }
-
-        LambdaQueryWrapper<UserInterfaceInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(UserInterfaceInfo::getUserId, userId)
+    public boolean invokeCount(long interfaceInfoId, long userId) {
+        // 查询接口是否存在
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.lambdaQuery()
                 .eq(UserInterfaceInfo::getInterfaceInfoId, interfaceInfoId)
-                .gt(UserInterfaceInfo::getLeftNum, 0);
-
-        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoMapper.selectOne(queryWrapper);
-        return userInterfaceInfo != null;
+                .eq(UserInterfaceInfo::getUserId, userId)
+                .one();
+        if (userInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口不存在");
+        }
+        // 修改调用次数
+        return userInterfaceInfoService.lambdaUpdate()
+                .eq(UserInterfaceInfo::getInterfaceInfoId, interfaceInfoId)
+                .eq(UserInterfaceInfo::getUserId, userId)
+                .set(UserInterfaceInfo::getTotalNum, userInterfaceInfo.getTotalNum() + 1)
+                .set(UserInterfaceInfo::getLeftNum, userInterfaceInfo.getLeftNum() - 1)
+                .update();
     }
 
     @Override
-    public boolean invokeInterfaceCount(long userId, long interfaceInfoId) {
-        if (userId <= 0 || interfaceInfoId <= 0) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+    public UserInterfaceInfo hasLeftNum(Long interfaceId, Long userId) {
+        return userInterfaceInfoService.lambdaQuery()
+                .eq(UserInterfaceInfo::getInterfaceInfoId, interfaceId)
+                .eq(UserInterfaceInfo::getUserId, userId)
+                .one();
+    }
+
+    @Override
+    public Boolean addDefaultUserInterfaceInfo(Long interfaceId, Long userId) {
+        UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
+        userInterfaceInfo.setUserId(userId);
+        userInterfaceInfo.setInterfaceInfoId(interfaceId);
+        userInterfaceInfo.setLeftNum(99999999);
+
+        return userInterfaceInfoService.save(userInterfaceInfo);
+    }
+
+    @Override
+    public UserInterfaceInfo checkUserHasInterface(long interfaceId, long userId) {
+        if (interfaceId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-
-        LambdaUpdateWrapper<UserInterfaceInfo> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(UserInterfaceInfo::getUserId, userId)
-                .eq(UserInterfaceInfo::getInterfaceInfoId, interfaceInfoId)
-                .gt(UserInterfaceInfo::getLeftNum, 0)
-                .setSql("left_num = left_num -1, total_num = total_num + 1");
-
-        int updateCount = userInterfaceInfoMapper.update(null, updateWrapper);
-        return updateCount > 0;
+        return userInterfaceInfoService.lambdaQuery()
+                .eq(UserInterfaceInfo::getUserId, userId)
+                .eq(UserInterfaceInfo::getInterfaceInfoId, interfaceId)
+                .one();
     }
 }
+
+

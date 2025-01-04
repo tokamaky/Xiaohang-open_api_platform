@@ -3,23 +3,21 @@ package com.xiaohang.project.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.xiaohang.project.common.BaseResponse;
-import com.xiaohang.project.common.DeleteRequest;
-import com.xiaohang.project.common.ErrorCode;
-import com.xiaohang.project.common.ResultUtils;
+import com.xiaohang.project.annotation.AuthCheck;
 import com.xiaohang.project.exception.BusinessException;
-import com.xiaohang.project.model.dto.user.UserAddRequest;
-import com.xiaohang.project.model.dto.user.UserQueryRequest;
-import com.xiaohang.project.model.dto.user.UserUpdateRequest;
+import com.xiaohang.project.exception.ThrowUtils;
+import com.xiaohang.xiaohangapicommon.common.*;
+import com.xiaohang.xiaohangapicommon.constant.UserConstant;
+import com.xiaohang.xiaohangapicommon.model.dto.user.*;
 import com.xiaohang.xiaohangapicommon.model.entity.User;
-import com.xiaohang.project.model.request.UserLoginRequest;
-import com.xiaohang.project.model.request.UserRegisterRequest;
 import com.xiaohang.project.service.UserService;
-import com.xiaohang.project.model.vo.UserVO;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import com.xiaohang.xiaohangapicommon.model.vo.LoginUserVO;
+import com.xiaohang.xiaohangapicommon.model.vo.UserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,8 +43,8 @@ public class UserController {
     /**
      * User registration
      *
-     * @param userRegisterRequest
-     * @return
+     * @param userRegisterRequest User registration request data
+     * @return Response with user registration result
      */
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -66,12 +64,12 @@ public class UserController {
     /**
      * User login
      *
-     * @param userLoginRequest
-     * @param request
-     * @return
+     * @param userLoginRequest User login request data
+     * @param request          HTTP request
+     * @return Response with user login details
      */
     @PostMapping("/login")
-    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -80,15 +78,16 @@ public class UserController {
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.userLogin(userAccount, userPassword, request);
-        return ResultUtils.success(user);
+        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        return ResultUtils.success(loginUserVO);
     }
+
 
     /**
      * User logout
      *
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return Response with the logout result
      */
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
@@ -100,31 +99,26 @@ public class UserController {
     }
 
     /**
-     * Get current logged-in user
+     * Get the current logged-in user
      *
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return Response with the logged-in user details
      */
     @GetMapping("/get/login")
-    public BaseResponse<UserVO> getLoginUser(HttpServletRequest request) {
+    public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
         User user = userService.getLoginUser(request);
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return ResultUtils.success(userVO);
+        return ResultUtils.success(userService.getLoginUserVO(user));
     }
 
-    // endregion
-
-    // region CRUD operations
-
     /**
-     * Add user
+     * Create user (Admin only)
      *
-     * @param userAddRequest
-     * @param request
-     * @return
+     * @param userAddRequest User add request data
+     * @param request        HTTP request
+     * @return Response with the created user's ID
      */
     @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest, HttpServletRequest request) {
         if (userAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -132,115 +126,160 @@ public class UserController {
         User user = new User();
         BeanUtils.copyProperties(userAddRequest, user);
         boolean result = userService.save(user);
-        if (!result) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR);
-        }
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(user.getId());
     }
 
     /**
-     * Delete user
+     * Delete user (Admin only)
      *
-     * @param deleteRequest
-     * @param request
-     * @return
+     * @param deleteRequest Delete request data
+     * @param request       HTTP request
+     * @return Response with the result of the deletion
      */
     @PostMapping("/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean b = userService.removeById(deleteRequest.getId());
-        return ResultUtils.success(b);
+        boolean success = userService.removeById(deleteRequest.getId());
+        return ResultUtils.success(success);
     }
 
     /**
-     * Update user
+     * Update user (Admin only)
      *
-     * @param userUpdateRequest
-     * @param request
-     * @return
+     * @param userUpdateRequest User update request data
+     * @param request           HTTP request
+     * @return Response with the result of the update
      */
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request) {
+// @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
+                                            HttpServletRequest request) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
         boolean result = userService.updateById(user);
-        return ResultUtils.success(result);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
     }
 
     /**
-     * Get user by ID
+     * Get user by ID (Admin only)
      *
-     * @param id
-     * @param request
-     * @return
+     * @param id      User ID
+     * @param request HTTP request
+     * @return Response with user data
      */
     @GetMapping("/get")
-    public BaseResponse<UserVO> getUserById(int id, HttpServletRequest request) {
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<User> getUserById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.getById(id);
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return ResultUtils.success(userVO);
+        ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR);
+        return ResultUtils.success(user);
     }
 
     /**
-     * Get user list
+     * Get user by ID with wrapped response
      *
-     * @param userQueryRequest
-     * @param request
-     * @return
+     * @param id      User ID
+     * @param request HTTP request
+     * @return Response with wrapped user data
      */
-    @GetMapping("/list")
-    public BaseResponse<List<UserVO>> listUser(UserQueryRequest userQueryRequest, HttpServletRequest request) {
-        User userQuery = new User();
-        if (userQueryRequest != null) {
-            BeanUtils.copyProperties(userQueryRequest, userQuery);
-        }
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
-        List<User> userList = userService.list(queryWrapper);
-        List<UserVO> userVOList = userList.stream().map(user -> {
-            UserVO userVO = new UserVO();
-            BeanUtils.copyProperties(user, userVO);
-            return userVO;
-        }).collect(Collectors.toList());
-        return ResultUtils.success(userVOList);
+    @GetMapping("/get/vo")
+    public BaseResponse<UserVO> getUserVOById(long id, HttpServletRequest request) {
+        BaseResponse<User> response = getUserById(id, request);
+        User user = response.getData();
+        return ResultUtils.success(userService.getUserVO(user));
     }
 
     /**
-     * Get user list with pagination
+     * Paginated list of users (Admin only)
      *
-     * @param userQueryRequest
-     * @param request
-     * @return
+     * @param userQueryRequest User query request data
+     * @param request          HTTP request
+     * @return Paginated response with user list
      */
-    @GetMapping("/list/page")
-    public BaseResponse<Page<UserVO>> listUserByPage(UserQueryRequest userQueryRequest, HttpServletRequest request) {
-        long current = 1;
-        long size = 10;
-        User userQuery = new User();
-        if (userQueryRequest != null) {
-            BeanUtils.copyProperties(userQueryRequest, userQuery);
-            current = userQueryRequest.getCurrent();
-            size = userQueryRequest.getPageSize();
+    @PostMapping("/list/page")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest,
+                                                   HttpServletRequest request) {
+        long current = userQueryRequest.getCurrent();
+        long size = userQueryRequest.getPageSize();
+        Page<User> userPage = userService.page(new Page<>(current, size),
+                userService.getQueryWrapper(userQueryRequest));
+        return ResultUtils.success(userPage);
+    }
+
+    /**
+     * Paginated list of wrapped users
+     *
+     * @param userQueryRequest User query request data
+     * @param request          HTTP request
+     * @return Paginated response with wrapped user list
+     */
+    @PostMapping("/list/page/vo")
+    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest,
+                                                       HttpServletRequest request) {
+        if (userQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>(userQuery);
-        Page<User> userPage = userService.page(new Page<>(current, size), queryWrapper);
-        Page<UserVO> userVOPage = new PageDTO<>(userPage.getCurrent(), userPage.getSize(), userPage.getTotal());
-        List<UserVO> userVOList = userPage.getRecords().stream().map(user -> {
-            UserVO userVO = new UserVO();
-            BeanUtils.copyProperties(user, userVO);
-            return userVO;
-        }).collect(Collectors.toList());
-        userVOPage.setRecords(userVOList);
+        long current = userQueryRequest.getCurrent();
+        long size = userQueryRequest.getPageSize();
+        // Limit size to avoid crawlers
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        Page<User> userPage = userService.page(new Page<>(current, size),
+                userService.getQueryWrapper(userQueryRequest));
+        Page<UserVO> userVOPage = new Page<>(current, size, userPage.getTotal());
+        List<UserVO> userVO = userService.getUserVO(userPage.getRecords());
+        userVOPage.setRecords(userVO);
         return ResultUtils.success(userVOPage);
     }
 
-    // endregion
+    /**
+     * Update personal information
+     *
+     * @param userUpdateMyRequest Personal update request data
+     * @param request             HTTP request
+     * @return Response with the result of the update
+     */
+    @PostMapping("/update/my")
+    public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
+                                              HttpServletRequest request) {
+        if (userUpdateMyRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        User user = new User();
+        BeanUtils.copyProperties(userUpdateMyRequest, user);
+        user.setId(loginUser.getId());
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * Update user secret key
+     *
+     * @param idRequest ID request data
+     * @param request   HTTP request
+     * @return Response with the result of the update
+     */
+    @PostMapping("/update/secret_key")
+    public BaseResponse<Boolean> updateSecretKey(@RequestBody IdRequest idRequest,
+                                                 HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = userService.updateSecretKey(idRequest.getId());
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
 }

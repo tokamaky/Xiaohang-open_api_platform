@@ -14,44 +14,48 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.UUID;
-
 /**
- * 请求响应日志 AOP
- *
- * @author xiaohang
- **/
+ * Login Check AOP (Aspect-Oriented Programming)
+ * @author Xiaohang
+ */
 @Aspect
 @Component
 @Slf4j
 public class LogInterceptor {
 
     /**
-     * 执行拦截
+     * Execute Interception
      */
     @Around("execution(* com.xiaohang.project.controller.*.*(..))")
     public Object doInterceptor(ProceedingJoinPoint point) throws Throwable {
-        // 计时
+        // Start timing
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        // 获取请求路径
+
+        // Get request path
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest httpServletRequest = ((ServletRequestAttributes) requestAttributes).getRequest();
-        // 生成请求唯一 id
+
+        // Generate unique request id
         String requestId = UUID.randomUUID().toString();
         String url = httpServletRequest.getRequestURI();
-        // 获取请求参数
+
+        // Get request parameters
         Object[] args = point.getArgs();
         String reqParam = "[" + StringUtils.join(args, ", ") + "]";
-        // 输出请求日志
-        log.info("request start，id: {}, path: {}, ip: {}, params: {}", requestId, url,
+
+        // Log the request details
+        log.info("request start, id: {}, path: {}, ip: {}, params: {}", requestId, url,
                 httpServletRequest.getRemoteHost(), reqParam);
-        // 执行原方法
+
+        // Proceed with the original method execution
         Object result = point.proceed();
-        // 输出响应日志
+
+        // Log the response details
         stopWatch.stop();
         long totalTimeMillis = stopWatch.getTotalTimeMillis();
         log.info("request end, id: {}, cost: {}ms", requestId, totalTimeMillis);
+
         return result;
     }
 }
-

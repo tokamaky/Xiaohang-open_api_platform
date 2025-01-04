@@ -7,20 +7,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Interface Status Enum Class
+ * User Role Enum
  */
-public enum InterfaceInfoStatusEnum {
+public enum UserRoleEnum {
 
-    /**
-     * Interface Status Enum Values
-     */
-    OFFLINE("Closed", 0),
-    ONLINE("Online", 1);
+    USER("User", "user"),
+    ADMIN("Administrator", "admin"),
+    BAN("Banned", "ban");
 
     private final String text;
-    private final Integer value;
 
-    InterfaceInfoStatusEnum(String text, Integer value) {
+    private final String value;
+
+    UserRoleEnum(String text, String value) {
         this.text = text;
         this.value = value;
     }
@@ -30,7 +29,7 @@ public enum InterfaceInfoStatusEnum {
      *
      * @return List of values
      */
-    public static List<Integer> getValues() {
+    public static List<String> getValues() {
         return Arrays.stream(values())  // Stream through all enum values
                 .map(item -> item.value)  // Extract the 'value' from each enum
                 .collect(Collectors.toList());  // Collect into a list
@@ -42,11 +41,11 @@ public enum InterfaceInfoStatusEnum {
      * @param value The value of the enum
      * @return The corresponding enum, or null if not found
      */
-    public static InterfaceInfoStatusEnum getEnumByValue(String value) {
+    public static UserRoleEnum getEnumByValue(String value) {
         if (ObjectUtils.isEmpty(value)) {  // Check if the value is null or empty
             return null;
         }
-        for (InterfaceInfoStatusEnum anEnum : InterfaceInfoStatusEnum.values()) {
+        for (UserRoleEnum anEnum : UserRoleEnum.values()) {
             if (anEnum.value.equals(value)) {  // Compare the enum value
                 return anEnum;  // Return the enum that matches the value
             }
@@ -54,11 +53,11 @@ public enum InterfaceInfoStatusEnum {
         return null;  // Return null if no match found
     }
 
-    public Integer getValue() {
+    public String getValue() {
         return value;  // Return the value of the enum
     }
 
     public String getText() {
-        return text;  // Return the text of the enum
+        return text;  // Return the text description of the enum
     }
 }

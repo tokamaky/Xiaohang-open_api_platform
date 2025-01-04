@@ -14,14 +14,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthCheck {
 
-    /**
-     * any role
-     *
-     * @return
-     */
-    String[] anyRole() default "";
-
-    // https://t.zsxq.com/0emozsIJh
 
     /**
      * must have a role
