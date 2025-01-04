@@ -1,47 +1,35 @@
-package com.xiaohang.project.model.dto.user;
+package com.xiaohang.xiaohangapicommon.model.dto.user;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
+
 /**
- * User creation request
- *
- * @author xiaohang
- *  
+ * User Creation Request
  */
 @Data
 public class UserAddRequest implements Serializable {
 
     /**
-     * 用户昵称
+     * User nickname
      */
     private String userName;
 
     /**
-     * 账号
+     * Account
      */
     private String userAccount;
 
     /**
-     * 用户头像
+     * User avatar
      */
     private String userAvatar;
 
     /**
-     * 性别
-     */
-    private Integer gender;
-
-    /**
-     * 用户角色: user, admin
+     * User role: user, admin
      */
     private String userRole;
-
-    /**
-     * 密码
-     */
-    private String userPassword;
 
     private static final long serialVersionUID = 1L;
 }

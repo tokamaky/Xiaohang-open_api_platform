@@ -1,4 +1,4 @@
-package com.xiaohang.project.model.dto.userinterfaceinfo;
+package com.xiaohang.xiaohangapicommon.model.dto.userinterfaceinfo;
 
 import lombok.Data;
 
@@ -6,31 +6,28 @@ import java.io.Serializable;
 
 /**
  * Update Request
- *
- * @author Xiaohang
  */
 @Data
 public class UserInterfaceInfoUpdateRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Primary key
+     * Primary Key
      */
     private Long id;
 
     /**
-     * Total number of calls
+     * Total number of invocations
      */
     private Integer totalNum;
 
     /**
-     * Remaining number of calls
+     * Remaining number of invocations
      */
     private Integer leftNum;
 
     /**
-     * Status (0 - Active, 1 - Disabled)
+     * 0 - active, 1 - disabled
      */
     private Integer status;
-
-    private static final long serialVersionUID = 1L;
 }
