@@ -1,12 +1,9 @@
-import { InitialState } from "./typings";
-
 /**
  * @see https://umijs.org/docs/max/access#access
  * */
-export default function access(initialState: InitialState | undefined) {
-  const { loginUser } = initialState ?? {};
+export default function access(initialState: { currentUser?: API.CurrentUser } | undefined) {
+  const { currentUser } = initialState ?? {};
   return {
-    canUser: loginUser ,
-    canAdmin: loginUser?.userRole ==='admin',
+    canAdmin: currentUser && currentUser.access === 'admin',
   };
 }
