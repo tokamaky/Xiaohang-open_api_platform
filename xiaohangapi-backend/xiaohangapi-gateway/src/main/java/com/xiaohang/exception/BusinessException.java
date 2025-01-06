@@ -1,6 +1,6 @@
 package com.xiaohang.exception;
 
-import cn.ichensw.neroapicommon.common.ErrorCode;
+import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 
 /**
  * 自定义异常类

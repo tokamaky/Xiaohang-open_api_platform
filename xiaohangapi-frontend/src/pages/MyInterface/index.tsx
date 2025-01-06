@@ -1,4 +1,4 @@
-import { listInterfaceInfoVOByUserIdPageUsingPost } from '@/services/xiaohang-backend/interfaceInfoController';
+import { listInterfaceInfoVoByUserIdPageUsingPost} from '@/services/xiaohang-backend/interfaceInfoController';
 import { ShareAltOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
@@ -34,7 +34,7 @@ const Index: React.FC = () => {
     const loadData = async (searchText = '', current = 1, pageSize = 6) => {
         setLoading(true);
         try {
-            await listInterfaceInfoVOByUserIdPageUsingPost({
+            await listInterfaceInfoVoByUserIdPageUsingPost({
                 name: searchText,
                 current,
                 pageSize,

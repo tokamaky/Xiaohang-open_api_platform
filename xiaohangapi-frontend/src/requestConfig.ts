@@ -26,8 +26,7 @@ interface ResponseStructure {
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const requestConfig: RequestConfig = {
-  // baseURL: 'http://localhost:8101',
-  baseURL: 'http://124.70.63.241:8101',
+  baseURL: 'http://localhost:7529',
   withCredentials: true,
 
   // 请求拦截器

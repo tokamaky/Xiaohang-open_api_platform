@@ -13,7 +13,7 @@ public class DyeDataInterceptor implements HandlerInterceptor {
     private static final String DYE_DATA_HEADER = "X-Dye-Data";
     private static final String DYE_DATA_VALUE = "nero";
 
-    @Override
+//@Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 获取请求头中的染色数据
         String dyeData = request.getHeader(DYE_DATA_HEADER);
