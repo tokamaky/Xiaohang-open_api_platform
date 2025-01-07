@@ -10,6 +10,7 @@ public enum ErrorCode {
     SUCCESS(0, "ok"),
     PARAMS_ERROR(40000, "Request parameter error"),
     NOT_LOGIN_ERROR(40100, "Not logged in"),
+    FIRST_TIME_LOGIN(40102, "Welcome, Please login"),
     NO_AUTH_ERROR(40101, "No permissions"),
     NOT_FOUND_ERROR(40400, "The requested data does not exist"),
     FORBIDDEN_ERROR(40300, "Access Denied"),

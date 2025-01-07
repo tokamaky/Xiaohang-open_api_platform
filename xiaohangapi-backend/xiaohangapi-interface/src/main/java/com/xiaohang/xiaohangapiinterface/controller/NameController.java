@@ -15,9 +15,9 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 public class NameController {
 
-    @GetMapping("/get")
-    public String getNameByGet(String name) {
-        return "GET 你的名字是" + name;
+    @PostMapping("/get")
+    public String getNameByGet(@RequestParam String name) {
+        return "GET your name is: " + name;
     }
 
     @PostMapping("/post")
@@ -61,6 +61,6 @@ public class NameController {
     @PostMapping("/api/name/user")
     public String getUserNameByPost(@RequestBody User user, HttpServletRequest request) {
         System.out.println("Received user: " + user);
-        return "POST 你的用户名字是：" + user.getUsername();
+        return "POST your user name is ：" + user.getUsername();
     }
 }

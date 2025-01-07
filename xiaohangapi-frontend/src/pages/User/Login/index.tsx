@@ -76,10 +76,22 @@ const Login: React.FC = () => {
         <LoginFormPage
           backgroundImageUrl={pandaBackImg}
           logo={logo}
-          title="Panda API"
-          subTitle="**The Best Free API Interface Platform in History**"
+          title="Panda API BETA"
+          //subTitle="The Best Free API Interface Platform in History"
+          subTitle={
+            <>
+              The Best Free API Interface Platform in History
+              <br />
+              The default permissions for newly registered accounts are user.
+              <br />
+              Please use the following administrator account for testing:
+              <br />
+              <strong>Account:</strong> xiaohang <br />
+              <strong>Password:</strong> 12345678
+            </>
+          }
           initialValues={{
-            autoLogin: true,
+            autoLogin: false,
           }}
           onFinish={async (values) => {
             await handleSubmit(values as API.UserRegisterRequest);
@@ -137,7 +149,7 @@ const Login: React.FC = () => {
                   style={{
                     float: 'right',
                   }}
-                  onClick={() => setLoginType("forgetPassword")}
+                  onClick={() => setLoginType('forgetPassword')}
                 >
                   Forgot password?
                 </a>

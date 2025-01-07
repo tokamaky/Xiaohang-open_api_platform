@@ -37,10 +37,10 @@ xiaohang:
   gateway:
     host: http://localhost:8090
 
-xiaohangapi:
-  client:
-    secret-key: xiaohang
-    access-key: abcdefgh
+#xiaohangapi:
+#  client:
+#    secret-key: xiaohang
+#    access-key: abcdefgh
 dubbo:
   application:
     name: xiaohangapi-provider
