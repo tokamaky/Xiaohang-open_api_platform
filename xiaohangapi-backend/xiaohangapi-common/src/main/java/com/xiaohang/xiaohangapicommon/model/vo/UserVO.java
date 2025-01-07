@@ -12,8 +12,9 @@ import java.util.Date;
  */
 @Data
 public class UserVO implements Serializable {
+
     /**
-     * User ID
+     * ID
      */
     private Long id;
 
@@ -23,7 +24,7 @@ public class UserVO implements Serializable {
     private String userName;
 
     /**
-     * Account
+     * User account
      */
     private String userAccount;
 
@@ -33,24 +34,29 @@ public class UserVO implements Serializable {
     private String userAvatar;
 
     /**
-     * Gender
+     * User profile
      */
-    private Integer gender;
+    private String userProfile;
 
     /**
-     * User role: user, admin
+     * User role: user/admin/ban
      */
     private String userRole;
+
+    /**
+     * AccessKey
+     */
+    private String accessKey;
+
+    /**
+     * SecretKey
+     */
+    private String secretKey;
 
     /**
      * Creation time
      */
     private Date createTime;
-
-    /**
-     * Update time
-     */
-    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 }

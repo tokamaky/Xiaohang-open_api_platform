@@ -1,15 +1,19 @@
 package com.xiaohang.xiaohangapigateway;
 
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.URLUtil;
+import com.xiaohang.exception.BusinessException;
 import com.xiaohang.xiaohangapiclientsdk.utils.SignUtils;
 //import cn.hutool.core.net.URLDecoder;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
-
+import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 import com.xiaohang.xiaohangapicommon.model.entity.InterfaceInfo;
 import com.xiaohang.xiaohangapicommon.model.entity.User;
 import com.xiaohang.xiaohangapicommon.service.InnerInterfaceInfoService;
 import com.xiaohang.xiaohangapicommon.service.InnerUserInterfaceInfoService;
 import com.xiaohang.xiaohangapicommon.service.InnerUserService;
+import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
@@ -50,7 +54,9 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     @DubboReference
     private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
 
-    private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1", "127.0.0.2");
+    private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1", "127.0.0.2", "0:0:0:0:0:0:0:1");
+    private static final String DYE_DATA_HEADER = "X-Dye-Data";
+    private static final String DYE_DATA_VALUE = "nero";
 
     private static final long FIVE_MINUTES = 5 * 60 * 1000L;
 
@@ -60,83 +66,89 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 1. 请求日志
         ServerHttpRequest request = exchange.getRequest();
-        String path = INTERFACE_HOST + request.getPath().value();
-        String method = Objects.requireNonNull(request.getMethod()).toString();
-        log.info("请求id: {}", request.getId());
-        log.info("请求路径: {}", path);
-        log.info("请求方法: {}", method);
-        log.info("请求参数: {}", request.getQueryParams());
-        log.info("请求头: {}", request.getHeaders());
-        String remoteAddress = Objects.requireNonNull(request.getRemoteAddress()).getHostString();
-        log.info("请求地址: {}", remoteAddress);
+        String IP_ADDRESS = Objects.requireNonNull(request.getLocalAddress()).getHostString();
+        String path = request.getPath().value();
+        log.info("Request Unique Identifier: {}", request.getId());
+        log.info("Request Path: {}", path);
+        log.info("Request Parameters: {}", request.getQueryParams());
+        log.info("Request Source Address (IP Address): {}", IP_ADDRESS);
+        log.info("Request Source Address (Remote Address): {}", request.getRemoteAddress());
 
-        // 2. 访问控制 - 黑白名单
+
         ServerHttpResponse response = exchange.getResponse();
-        if (!IP_WHITE_LIST.contains(remoteAddress)) {
+
+        // 2. 黑白名单
+        if (!IP_WHITE_LIST.contains(IP_ADDRESS)) {
+            log.error("Unauthorized IP Address: {}", IP_ADDRESS);
             return handleNoAuth(response);
         }
 
-        // 3. 用户鉴权
+        // 3. 用户鉴权 （判断 accessKey 和 secretKey 是否合法）
         HttpHeaders headers = request.getHeaders();
         String accessKey = headers.getFirst("accessKey");
-        // 防止中文乱码
-        String body = null;
-        try {
-            body = URLDecoder.decode(headers.getFirst("body"), StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-        String sign = headers.getFirst("sign");
-        String nonce = headers.getFirst("nonce");
         String timestamp = headers.getFirst("timestamp");
-        boolean hasBlank = StrUtil.hasBlank(accessKey, body, sign, nonce, timestamp);
-        // 判断是否有空
-        if (hasBlank) {
-            return handleInvokeError(response);
+        String nonce = headers.getFirst("nonce");
+        String sign = headers.getFirst("sign");
+        String body = URLUtil.decode(headers.getFirst("body"), CharsetUtil.CHARSET_UTF_8);
+        String method = headers.getFirst("method");
+
+        log.info("AccessKey: {}", accessKey);
+        log.info("Timestamp: {}", timestamp);
+        log.info("Nonce: {}", nonce);
+        log.info("Sign: {}", sign);
+        log.info("Method: {}", method);
+
+        if (StringUtil.isEmpty(nonce)
+                || StringUtil.isEmpty(sign)
+                || StringUtil.isEmpty(timestamp)
+                || StringUtil.isEmpty(method)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "The request header parameters are incomplete");
         }
-        // 使用accessKey去数据库查询secretKey
-        User invokeUser = null;
-        try {
-            invokeUser = innerUserService.getInvokeUser(accessKey);
-        } catch (Exception e) {
-            log.error("getInvokeUser error", e);
-        }
+
+
+// Query if the user exists using the accessKey
+        User invokeUser = innerUserService.getInvokeUser(accessKey);
         if (invokeUser == null) {
-            return handleInvokeError(response);
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "Invalid accessKey!");
         }
-        String secretKey = invokeUser.getSecretKey();
-        String sign1 = SignUtils.getSign(body, secretKey);
-        if (!StrUtil.equals(sign, sign1)) {
-            return handleInvokeError(response);
+
+// Check if the nonce exists to prevent replay attacks
+//        String existNonce = (String) redisTemplate.opsForValue().get(nonce);
+//        if (StringUtil.isNotBlank(existNonce)) {
+//            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "Duplicate request!");
+//        }
+
+// Ensure the timestamp is within 5 minutes (300,000 milliseconds) of the current time
+        long currentTimeMillis = System.currentTimeMillis() / 1000;
+        long difference = currentTimeMillis - Long.parseLong(timestamp);
+        if (Math.abs(difference) > 300000) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "Request timeout!");
         }
-        // TODO 判断随机数nonce
-        // 时间戳是否为数字
-        if (!NumberUtil.isNumber(timestamp)) {
-            return handleInvokeError(response);
+
+// Validate the signature
+// Use the secretKey fetched with the accessKey to generate the server-side sign
+// Compare the generated sign with the one provided by the client
+        String serverSign = SignUtils.genSign(body, invokeUser.getSecretKey());
+        if (!sign.equals(serverSign)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "Invalid signature!");
         }
-        // 五分钟内的请求有效
-        if (System.currentTimeMillis() - Long.parseLong(timestamp) > FIVE_MINUTES) {
-            return handleInvokeError(response);
-        }
-        // 4. 请求的模拟接口是否存在
-        InterfaceInfo invokeInterfaceInfo = null;
+
+// Check if the requested mock interface exists
+// Query the database to verify the existence of the interface and match the method (also validate the request parameters)
+        InterfaceInfo interfaceInfo = null;
         try {
-            invokeInterfaceInfo = innerInterfaceInfoService.getInvokeInterfaceInfo(path, method);
+            interfaceInfo = innerInterfaceInfoService.getInterfaceInfo(path, method);
         } catch (Exception e) {
-            log.error("getInvokeInterfaceInfo error", e);
+            log.error("Error fetching interface details", e);
         }
-        if (invokeInterfaceInfo == null) {
-            return handleInvokeError(response);
+        if (interfaceInfo == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface does not exist!");
         }
-        //  是否有调用次数
-        if (!innerUserInterfaceInfoService.hasInvokeNum(invokeUser.getId(), invokeInterfaceInfo.getId())) {
-            return handleInvokeError(response);
-        }
-        // 5. 请求转发，调用模拟接口
-        return handleResponse(exchange, chain, invokeUser.getId(), invokeInterfaceInfo.getId());
+
+// Forward the request to invoke the mock interface and log the response
+        return handleResponse(exchange, chain, interfaceInfo.getId(), invokeUser.getId());
 
     }
-
     @Override
     public int getOrder() {
         return -1;
@@ -174,7 +186,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                             return super.writeWith(fluxBody.map(dataBuffer -> {
                                 // 7. 调用成功，接口调用次数+1
                                 try {
-                                    innerUserInterfaceInfoService.invokeInterfaceCount(userId, interfaceInfoId);
+                                    innerUserInterfaceInfoService.invokeCount(userId, interfaceInfoId);
                                 } catch (Exception e) {
                                     log.error("invokeInterfaceCount error", e);
                                 }
@@ -183,23 +195,33 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                                 dataBuffer.read(content);
                                 DataBufferUtils.release(dataBuffer);// 释放掉内存
                                 // 6.构建日志
+                                StringBuilder sb2 = new StringBuilder(200);
                                 List<Object> rspArgs = new ArrayList<>();
                                 rspArgs.add(originalResponse.getStatusCode());
                                 String data = new String(content, StandardCharsets.UTF_8);// data
                                 rspArgs.add(data);
-                                log.info("<--- status:{} data:{}"// data
-                                        , rspArgs.toArray());// log.info("<-- {} {}", originalResponse.getStatusCode(), data);
+                                sb2.append(data);
+                                // 打印日志
+                                log.info("response result：" + data);
                                 return bufferFactory.wrap(content);
                             }));
                         } else {
                             // 8.调用失败返回错误状态码
-                            log.error("<--- {} 响应code异常", getStatusCode());
+                            log.error("<--- {} Response Code Exception", getStatusCode());
                         }
                         return super.writeWith(body);
                     }
                 };
-                // 设置 response 对象为装饰过的
-                return chain.filter(exchange.mutate().response(decoratedResponse).build());
+                // 流量染色，只有染色数据才能被调用
+                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                        .header(DYE_DATA_HEADER, DYE_DATA_VALUE)
+                        .build();
+
+                ServerWebExchange serverWebExchange = exchange.mutate()
+                        .request(modifiedRequest)
+                        .response(decoratedResponse)
+                        .build();
+                return chain.filter(serverWebExchange);
             }
             return chain.filter(exchange);// 降级处理返回数据
         } catch (Exception e) {
@@ -211,6 +233,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> handleNoAuth(ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.FORBIDDEN);
+        response.setRawStatusCode(HttpStatus.FORBIDDEN.value());
         return response.setComplete();
     }
 
@@ -218,5 +241,6 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
         return response.setComplete();
     }
+
 
 }

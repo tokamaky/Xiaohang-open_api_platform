@@ -1,68 +1,60 @@
-import { Footer } from '@/components';
-import {
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import {
-  ProFormCheckbox, ProFormInstance,
-  ProFormText,
-} from '@ant-design/pro-components';
-import {useModel } from '@umijs/max';
-import { message, Tabs } from 'antd';
-
-import React, {CSSProperties, useRef, useState} from 'react';
-
-import {userLoginUsingPost, userRegisterUsingPost} from '@/services/xiaohangapi-backend/userController';
-import {LoginFormPage} from "@ant-design/pro-form/lib";
+import Footer from '@/components/Footer';
+import {userLoginUsingPost, userRegisterUsingPost} from '@/services/xiaohang-backend/userController';
+import {LockOutlined, UserOutlined,} from '@ant-design/icons';
+import {LoginFormPage, ProFormCheckbox, ProFormInstance, ProFormText,} from '@ant-design/pro-components';
+import {useModel} from '@umijs/max';
+import {message, Tabs} from 'antd';
+import type {CSSProperties} from 'react';
+import React, {useRef, useState} from 'react';
+import pandaBackImg from '../../../../public/panda2.jpg';
+import logo from '../../../../public/logo.png';
 
 type LoginType = 'account' | 'register' | 'forgetPassword';
 
 const iconStyles: CSSProperties = {
-  color: 'rgba(0, 0, 0, 0.2)',
-  fontSize: '18px',
-  verticalAlign: 'middle',
-  cursor: 'pointer',
+    color: 'rgba(0, 0, 0, 0.2)',
+    fontSize: '18px',
+    verticalAlign: 'middle',
+    cursor: 'pointer',
 };
-
 const Login: React.FC = () => {
-  const {initialState, setInitialState} = useModel('@@initialState');
-  const [loginType, setLoginType] = useState<LoginType>('account');
-  const formRef = useRef<ProFormInstance>();
-
+    const {initialState, setInitialState} = useModel('@@initialState');
+    const [loginType, setLoginType] = useState<LoginType>('account');
+    const formRef = useRef<ProFormInstance>();
 
 
   const handleSubmit = async (values: API.UserRegisterRequest) => {
-    const {userPassword, checkPassword} = values;
+    const { userPassword, checkPassword } = values;
     if (checkPassword) {
-      // 注册
+      // Register
       if (userPassword !== checkPassword) {
-        message.error('两次输入密码不一致！');
+        message.error('The passwords do not match!');
         return;
       }
       const res = await userRegisterUsingPost(values);
       if (res.code === 0) {
-        // 注册成功
-        const defaultRegisterSuccessMessage = '注册成功！';
-        message.success(defaultRegisterSuccessMessage)
-        // 切换到登录
+        // Registration success
+        const defaultRegisterSuccessMessage = 'Registration successful!';
+        message.success(defaultRegisterSuccessMessage);
+        // Switch to login
         setLoginType('account');
-        // 重置表单
+        // Reset form
         formRef.current?.resetFields();
       }
 
     } else {
-      // 登录
+      // Login
       const res = await userLoginUsingPost({
         ...values,
       });
       if (res.data) {
-        const defaultLoginSuccessMessage = '登录成功！';
+        const defaultLoginSuccessMessage = 'Login successful!';
         message.success(defaultLoginSuccessMessage);
-        // 登录成功后处理
+        // Handle login success
         const urlParams = new URL(window.location.href).searchParams;
-        // 重定向到 redirect 参数所在的位置
+        // Redirect to the location specified by the redirect parameter
         location.href = urlParams.get('redirect') || '/';
-        // 保存登录状态
+        // Save login state
         setInitialState({
           loginUser: res.data,
         });
@@ -71,6 +63,7 @@ const Login: React.FC = () => {
       }
     }
   };
+
   return (
     <div>
       <div
@@ -81,11 +74,10 @@ const Login: React.FC = () => {
         }}
       >
         <LoginFormPage
-          //backgroundImageUrl={pandaBackImg}
-          // logo="https://image-bed-ichensw.oss-cn-hangzhou.aliyuncs.com/logo.png"
-          //logo={logo}
-          title="Xiaohang API"
-          subTitle="史上最好用的免费API接口平台"
+          backgroundImageUrl={pandaBackImg}
+          logo={logo}
+          title="Panda API"
+          subTitle="**The Best Free API Interface Platform in History**"
           initialValues={{
             autoLogin: true,
           }}
@@ -99,8 +91,8 @@ const Login: React.FC = () => {
               activeKey={loginType}
               onChange={(activeKey) => setLoginType(activeKey as LoginType)}
             >
-              <Tabs.TabPane key={'account'} tab={'登录'}/>
-              <Tabs.TabPane key={'register'} tab={'注册'}/>
+              <Tabs.TabPane key={'account'} tab={'Login'} />
+              <Tabs.TabPane key={'register'} tab={'Register'} />
             </Tabs>
           }
           {loginType === 'account' && (
@@ -109,13 +101,13 @@ const Login: React.FC = () => {
                 name="userAccount"
                 fieldProps={{
                   size: 'large',
-                  prefix: <UserOutlined/>,
+                  prefix: <UserOutlined />,
                 }}
-                placeholder={'请输入用户名'}
+                placeholder={'Please enter your username'}
                 rules={[
                   {
                     required: true,
-                    message: '用户名是必填项！',
+                    message: 'Username is required!',
                   },
                 ]}
               />
@@ -123,13 +115,13 @@ const Login: React.FC = () => {
                 name="userPassword"
                 fieldProps={{
                   size: 'large',
-                  prefix: <LockOutlined/>,
+                  prefix: <LockOutlined />,
                 }}
-                placeholder={'请输入密码'}
+                placeholder={'Please enter your password'}
                 rules={[
                   {
                     required: true,
-                    message: '密码是必填项！',
+                    message: 'Password is required!',
                   },
                 ]}
               />
@@ -139,7 +131,7 @@ const Login: React.FC = () => {
                 }}
               >
                 <ProFormCheckbox noStyle name="autoLogin">
-                  自动登录
+                  Auto-login
                 </ProFormCheckbox>
                 <a
                   style={{
@@ -147,7 +139,7 @@ const Login: React.FC = () => {
                   }}
                   onClick={() => setLoginType("forgetPassword")}
                 >
-                  忘记密码 ?
+                  Forgot password?
                 </a>
               </div>
             </>
@@ -157,54 +149,54 @@ const Login: React.FC = () => {
               <ProFormText
                 fieldProps={{
                   size: 'large',
-                  prefix: <UserOutlined/>,
+                  prefix: <UserOutlined />,
                 }}
                 name="userAccount"
-                placeholder={'请输入用户名'}
+                placeholder={'Please enter your username'}
                 rules={[
                   {
                     required: true,
-                    message: '用户名是必填项！',
+                    message: 'Username is required!',
                   },
                   {
                     min: 4,
-                    message: '长度不能少于4位！',
+                    message: 'Length cannot be less than 4 characters!',
                   },
                 ]}
               />
               <ProFormText.Password
                 fieldProps={{
                   size: 'large',
-                  prefix: <LockOutlined/>,
+                  prefix: <LockOutlined />,
                 }}
                 name="userPassword"
-                placeholder={'请输入密码'}
+                placeholder={'Please enter your password'}
                 rules={[
                   {
                     required: true,
-                    message: '密码是必填项！',
+                    message: 'Password is required!',
                   },
                   {
                     min: 8,
-                    message: '长度不能少于8位！',
+                    message: 'Length cannot be less than 8 characters!',
                   },
                 ]}
               />
               <ProFormText.Password
                 fieldProps={{
                   size: 'large',
-                  prefix: <LockOutlined/>,
+                  prefix: <LockOutlined />,
                 }}
                 name="checkPassword"
-                placeholder={'请再次输入密码'}
+                placeholder={'Please re-enter your password'}
                 rules={[
                   {
                     required: true,
-                    message: '密码是必填项！',
+                    message: 'Password is required!',
                   },
                   {
                     min: 8,
-                    message: '长度不能少于8位！',
+                    message: 'Length cannot be less than 8 characters!',
                   },
                 ]}
               />
@@ -212,7 +204,7 @@ const Login: React.FC = () => {
           )}
         </LoginFormPage>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };

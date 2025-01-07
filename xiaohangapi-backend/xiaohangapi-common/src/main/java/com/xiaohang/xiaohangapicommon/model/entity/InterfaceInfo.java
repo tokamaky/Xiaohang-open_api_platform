@@ -15,7 +15,7 @@ import java.util.Date;
 @Data
 public class InterfaceInfo implements Serializable {
     /**
-     * Primary Key
+     * Primary key
      */
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -36,50 +36,62 @@ public class InterfaceInfo implements Serializable {
     private String url;
 
     /**
-     * Request Parameters
-     * [
-     *   {"name": "username", "type": "string"}
-     * ]
+     * Host name
+     */
+    private String host;
+
+    /**
+     * Request parameters
      */
     private String requestParams;
 
     /**
-     * Request Header
+     * Request parameter remarks
+     */
+    private String requestParamsRemark;
+
+    /**
+     * Response parameter remarks
+     */
+    private String responseParamsRemark;
+
+    /**
+     * Request headers
      */
     private String requestHeader;
 
     /**
-     * Response Header
+     * Response headers
      */
     private String responseHeader;
 
     /**
-     * Interface Status (0 - Disabled, 1 - Enabled)
+     * Interface status (0-closed, 1-open)
      */
     private Integer status;
 
     /**
-     * Request Method
+     * Request method type
      */
     private String method;
 
     /**
-     * Creator User ID
+     * Creator ID
      */
     private Long userId;
 
     /**
-     * Creation Time
+     * Creation time
      */
     private Date createTime;
 
     /**
-     * Update Time
+     * Update time
      */
     private Date updateTime;
 
     /**
-     * Is Deleted (0 - Not Deleted, 1 - Deleted)
+     * Is deleted (0-not deleted, 1-deleted)
      */
     @TableLogic
     private Integer isDelete;

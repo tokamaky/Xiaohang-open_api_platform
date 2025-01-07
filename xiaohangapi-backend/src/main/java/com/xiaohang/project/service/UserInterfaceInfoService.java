@@ -1,8 +1,14 @@
 package com.xiaohang.project.service;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xiaohang.xiaohangapicommon.model.dto.userinterfaceinfo.UserInterfaceInfoQueryRequest;
 import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author 14711
@@ -11,13 +17,37 @@ import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 */
 public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
 
+    /**
+     * Validation
+     *
+     * @param userInterfaceInfo
+     * @param add
+     */
     void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add);
 
     /**
-     * API Call Statistics
-     * @param interfaceInfoId
-     * @param userId
+     * Get query conditions
+     *
+     * @param interfaceInfoQueryRequest
      * @return
      */
-    boolean invokeCount(long interfaceInfoId, long userId);
+    QueryWrapper<UserInterfaceInfo> getQueryWrapper(UserInterfaceInfoQueryRequest interfaceInfoQueryRequest);
+
+    /**
+     * Get paginated interface information wrapper
+     *
+     * @param userInterfaceInfoPage
+     * @param request
+     * @return
+     */
+    Page<UserInterfaceInfo> getUserInterfaceInfoVOPage(Page<UserInterfaceInfo> userInterfaceInfoPage, HttpServletRequest request);
+
+    /**
+     * Get top n interface information based on call ranking
+     *
+     * @param limit Top n
+     * @return List<UserInterfaceInfo>
+     */
+    List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit);
+
 }

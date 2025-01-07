@@ -1,6 +1,7 @@
 package com.xiaohang.project.exception;
 
-import com.xiaohang.project.common.ErrorCode;
+
+import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 
 /**
  * Custom exception classes

@@ -1,8 +1,7 @@
 package com.xiaohang.project.exception;
 
-import com.xiaohang.project.common.BaseResponse;
-import com.xiaohang.project.common.ErrorCode;
-import com.xiaohang.project.common.ResultUtils;
+
+import com.xiaohang.xiaohangapicommon.common.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

@@ -3,16 +3,17 @@ package com.xiaohang.xiaohangapicommon.service;
 import com.xiaohang.xiaohangapicommon.model.entity.User;
 
 /**
- * 内部用户服务
+ * Internal User Service
  *
  * @author Xiaohang
  */
 public interface InnerUserService {
 
     /**
-     * 数据库中查是否已分配给用户秘钥（accessKey）
-     * @param accessKey
-     * @return
+     * Check in the database if the access key (accessKey) has already been assigned to a user.
+     *
+     * @param accessKey The access key to check.
+     * @return The user associated with the access key, if found.
      */
     User getInvokeUser(String accessKey);
 }

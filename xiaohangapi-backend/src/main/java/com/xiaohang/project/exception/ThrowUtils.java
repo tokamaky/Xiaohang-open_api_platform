@@ -1,18 +1,19 @@
 package com.xiaohang.project.exception;
 
-import com.xiaohang.project.common.ErrorCode;
+
+import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 
 /**
- * 抛异常工具类
+ * Exception Throwing Utility Class
  *
  */
 public class ThrowUtils {
 
     /**
-     * 条件成立则抛异常
+     * Throws an exception if the condition is true.
      *
-     * @param condition
-     * @param runtimeException
+     * @param condition The condition to check.
+     * @param runtimeException The runtime exception to throw.
      */
     public static void throwIf(boolean condition, RuntimeException runtimeException) {
         if (condition) {
@@ -21,21 +22,21 @@ public class ThrowUtils {
     }
 
     /**
-     * 条件成立则抛异常
+     * Throws an exception if the condition is true.
      *
-     * @param condition
-     * @param errorCode
+     * @param condition The condition to check.
+     * @param errorCode The error code to use when creating the exception.
      */
     public static void throwIf(boolean condition, ErrorCode errorCode) {
         throwIf(condition, new BusinessException(errorCode));
     }
 
     /**
-     * 条件成立则抛异常
+     * Throws an exception if the condition is true.
      *
-     * @param condition
-     * @param errorCode
-     * @param message
+     * @param condition The condition to check.
+     * @param errorCode The error code to use when creating the exception.
+     * @param message The message to include in the exception.
      */
     public static void throwIf(boolean condition, ErrorCode errorCode, String message) {
         throwIf(condition, new BusinessException(errorCode, message));

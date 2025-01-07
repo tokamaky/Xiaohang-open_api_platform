@@ -1,27 +1,32 @@
 package com.xiaohang.xiaohangapiclientsdk.Client;
 
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.xiaohang.xiaohangapiclientsdk.model.User;
+import lombok.extern.slf4j.Slf4j;
 
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.getSign;
+import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.genSign;
 
 /**
- * 调用第三方接口的客户端
+ * API 调用
  *
  * @author xiaohang
  */
+@Slf4j
 public class XiaohangApiClient {
 
-    private static final String GATEWAY_HOST = "http://localhost:8090";
+    private static String GATEWAY_HOST = "http://localhost:8090";
 
     private String accessKey;
 
@@ -32,23 +37,19 @@ public class XiaohangApiClient {
         this.secretKey = secretKey;
     }
 
-    public String getNameByGet(String name) {
-        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("name", name);
-        String result = HttpUtil.get(GATEWAY_HOST + "/api/name/", paramMap);
-        System.out.println(result);
-        return result;
+    public void setGatewayHost(String gatewayHost) {
+        GATEWAY_HOST = gatewayHost;
     }
 
-    public String getNameByPost(String name) {
-        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("name", name);
-        String result = HttpUtil.post(GATEWAY_HOST + "/api/name/", paramMap);
-        System.out.println(result);
-        return result;
-    }
+//    public String getNameByGet(String name) {
+//        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
+//        HashMap<String, Object> paramMap = new HashMap<>();
+//        paramMap.put("name", name);
+//        String result = HttpUtil.get(GATEWAY_HOST + "/api/name/", paramMap);
+//        System.out.println(result);
+//        return result;
+//    }
+
 
     private Map<String, String> getHeaderMap(String body, String method) throws UnsupportedEncodingException {
         HashMap<String, String> map = new HashMap<>();
@@ -61,16 +62,20 @@ public class XiaohangApiClient {
         map.put("method", method);
         return map;
     }
-    
-    public String getUsernameByPost(User user) {
-        String json = JSONUtil.toJsonStr(user);
-        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/api/name/user")
-                .addHeaders(getHeaderMap(json))
-                .body(json)
+
+    public String invokeInterface(String params, String url, String method) throws UnsupportedEncodingException {
+        // Log the request parameters and URL
+        log.info("original gateway host:{}", GATEWAY_HOST);
+        log.info("Invoking API with URL: " + GATEWAY_HOST + url);
+        log.info("Request Parameters: " + params);
+
+        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + url)
+                .header("Accept-Charset", CharsetUtil.UTF_8)
+                .addHeaders(getHeaderMap(params, method))
+                .body(params)
                 .execute();
-        System.out.println(httpResponse.getStatus());
-        String result = httpResponse.body();
-        System.out.println(result);
-        return result;
+
+        log.info("HTTP Response Body: " + httpResponse.body());
+        return JSONUtil.formatJsonStr(httpResponse.body());
     }
 }

@@ -2,12 +2,13 @@ package com.xiaohang.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xiaohang.project.annotation.AuthCheck;
-import com.xiaohang.project.common.BaseResponse;
-import com.xiaohang.project.common.ErrorCode;
-import com.xiaohang.project.common.ResultUtils;
+
 import com.xiaohang.project.exception.BusinessException;
 import com.xiaohang.project.mapper.UserInterfaceInfoMapper;
 import com.xiaohang.project.service.InterfaceInfoService;
+import com.xiaohang.xiaohangapicommon.common.BaseResponse;
+import com.xiaohang.xiaohangapicommon.common.ErrorCode;
+import com.xiaohang.xiaohangapicommon.common.ResultUtils;
 import com.xiaohang.xiaohangapicommon.model.entity.InterfaceInfo;
 import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 import com.xiaohang.xiaohangapicommon.model.vo.InterfaceInfoVO;

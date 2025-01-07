@@ -9,7 +9,7 @@ spring:
         - id: api_route
           uri: http://localhost:8123
           predicates:
-            - Path=/api/**
+            - Path=/**
 #        - id: add_request_header_route
 #          uri: http://localhost:8123
 #          predicates:

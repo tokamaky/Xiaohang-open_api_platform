@@ -1,29 +1,47 @@
 package com.xiaohang.xiaohangapicommon.service;
 
+import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
+
 /**
- * 内部用户接口信息服务
+ * Internal User Interface Information Service
  *
  * @author Xiaohang
  */
 public interface InnerUserInterfaceInfoService {
 
     /**
-     * 是否还有调用次数
+     * Count the invocation of an interface.
      *
-     * @param userId          用户id
-     * @param interfaceInfoId 接口id
-     * @return boolean
+     * @param interfaceInfoId The ID of the interface.
+     * @param userId          The ID of the user.
+     * @return boolean Whether the operation was successful.
      */
-    boolean hasInvokeNum(long userId, long interfaceInfoId);
-
+    boolean invokeCount(long interfaceInfoId, long userId);
 
     /**
-     * 根据userId、interfaceInfoId计数
+     * Check if there are remaining invocation counts.
      *
-     * @param userId          用户id
-     * @param interfaceInfoId 接口id
-     * @return boolean
+     * @param interfaceId The ID of the interface.
+     * @param userId      The ID of the user.
+     * @return UserInterfaceInfo The user interface information.
      */
-    boolean invokeInterfaceCount(long userId, long interfaceInfoId);
+    UserInterfaceInfo hasLeftNum(Long interfaceId, Long userId);
 
+    /**
+     * Add default user interface information.
+     *
+     * @param interfaceId The ID of the interface.
+     * @param userId      The ID of the user.
+     * @return Boolean Whether the addition was successful.
+     */
+    Boolean addDefaultUserInterfaceInfo(Long interfaceId, Long userId);
+
+    /**
+     * Check if a user has access to an interface.
+     *
+     * @param interfaceId The ID of the interface.
+     * @param userId      The ID of the user.
+     * @return UserInterfaceInfo The user interface information.
+     */
+    UserInterfaceInfo checkUserHasInterface(long interfaceId, long userId);
 }
