@@ -35,119 +35,116 @@ const CreateModal: React.FC<Props> = (props) => {
         readonly API.ResponseParamsRemarkVO[]
     >([]);
     return (
-        <DrawerForm<API.InterfaceInfoVO>
-            onFinish={async (value) => {
-                console.log('---------->', value);
-                onSubmit?.(value);
+      <DrawerForm<API.InterfaceInfoVO>
+        onFinish={async (value) => {
+          console.log('---------->', value);
+          onSubmit?.(value);
+        }}
+        formRef={formRef}
+        formKey="update-modal-form"
+        autoFocusFirstInput
+        onOpenChange={setVisible}
+        title="Add New Interface"
+        open={visible}
+      >
+        <ProFormText
+          name="name"
+          label="Interface Name"
+          rules={[{ required: true, message: 'Interface name cannot be empty!' }]}
+        />
+        <ProFormText
+          name="description"
+          label="Description"
+          rules={[{ required: true, message: 'Description cannot be empty!' }]}
+        />
+        <ProFormText
+          name="method"
+          label="Request Method"
+          rules={[{ required: true, message: 'Request method cannot be empty!' }]}
+        />
+        <ProFormText
+          name="host"
+          label="Hostname"
+          rules={[{ required: true, message: 'Hostname cannot be empty!' }]}
+        />
+        <ProFormText
+          name="url"
+          label="Interface URL"
+          rules={[{ required: true, message: 'Interface URL cannot be empty!' }]}
+        />
+        <Form.Item name="requestParams" label="Request Parameters Example">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item name="requestParamsRemark" label="Request Parameters Description">
+          <EditableProTable<API.RequestParamsRemarkVO>
+            rowKey="id"
+            toolBarRender={false}
+            columns={requestColumns}
+            value={requestDataSource}
+            onChange={setRequestDataSource}
+            recordCreatorProps={{
+              newRecordType: 'dataSource',
+              position: 'bottom',
+              record: () => ({
+                id: Date.now(),
+                isRequired: 'no',
+                type: 'string',
+              }),
             }}
-            formRef={formRef}
-            formKey="update-modal-form"
-            autoFocusFirstInput
-            onOpenChange={setVisible}
-            title="新增接口"
-            open={visible}
-        >
-            <ProFormText
-                name="name"
-                label="接口名称"
-                rules={[{ required: true, message: '接口名称不可为空！' }]}
-            />
-
-            <ProFormText
-                name="description"
-                label="描述"
-                rules={[{ required: true, message: '描述不可为空！' }]}
-            />
-            <ProFormText
-                name="method"
-                label="请求方法"
-                rules={[{ required: true, message: '请求方法不可为空！' }]}
-            />
-
-            <ProFormText
-                name="host"
-                label="主机名"
-                rules={[{ required: true, message: '主机名不可为空！' }]}
-            />
-            <ProFormText
-                name="url"
-                label="接口地址"
-                rules={[{ required: true, message: '接口地址不可为空！' }]}
-            />
-            <Form.Item name="requestParams" label="请求参数示例">
-                <Input.TextArea />
-            </Form.Item>
-            <Form.Item name="requestParamsRemark" label="请求参数说明">
-                <EditableProTable<API.RequestParamsRemarkVO>
-                    rowKey="id"
-                    toolBarRender={false}
-                    columns={requestColumns}
-                    value={requestDataSource}
-                    onChange={setRequestDataSource}
-                    recordCreatorProps={{
-                        newRecordType: 'dataSource',
-                        position: 'bottom',
-                        record: () => ({
-                            id: Date.now(),
-                            isRequired: 'no',
-                            type: 'string',
-                        }),
-                    }}
-                    editable={{
-                        type: 'multiple',
-                        editableKeys: requestEditableKeys,
-                        onChange: setRequestEditableKeys,
-                        actionRender: (row, _, dom) => {
-                            return [dom.delete];
-                        },
-                        onValuesChange: (record, recordList) => {
-                            setRequestDataSource(recordList);
-                            formRef.current?.setFieldsValue({
-                                requestParamsRemark: recordList,
-                            });
-                        },
-                    }}
-                />
-            </Form.Item>
-
-            <Form.Item name="responseParamsRemark" label="响应参数说明">
-                <EditableProTable<API.ResponseParamsRemarkVO>
-                    rowKey="id"
-                    toolBarRender={false}
-                    columns={responseColumns}
-                    value={responseDataSource}
-                    onChange={setResponseDataSource}
-                    recordCreatorProps={{
-                        newRecordType: 'dataSource',
-                        position: 'bottom',
-                        record: () => ({
-                            id: Date.now(),
-                            type: 'string',
-                        }),
-                    }}
-                    editable={{
-                        type: 'multiple',
-                        editableKeys: responseEditableKeys,
-                        onChange: setResponseEditableKeys,
-                        actionRender: (row, _, dom) => {
-                            return [dom.delete];
-                        },
-                        onValuesChange: (record, recordList) => {
-                            setResponseDataSource(recordList);
-                            formRef.current?.setFieldsValue({
-                                responseParamsRemark: recordList,
-                            });
-                        },
-                    }}
-                />
-            </Form.Item>
-            <Form.Item name="requestHeader" label="请求头">
-                <Input.TextArea />
-            </Form.Item>
-            <Form.Item name="responseHeader" label="响应头">
-                <Input.TextArea />
-            </Form.Item>
-        </DrawerForm>
+            editable={{
+              type: 'multiple',
+              editableKeys: requestEditableKeys,
+              onChange: setRequestEditableKeys,
+              actionRender: (row, _, dom) => {
+                return [dom.delete];
+              },
+              onValuesChange: (record, recordList) => {
+                setRequestDataSource(recordList);
+                formRef.current?.setFieldsValue({
+                  requestParamsRemark: recordList,
+                });
+              },
+            }}
+          />
+        </Form.Item>
+        <Form.Item name="responseParamsRemark" label="Response Parameters Description">
+          <EditableProTable<API.ResponseParamsRemarkVO>
+            rowKey="id"
+            toolBarRender={false}
+            columns={responseColumns}
+            value={responseDataSource}
+            onChange={setResponseDataSource}
+            recordCreatorProps={{
+              newRecordType: 'dataSource',
+              position: 'bottom',
+              record: () => ({
+                id: Date.now(),
+                type: 'string',
+              }),
+            }}
+            editable={{
+              type: 'multiple',
+              editableKeys: responseEditableKeys,
+              onChange: setResponseEditableKeys,
+              actionRender: (row, _, dom) => {
+                return [dom.delete];
+              },
+              onValuesChange: (record, recordList) => {
+                setResponseDataSource(recordList);
+                formRef.current?.setFieldsValue({
+                  responseParamsRemark: recordList,
+                });
+              },
+            }}
+          />
+        </Form.Item>
+        <Form.Item name="requestHeader" label="Request Header">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item name="responseHeader" label="Response Header">
+          <Input.TextArea />
+        </Form.Item>
+      </DrawerForm>
     );
 };
 export default CreateModal;

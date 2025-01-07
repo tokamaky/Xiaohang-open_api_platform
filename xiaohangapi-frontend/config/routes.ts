@@ -20,13 +20,13 @@
     access: 'canAdmin',
     routes: [
       {
-        name: '**API Management**',
+        name: 'API Management',
         icon: 'table',
         path: '/admin/interface_info',
         component: './Admin/InterfaceInfo',
       },
       {
-        name: 'Invoke Times Analysis',
+        name: 'Invocation Count Statistics',
         icon: 'table',
         path: '/admin/analysis',
         component: './Admin/InterfaceInfoAnalysis',

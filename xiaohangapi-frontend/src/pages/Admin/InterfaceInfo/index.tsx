@@ -39,19 +39,19 @@ const TableList: React.FC = () => {
      * @param fields
      */
     const handleAdd = async (fields: API.InterfaceInfoVO) => {
-        const hide = message.loading('正在添加');
+        const hide = message.loading('adding');
         try {
             await addInterfaceInfoUsingPost({
                 ...fields,
             });
             hide();
-            message.success('创建成功');
+            message.success('Creation Successful');
             handleModalOpen(false);
             actionRef.current?.reload();
             return true;
         } catch (error: any) {
             hide();
-            message.error('创建失败，' + error.message);
+            message.error('Creation Failed，' + error.message);
             return false;
         }
     };
@@ -66,18 +66,18 @@ const TableList: React.FC = () => {
         if (!currentRow) {
             return;
         }
-        const hide = message.loading('修改中');
+        const hide = message.loading('In Progress');
         try {
             await updateInterfaceInfoUsingPost({
                 id: currentRow.id,
                 ...fields,
             });
             hide();
-            message.success('操作成功');
+            message.success('Operation Successful');
             return true;
         } catch (error: any) {
             hide();
-            message.error('操作失败，' + error.message);
+            message.error('Operation Failed' + error.message);
             return false;
         }
     };
@@ -89,19 +89,19 @@ const TableList: React.FC = () => {
      * @param record
      */
     const handleRemove = async (record: API.InterfaceInfoVO) => {
-        const hide = message.loading('正在删除');
+        const hide = message.loading('In Progress');
         if (!record) return true;
         try {
             await deleteInterfaceInfoUsingPost({
                 id: record.id,
             });
             hide();
-            message.success('删除成功');
+            message.success('Operation Successful');
             actionRef.current?.reload();
             return true;
         } catch (error) {
             hide();
-            message.error('删除失败');
+            message.error('Operation Failed');
             return false;
         }
     };
@@ -112,7 +112,7 @@ const TableList: React.FC = () => {
      * @param record
      */
     const handleOnline = async (record: API.InterfaceInfoInvokeRequest) => {
-        const hide = message.loading('发布中');
+        const hide = message.loading('Publishing');
         if (!record) return true;
         try {
             const res = await onlineInterfaceInfoUsingPost({
@@ -122,341 +122,342 @@ const TableList: React.FC = () => {
                 requestParams: record.requestParams,
             });
             if (res.code === 0) {
-                message.success('发布成功');
+                message.success('Publishing Successful');
             }
             hide();
             actionRef.current?.reload();
             return true;
         } catch (error) {
             hide();
-            message.error('发布失败');
+            message.error('Publishing Failed');
             return false;
         }
     };
 
-    /**
-     *  下线接口
-     *
-     * @param record
-     */
-    const handleOffline = async (record: API.IdRequest) => {
-        const hide = message.loading('下线中');
-        if (!record) return true;
-        try {
-            await offlineInterfaceInfoUsingPost({
-                id: record.id,
-            });
-            hide();
-            message.success('下线成功');
-            actionRef.current?.reload();
-            return true;
-        } catch (error) {
-            hide();
-            message.error('下线失败');
-            return false;
-        }
-    };
+  /**
+   * Offline the interface
+   *
+   * @param record
+   */
+  const handleOffline = async (record: API.IdRequest) => {
+    const hide = message.loading('Offlining');
+    if (!record) return true;
+    try {
+      await offlineInterfaceInfoUsingPost({
+        id: record.id,
+      });
+      hide();
+      message.success('Offline successful');
+      actionRef.current?.reload();
+      return true;
+    } catch (error) {
+      hide();
+      message.error('Offline failed');
+      return false;
+    }
+  };
 
-    /**
-     * table 展示的列
-     * */
-    const columns: ProColumns<API.InterfaceInfoVO>[] = [
-        {
-            title: 'id',
-            dataIndex: 'id',
-            valueType: 'index',
+  /**
+   * Columns displayed in the table
+   */
+  const columns: ProColumns<API.InterfaceInfoVO>[] = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      valueType: 'index',
+    },
+    {
+      title: 'Interface Name',
+      dataIndex: 'name',
+      valueType: 'text',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      valueType: 'textarea',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: 'Request Method',
+      dataIndex: 'method',
+      valueType: 'text',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: 'Host Name',
+      dataIndex: 'host',
+      valueType: 'text',
+      hideInTable: true,
+      hideInSearch: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: 'Interface Address',
+      dataIndex: 'url',
+      valueType: 'text',
+      hideInTable: true,
+      hideInSearch: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: 'Request Parameters',
+      dataIndex: 'requestParams',
+      valueType: 'jsonCode',
+      hideInTable: true,
+      hideInSearch: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: 'Request Header',
+      dataIndex: 'requestHeader',
+      valueType: 'jsonCode',
+      hideInTable: true,
+      hideInSearch: true,
+    },
+    {
+      title: 'Response Header',
+      dataIndex: 'responseHeader',
+      valueType: 'jsonCode',
+      hideInTable: true,
+      hideInSearch: true,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      hideInForm: true,
+      valueEnum: {
+        0: {
+          text: 'Closed',
+          status: 'Default',
         },
-        {
-            title: '接口名称',
-            dataIndex: 'name',
-            valueType: 'text',
-            formItemProps: {
-                rules: [
-                    {
-                        required: true,
-                    },
-                ],
-            },
+        1: {
+          text: 'Open',
+          status: 'Processing',
         },
-        {
-            title: '描述',
-            dataIndex: 'description',
-            valueType: 'textarea',
-            formItemProps: {
-                rules: [
-                    {
-                        required: true,
-                    },
-                ],
-            },
-        },
-        {
-            title: '请求方法',
-            dataIndex: 'method',
-            valueType: 'text',
-            formItemProps: {
-                rules: [
-                    {
-                        required: true,
-                    },
-                ],
-            },
-        },
-        {
-            title: '主机名',
-            dataIndex: 'host',
-            valueType: 'text',
-            hideInTable: true,
-            hideInSearch: true,
-            formItemProps: {
-                rules: [
-                    {
-                        required: true,
-                    },
-                ],
-            },
-        },
-        {
-            title: '接口地址',
-            dataIndex: 'url',
-            valueType: 'text',
-            hideInTable: true,
-            hideInSearch: true,
-            formItemProps: {
-                rules: [
-                    {
-                        required: true,
-                    },
-                ],
-            },
-        },
-        {
-            title: '请求参数',
-            dataIndex: 'requestParams',
-            valueType: 'jsonCode',
-            hideInTable: true,
-            hideInSearch: true,
-            formItemProps: {
-                rules: [
-                    {
-                        required: true,
-                    },
-                ],
-            },
-        },
-        {
-            title: '请求头',
-            dataIndex: 'requestHeader',
-            valueType: 'jsonCode',
-            hideInTable: true,
-            hideInSearch: true,
-        },
-        {
-            title: '响应头',
-            dataIndex: 'responseHeader',
-            valueType: 'jsonCode',
-            hideInTable: true,
-            hideInSearch: true,
-        },
-        {
-            title: '状态',
-            dataIndex: 'status',
-            hideInForm: true,
-            valueEnum: {
-                0: {
-                    text: '关闭',
-                    status: 'Default',
-                },
-                1: {
-                    text: '开启',
-                    status: 'Processing',
-                },
-            },
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            valueType: 'dateTime',
-            hideInForm: true,
-        },
-        {
-            title: '更新时间',
-            dataIndex: 'updateTime',
-            valueType: 'dateTime',
-            hideInForm: true,
-            hideInTable: true,
-            hideInSearch: true,
-        },
-        {
-            title: '操作',
-            dataIndex: 'option',
-            valueType: 'option',
-            render: (_, record) => {
-                return record.status === 0
-                    ? [
-                          <Button
-                              key="detail"
-                              onClick={() => {
-                                  handleShowModalOpen(true);
-                                  setCurrentRow(record);
-                              }}
-                          >
-                              详情
-                          </Button>,
+      },
+    },
+    {
+      title: 'Creation Time',
+      dataIndex: 'createTime',
+      valueType: 'dateTime',
+      hideInForm: true,
+    },
+    {
+      title: 'Update Time',
+      dataIndex: 'updateTime',
+      valueType: 'dateTime',
+      hideInForm: true,
+      hideInTable: true,
+      hideInSearch: true,
+    },
+    {
+      title: 'Actions',
+      dataIndex: 'option',
+      valueType: 'option',
+      render: (_, record) => {
+        return record.status === 0
+          ? [
+            <Button
+              key="detail"
+              onClick={() => {
+                handleShowModalOpen(true);
+                setCurrentRow(record);
+              }}
+            >
+              Detail
+            </Button>,
+            <Button
+              key="update"
+              onClick={() => {
+                handleUpdateModalOpen(true);
+                setCurrentRow(record);
+              }}
+            >
+              Edit
+            </Button>,
+            <Button
+              key="online"
+              onClick={() => {
+                handleOnline(record);
+              }}
+            >
+              Publish
+            </Button>,
+            <Button
+              danger
+              key="remove"
+              onClick={() => {
+                handleRemove(record);
+              }}
+            >
+              Delete
+            </Button>,
+          ]
+          : [
+            <Button
+              key="detail"
+              onClick={() => {
+                handleShowModalOpen(true);
+                setCurrentRow(record);
+              }}
+            >
+              Detail
+            </Button>,
+            <Button
+              key="update"
+              onClick={() => {
+                handleUpdateModalOpen(true);
+                setCurrentRow(record);
+              }}
+            >
+              Edit
+            </Button>,
+            <Button
+              key="offline"
+              onClick={() => {
+                handleOffline(record);
+              }}
+            >
+              Offline
+            </Button>,
+            <Popconfirm
+              title="Delete data"
+              key="remove"
+              description="Are you sure you want to delete this data?"
+              icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+              onConfirm={() => {
+                handleRemove(record);
+              }}
+            >
+              <Button danger>Delete</Button>
+            </Popconfirm>,
+          ];
+      },
+    },
+  ];
 
-                          <Button
-                              key="update"
-                              onClick={() => {
-                                  handleUpdateModalOpen(true);
-                                  setCurrentRow(record);
-                              }}
-                          >
-                              修改
-                          </Button>,
-                          <Button
-                              key="online"
-                              onClick={() => {
-                                  handleOnline(record);
-                              }}
-                          >
-                              发布
-                          </Button>,
-                          <Button
-                              danger
-                              key="remove"
-                              onClick={() => {
-                                  handleRemove(record);
-                              }}
-                          >
-                              删除
-                          </Button>,
-                      ]
-                    : [
-                          <Button
-                              key="detail"
-                              onClick={() => {
-                                  handleShowModalOpen(true);
-                                  setCurrentRow(record);
-                              }}
-                          >
-                              详情
-                          </Button>,
-                          <Button
-                              key="update"
-                              onClick={() => {
-                                  handleUpdateModalOpen(true);
-                                  setCurrentRow(record);
-                              }}
-                          >
-                              修改
-                          </Button>,
-                          <Button
-                              key="online"
-                              onClick={() => {
-                                  handleOffline(record);
-                              }}
-                          >
-                              下线
-                          </Button>,
-                          <Popconfirm
-                              title="删除数据"
-                              key="remove"
-                              description="确认删除该数据吗？"
-                              icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                              onConfirm={() => {
-                                  handleRemove(record);
-                              }}
-                          >
-                              <Button danger>删除</Button>
-                          </Popconfirm>,
-                      ];
-            },
+  const requestColumns: ProColumns<API.RequestParamsRemarkVO>[] = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      width: '15%',
+    },
+    {
+      title: 'Required',
+      key: 'isRequired',
+      dataIndex: 'isRequired',
+      valueType: 'select',
+      valueEnum: {
+        yes: {
+          text: 'Yes',
         },
-    ];
+        no: {
+          text: 'No',
+        },
+      },
+      width: '15%',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      width: '15%',
+    },
+    {
+      title: 'Description',
+      dataIndex: 'remark',
+    },
+    {
+      title: 'Actions',
+      valueType: 'option',
+      width: '10%',
+      render: () => {
+        return null;
+      },
+    },
+  ];
 
-    const requestColumns: ProColumns<API.RequestParamsRemarkVO>[] = [
-        {
-            title: '名称',
-            dataIndex: 'name',
-            width: '15%',
-        },
-        {
-            title: '必填',
-            key: 'isRequired',
-            dataIndex: 'isRequired',
-            valueType: 'select',
-            valueEnum: {
-                yes: {
-                    text: '是',
-                },
-                no: {
-                    text: '否',
-                },
-            },
-            width: '15%',
-        },
-        {
-            title: '类型',
-            dataIndex: 'type',
-            width: '15%',
-        },
-        {
-            title: '说明',
-            dataIndex: 'remark',
-        },
-        {
-            title: '操作',
-            valueType: 'option',
-            width: '10%',
-            render: () => {
-                return null;
-            },
-        },
-    ];
-    const responseColumns: ProColumns<API.RequestParamsRemarkVO>[] = [
-        {
-            title: '名称',
-            dataIndex: 'name',
-            width: '15%',
-        },
-        {
-            title: '类型',
-            dataIndex: 'type',
-            width: '15%',
-        },
-        {
-            title: '说明',
-            dataIndex: 'remark',
-        },
-        {
-            title: '操作',
-            valueType: 'option',
-            width: '10%',
-            render: () => {
-                return null;
-            },
-        },
-    ];
-    return (
-        <PageContainer>
-            <ProTable<API.InterfaceInfoVO, API.PageParams>
-                headerTitle={'查询表格'}
-                actionRef={actionRef}
-                rowKey="key"
-                search={{
-                    labelWidth: 120,
-                }}
-                toolBarRender={() => [
-                    <Button
-                        type="primary"
-                        key="primary"
-                        onClick={() => {
-                            handleModalOpen(true);
-                        }}
-                    >
-                        <PlusOutlined /> 新建
-                    </Button>,
-                ]}
+  const responseColumns: ProColumns<API.RequestParamsRemarkVO>[] = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      width: '15%',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      width: '15%',
+    },
+    {
+      title: 'Description',
+      dataIndex: 'remark',
+    },
+    {
+      title: 'Actions',
+      valueType: 'option',
+      width: '10%',
+      render: () => {
+        return null;
+      },
+    },
+  ];
+
+  return (
+    <PageContainer>
+      <ProTable<API.InterfaceInfoVO, API.PageParams>
+        headerTitle={'Query Table'}
+        actionRef={actionRef}
+        rowKey="key"
+        search={{
+          labelWidth: 120,
+        }}
+        toolBarRender={() => [
+          <Button
+            type="primary"
+            key="primary"
+            onClick={() => {
+              handleModalOpen(true);
+            }}
+          >
+            <PlusOutlined /> Create New
+          </Button>,
+        ]}
                 request={async (params) => {
                     console.log('---------->', params);
                     const res = await listInterfaceInfoVoByPageUsingPost({

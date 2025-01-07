@@ -7,6 +7,7 @@ import React from 'react';
 import defaultSettings from '../config/defaultSettings';
 import {getLoginUserUsingGet} from "@/services/xiaohang-backend/userController";
 import {requestConfig} from "@/requestConfig";
+import { LinkedinOutlined, GlobalOutlined, MailOutlined } from '@ant-design/icons';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -84,12 +85,21 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     ],
     links: isDev
       ? [
-        <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
-          <LinkOutlined />
-          <span>OpenAPI 文档</span>
-        </Link>,
+        <a key="linkedin" href="https://www.linkedin.com/in/xiaohang-ji" target="_blank" rel="noopener noreferrer">
+          <LinkedinOutlined />
+          <span>LinkedIn</span>
+        </a>,
+        <a key="personal-web" href="https://xiaohang-ji-profile.netlify.app/" target="_blank" rel="noopener noreferrer">
+          <GlobalOutlined />
+          <span>Profile</span>
+        </a>,
+        <a key="email" href="mailto:jxh186045@gmail.com">
+          <MailOutlined />
+          <span>Email Me</span>
+        </a>,
       ]
       : [],
+
     menuHeaderRender: undefined,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,

@@ -46,135 +46,136 @@ const Index: React.FC = () => {
     };
 
 
-    /**
-     * table 展示的列
-     * */
-    const columns: ProColumns<API.InterfaceInfoVO>[] = [
-        {
-            title: 'id',
-            dataIndex: 'id',
-            valueType: 'index',
-            align: 'center',
+  /**
+   * Columns for the table display
+   */
+  const columns: ProColumns<API.InterfaceInfoVO>[] = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      valueType: 'index',
+      align: 'center',
+    },
+    {
+      title: 'Interface Name',
+      dataIndex: 'name',
+      valueType: 'text',
+      align: 'center',
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      valueType: 'textarea',
+      align: 'center',
+    },
+    {
+      title: 'Request Method',
+      dataIndex: 'method',
+      valueType: 'text',
+      align: 'center',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      hideInForm: true,
+      valueEnum: {
+        0: {
+          text: 'Inactive',
+          status: 'Default',
         },
-        {
-            title: '接口名称',
-            dataIndex: 'name',
-            valueType: 'text',
-            align: 'center',
+        1: {
+          text: 'Active',
+          status: 'Processing',
         },
-        {
-            title: '描述',
-            dataIndex: 'description',
-            valueType: 'textarea',
-            align: 'center',
-        },
-        {
-            title: '请求方法',
-            dataIndex: 'method',
-            valueType: 'text',
-            align: 'center',
-        },
-        {
-            title: '状态',
-            dataIndex: 'status',
-            hideInForm: true,
-            valueEnum: {
-                0: {
-                    text: '关闭',
-                    status: 'Default',
-                },
-                1: {
-                    text: '开启',
-                    status: 'Processing',
-                },
-            },
-            align: 'center',
-        },
-        {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            valueType: 'dateTime',
-            align: 'center',
-        },
-        {
-            title: '操作',
-            dataIndex: 'option',
-            valueType: 'option',
-            render: (_, record) => {
-                return record.isOwnerByCurrentUser ? (
-                    <Button
-                        type="primary"
-                        key="onlineUse"
-                        onClick={() => {
-                            history.push(`/interface_info/${record.id}`);
-                        }}
-                    >
-                        Online Invocation
-                    </Button>
-                ) : (
-                    <Button
-                        key="applyInterface"
-                        onClick={async () => {
-                            const res = await addUserInterfaceInfoUsingPost({
-                                interfaceInfoId: Number(record.id),
-                            });
-                            if (res.code === 0) {
-                                message.success('申请成功');
-                                // 刷新表格
-                                await loadData();
-                            }
-                        }}
-                    >
-                        开通接口
-                    </Button>
-                );
-            },
-        },
-    ];
+      },
+      align: 'center',
+    },
+    {
+      title: 'Creation Time',
+      dataIndex: 'createTime',
+      valueType: 'dateTime',
+      align: 'center',
+    },
+    {
+      title: 'Actions',
+      dataIndex: 'option',
+      valueType: 'option',
+      render: (_, record) => {
+        return record.isOwnerByCurrentUser ? (
+          <Button
+            type="primary"
+            key="onlineUse"
+            onClick={() => {
+              history.push(`/interface_info/${record.id}`);
+            }}
+          >
+            Online Invocation
+          </Button>
+        ) : (
+          <Button
+            key="applyInterface"
+            onClick={async () => {
+              const res = await addUserInterfaceInfoUsingPost({
+                interfaceInfoId: Number(record.id),
+              });
+              if (res.code === 0) {
+                message.success('Request Successful');
+                // Refresh table
+                await loadData();
+              }
+            }}
+          >
+            Activate Interface
+          </Button>
+        );
+      },
+    },
+  ];
 
-    useEffect(() => {
-        loadData();
-    }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
-    const onSearch = (value: string) => {
-        loadData(value);
-    };
+  const onSearch = (value: string) => {
+    loadData(value);
+  };
 
-    return (
-        <PageContainer>
-            <Layout>
-                <Header style={headerStyle}>
-                    <Search
-                        size={'large'}
-                        placeholder="请输入接口名称或描述"
-                        onSearch={onSearch}
-                        enterButton
-                    />
-                </Header>
-                <Content style={contentStyle}>
-                    <ProTable<API.RequestParamsRemarkVO>
-                        rowKey="id"
-                        toolBarRender={false}
-                        columns={columns}
-                        dataSource={list}
-                        loading={loading}
-                        actionRef={ref}
-                        pagination={{
-                            showTotal: (total) => {
-                                return '总数：' + total;
-                            },
-                            total,
-                            pageSize: 10,
-                            onChange: (page, pageSize) => {
-                                loadData('', page, pageSize);
-                            },
-                        }}
-                        search={false}
-                    />
-                </Content>
-            </Layout>
-        </PageContainer>
-    );
+  return (
+    <PageContainer>
+      <Layout>
+        <Header style={headerStyle}>
+          <Search
+            size={'large'}
+            placeholder="Enter interface name or description"
+            onSearch={onSearch}
+            enterButton
+          />
+        </Header>
+        <Content style={contentStyle}>
+          <ProTable<API.RequestParamsRemarkVO>
+            rowKey="id"
+            toolBarRender={false}
+            columns={columns}
+            dataSource={list}
+            loading={loading}
+            actionRef={ref}
+            pagination={{
+              showTotal: (total) => {
+                return 'Total: ' + total;
+              },
+              total,
+              pageSize: 10,
+              onChange: (page, pageSize) => {
+                loadData('', page, pageSize);
+              },
+            }}
+            search={false}
+          />
+        </Content>
+      </Layout>
+    </PageContainer>
+  );
+
 };
 
 export default Index;

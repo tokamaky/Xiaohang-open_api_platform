@@ -29,7 +29,7 @@ const InterfaceAnalysis: React.FC = () => {
 
     const option = {
         title: {
-            text: '调用次数统计',
+            text: 'Invocation Count Statistics',
             subtext: 'TOP3',
             left: 'center'
         },
@@ -42,7 +42,7 @@ const InterfaceAnalysis: React.FC = () => {
         },
         series: [
             {
-                name: '调用次数',
+                name: 'Invocation Count',
                 type: 'pie',
                 radius: '50%',
                 data: chartData,

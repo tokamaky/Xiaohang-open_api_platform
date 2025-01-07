@@ -8,7 +8,6 @@ import type { MenuInfo } from 'rc-menu/lib/interface';
 import React, { useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
-
 export type GlobalHeaderRightProps = {
     menu?: boolean;
     children?: React.ReactNode;
@@ -115,7 +114,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
         {
             key: 'logout',
             icon: <LogoutOutlined />,
-            label: '退出登录',
+            label: 'Logout',
         },
     ];
 
