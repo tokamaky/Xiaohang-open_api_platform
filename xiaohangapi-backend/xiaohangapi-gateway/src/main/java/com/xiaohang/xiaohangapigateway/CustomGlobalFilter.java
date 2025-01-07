@@ -54,7 +54,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     @DubboReference
     private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
 
-    private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1", "127.0.0.2");
+    private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1", "127.0.0.2", "0:0:0:0:0:0:0:1");
     private static final String DYE_DATA_HEADER = "X-Dye-Data";
     private static final String DYE_DATA_VALUE = "nero";
 
@@ -74,10 +74,12 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         log.info("Request Source Address (IP Address): {}", IP_ADDRESS);
         log.info("Request Source Address (Remote Address): {}", request.getRemoteAddress());
 
+
         ServerHttpResponse response = exchange.getResponse();
 
         // 2. 黑白名单
         if (!IP_WHITE_LIST.contains(IP_ADDRESS)) {
+            log.error("Unauthorized IP Address: {}", IP_ADDRESS);
             return handleNoAuth(response);
         }
 
@@ -90,12 +92,19 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String body = URLUtil.decode(headers.getFirst("body"), CharsetUtil.CHARSET_UTF_8);
         String method = headers.getFirst("method");
 
+        log.info("AccessKey: {}", accessKey);
+        log.info("Timestamp: {}", timestamp);
+        log.info("Nonce: {}", nonce);
+        log.info("Sign: {}", sign);
+        log.info("Method: {}", method);
+
         if (StringUtil.isEmpty(nonce)
                 || StringUtil.isEmpty(sign)
                 || StringUtil.isEmpty(timestamp)
                 || StringUtil.isEmpty(method)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "The request header parameters are incomplete");
         }
+
 
 // Query if the user exists using the accessKey
         User invokeUser = innerUserService.getInvokeUser(accessKey);
@@ -203,8 +212,16 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                         return super.writeWith(body);
                     }
                 };
-                // 设置 response 对象为装饰过的
-                return chain.filter(exchange.mutate().response(decoratedResponse).build());
+                // 流量染色，只有染色数据才能被调用
+                ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+                        .header(DYE_DATA_HEADER, DYE_DATA_VALUE)
+                        .build();
+
+                ServerWebExchange serverWebExchange = exchange.mutate()
+                        .request(modifiedRequest)
+                        .response(decoratedResponse)
+                        .build();
+                return chain.filter(serverWebExchange);
             }
             return chain.filter(exchange);// 降级处理返回数据
         } catch (Exception e) {
@@ -224,5 +241,6 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
         return response.setComplete();
     }
+
 
 }

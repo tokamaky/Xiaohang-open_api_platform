@@ -7,7 +7,7 @@ import cn.hutool.http.HttpResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
+import  jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 有意思的接口

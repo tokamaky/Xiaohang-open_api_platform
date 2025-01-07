@@ -65,7 +65,7 @@ const Index: React.FC = () => {
                 setData(interfaceInfoData);
             }
         } catch (error: any) {
-            message.error('请求失败，' + error.message);
+            message.error('Request Failed，' + error.message);
         }
     };
 
@@ -83,7 +83,7 @@ const Index: React.FC = () => {
         try {
             const res = await invokeInterfaceInfoUsingPost({
                 id: params.id,
-                host: data?.host,
+                //host: data?.host,
                 ...values,
             });
             console.log('调用接口请求数据：', res);
@@ -97,7 +97,7 @@ const Index: React.FC = () => {
                 message.error(messageObj.message);
             }
         } catch (error: any) {
-            message.error('接口请求失败');
+            message.error('接口Request Failed');
         }
         setInvokeLoading(false);
     };

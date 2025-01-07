@@ -1,8 +1,8 @@
 ﻿export default [
-  { name: 'API商店', icon: 'HomeOutlined', path: '/', component: './Index' },
-  { name: '我的接口', icon: 'StarOutlined', path: '/my_interface', component: './MyInterface' },
+  { name: 'API Store', icon: 'HomeOutlined', path: '/', component: './Index' },
+  { name: 'My API', icon: 'StarOutlined', path: '/my_interface', component: './MyInterface' },
   {
-    name: '查看接口',
+    name: 'Check API',
     icon: 'smile',
     path: '/interface_info/:id',
     component: './InterfaceInfo',
@@ -11,31 +11,28 @@
   {
     path: '/user',
     layout: false,
-    routes: [{ name: '登录', path: '/user/login', component: './User/Login' }],
+    routes: [{ name: 'Login', path: '/user/login', component: './User/Login' }],
   },
-  // { path: '/welcome', name: '欢迎', icon: 'smile', component: './MyInterface' },
   {
     path: '/admin',
-    name: '管理中心',
+    name: 'Management Center',
     icon: 'crown',
     access: 'canAdmin',
     routes: [
       {
-        name: '接口管理',
+        name: '**API Management**',
         icon: 'table',
         path: '/admin/interface_info',
         component: './Admin/InterfaceInfo',
       },
       {
-        name: '统计分析',
+        name: 'Invoke Times Analysis',
         icon: 'table',
         path: '/admin/analysis',
         component: './Admin/InterfaceInfoAnalysis',
       },
     ],
   },
-  { name: '个人中心', icon: 'UserOutlined', path: '/profile', component: './User/Profile' },
-  // {name: '接口管理', icon: 'table', path: '/list', component: './InterfaceInfo'},
-  // {path: '/', redirect: '/welcome'},
+  { name: 'User Center', icon: 'UserOutlined', path: '/profile', component: './User/Profile' },
   { path: '*', layout: false, component: './404' },
 ];

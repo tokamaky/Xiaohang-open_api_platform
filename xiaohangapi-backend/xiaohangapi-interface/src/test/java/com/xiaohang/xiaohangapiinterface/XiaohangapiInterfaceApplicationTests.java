@@ -19,12 +19,12 @@ class XiaohangapiInterfaceApplicationTests {
 
     @Test
     void contextLoads() {
-        String result =XiaohangApiClient.getNameByGet("Xiaohang");
+        //String result =XiaohangApiClient.getNameByGet("Xiaohang");
         User user = new User();
         user.setUsername("xiaohang ji");
-        String usernameByPost=XiaohangApiClient.getUsernameByPost(user);
-        System.out.println(result);
-        System.out.println(usernameByPost);
+        //String usernameByPost=XiaohangApiClient.getUsernameByPost(user);
+        //System.out.println(result);
+       // System.out.println(usernameByPost);
     }
 
 }

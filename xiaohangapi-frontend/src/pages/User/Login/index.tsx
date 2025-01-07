@@ -23,189 +23,187 @@ const Login: React.FC = () => {
     const formRef = useRef<ProFormInstance>();
 
 
-    const handleSubmit = async (values: API.UserRegisterRequest) => {
-        const {userPassword, checkPassword} = values;
-        if (checkPassword) {
-            // 注册
-            if (userPassword !== checkPassword) {
-                message.error('两次输入密码不一致！');
-                return;
-            }
-            const res = await userRegisterUsingPost(values);
-            if (res.code === 0) {
-                // 注册成功
-                const defaultRegisterSuccessMessage = '注册成功！';
-                message.success(defaultRegisterSuccessMessage)
-                // 切换到登录
-                setLoginType('account');
-                // 重置表单
-                formRef.current?.resetFields();
-            }
+  const handleSubmit = async (values: API.UserRegisterRequest) => {
+    const { userPassword, checkPassword } = values;
+    if (checkPassword) {
+      // Register
+      if (userPassword !== checkPassword) {
+        message.error('The passwords do not match!');
+        return;
+      }
+      const res = await userRegisterUsingPost(values);
+      if (res.code === 0) {
+        // Registration success
+        const defaultRegisterSuccessMessage = 'Registration successful!';
+        message.success(defaultRegisterSuccessMessage);
+        // Switch to login
+        setLoginType('account');
+        // Reset form
+        formRef.current?.resetFields();
+      }
 
-        } else {
-            // 登录
-            const res = await userLoginUsingPost({
-                ...values,
-            });
-            if (res.data) {
-                const defaultLoginSuccessMessage = '登录成功！';
-                message.success(defaultLoginSuccessMessage);
-                // 登录成功后处理
-                const urlParams = new URL(window.location.href).searchParams;
-                // 重定向到 redirect 参数所在的位置
-                location.href = urlParams.get('redirect') || '/';
-                // 保存登录状态
-                setInitialState({
-                    loginUser: res.data,
-                });
-            } else {
-                message.error(res.message);
-            }
-        }
-    };
-    return (
-        <div>
-            <div
-                style={{
-                    backgroundColor: 'white',
-                    height: 'calc(100vh - 100px)',
-                    margin: 0,
-                }}
+    } else {
+      // Login
+      const res = await userLoginUsingPost({
+        ...values,
+      });
+      if (res.data) {
+        const defaultLoginSuccessMessage = 'Login successful!';
+        message.success(defaultLoginSuccessMessage);
+        // Handle login success
+        const urlParams = new URL(window.location.href).searchParams;
+        // Redirect to the location specified by the redirect parameter
+        location.href = urlParams.get('redirect') || '/';
+        // Save login state
+        setInitialState({
+          loginUser: res.data,
+        });
+      } else {
+        message.error(res.message);
+      }
+    }
+  };
+
+  return (
+    <div>
+      <div
+        style={{
+          backgroundColor: 'white',
+          height: 'calc(100vh - 100px)',
+          margin: 0,
+        }}
+      >
+        <LoginFormPage
+          backgroundImageUrl={pandaBackImg}
+          logo={logo}
+          title="Panda API"
+          subTitle="**The Best Free API Interface Platform in History**"
+          initialValues={{
+            autoLogin: true,
+          }}
+          onFinish={async (values) => {
+            await handleSubmit(values as API.UserRegisterRequest);
+          }}
+        >
+          {
+            <Tabs
+              centered
+              activeKey={loginType}
+              onChange={(activeKey) => setLoginType(activeKey as LoginType)}
             >
-                <LoginFormPage
-                    backgroundImageUrl={pandaBackImg}
-                    // logo="https://image-bed-ichensw.oss-cn-hangzhou.aliyuncs.com/logo.png"
-                    logo={logo}
-                    title="Panda API"
-                    subTitle="史上最好用的免费API接口平台"
-                    initialValues={{
-                        autoLogin: true,
-                    }}
-                    onFinish={async (values) => {
-                        await handleSubmit(values as API.UserRegisterRequest);
-                    }}
+              <Tabs.TabPane key={'account'} tab={'Login'} />
+              <Tabs.TabPane key={'register'} tab={'Register'} />
+            </Tabs>
+          }
+          {loginType === 'account' && (
+            <>
+              <ProFormText
+                name="userAccount"
+                fieldProps={{
+                  size: 'large',
+                  prefix: <UserOutlined />,
+                }}
+                placeholder={'Please enter your username'}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Username is required!',
+                  },
+                ]}
+              />
+              <ProFormText.Password
+                name="userPassword"
+                fieldProps={{
+                  size: 'large',
+                  prefix: <LockOutlined />,
+                }}
+                placeholder={'Please enter your password'}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Password is required!',
+                  },
+                ]}
+              />
+              <div
+                style={{
+                  marginBottom: 24,
+                }}
+              >
+                <ProFormCheckbox noStyle name="autoLogin">
+                  Auto-login
+                </ProFormCheckbox>
+                <a
+                  style={{
+                    float: 'right',
+                  }}
+                  onClick={() => setLoginType("forgetPassword")}
                 >
-                    {
-                        <Tabs
-                            centered
-                            activeKey={loginType}
-                            onChange={(activeKey) => setLoginType(activeKey as LoginType)}
-                        >
-                            <Tabs.TabPane key={'account'} tab={'登录'}/>
-                            <Tabs.TabPane key={'register'} tab={'注册'}/>
-                        </Tabs>
-                    }
-                    {loginType === 'account' && (
-                        <>
-                            <ProFormText
-                                name="userAccount"
-                                fieldProps={{
-                                    size: 'large',
-                                    prefix: <UserOutlined/>,
-                                }}
-                                placeholder={'请输入用户名'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '用户名是必填项！',
-                                    },
-                                ]}
-                            />
-                            <ProFormText.Password
-                                name="userPassword"
-                                fieldProps={{
-                                    size: 'large',
-                                    prefix: <LockOutlined/>,
-                                }}
-                                placeholder={'请输入密码'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '密码是必填项！',
-                                    },
-                                ]}
-                            />
-                            <div
-                                style={{
-                                    marginBottom: 24,
-                                }}
-                            >
-                                <ProFormCheckbox noStyle name="autoLogin">
-                                    自动登录
-                                </ProFormCheckbox>
-                                <a
-                                    style={{
-                                        float: 'right',
-                                    }}
-                                    onClick={() => setLoginType("forgetPassword")}
-                                >
-                                    忘记密码 ?
-                                </a>
-                            </div>
-                        </>
-                    )}
-                    {loginType === 'register' && (
-                        <>
-                            <ProFormText
-                                fieldProps={{
-                                    size: 'large',
-                                    prefix: <UserOutlined/>,
-                                }}
-                                name="userAccount"
-                                placeholder={'请输入用户名'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '用户名是必填项！',
-                                    },
-                                    {
-                                        min: 4,
-                                        message: '长度不能少于4位！',
-                                    },
-                                ]}
-                            />
-                            <ProFormText.Password
-                                fieldProps={{
-                                    size: 'large',
-                                    prefix: <LockOutlined/>,
-                                }}
-                                name="userPassword"
-                                placeholder={'请输入密码'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '密码是必填项！',
-                                    },
-                                    {
-                                        min: 8,
-                                        message: '长度不能少于8位！',
-                                    },
-                                ]}
-                            />
-                            <ProFormText.Password
-                                fieldProps={{
-                                    size: 'large',
-                                    prefix: <LockOutlined/>,
-                                }}
-                                name="checkPassword"
-                                placeholder={'请再次输入密码'}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '密码是必填项！',
-                                    },
-                                    {
-                                        min: 8,
-                                        message: '长度不能少于8位！',
-                                    },
-                                ]}
-                            />
-                        </>
-                    )}
-                </LoginFormPage>
-            </div>
-            <Footer/>
-        </div>
-    );
-};
-export default Login;
+                  Forgot password?
+                </a>
+              </div>
+            </>
+          )}
+          {loginType === 'register' && (
+            <>
+              <ProFormText
+                fieldProps={{
+                  size: 'large',
+                  prefix: <UserOutlined />,
+                }}
+                name="userAccount"
+                placeholder={'Please enter your username'}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Username is required!',
+                  },
+                  {
+                    min: 4,
+                    message: 'Length cannot be less than 4 characters!',
+                  },
+                ]}
+              />
+              <ProFormText.Password
+                fieldProps={{
+                  size: 'large',
+                  prefix: <LockOutlined />,
+                }}
+                name="userPassword"
+                placeholder={'Please enter your password'}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Password is required!',
+                  },
+                  {
+                    min: 8,
+                    message: 'Length cannot be less than 8 characters!',
+                  },
+                ]}
+              />
+              <ProFormText.Password
+                fieldProps={{
+                  size: 'large',
+                  prefix: <LockOutlined />,
+                }}
+                name="checkPassword"
+                placeholder={'Please re-enter your password'}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Password is required!',
+                  },
+                  {
+                    min: 8,
+                    message: 'Length cannot be less than 8 characters!',
+                  },
+                ]}
+              />
+            </>
+          )}
+        </LoginFormPage>
+      </div>
+      <Footer />
+    </div>
+  );

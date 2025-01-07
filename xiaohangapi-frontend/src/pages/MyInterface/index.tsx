@@ -44,7 +44,7 @@ const Index: React.FC = () => {
                 setList(res?.data?.records ?? []);
             });
         } catch (error: any) {
-            message.error('请求失败，' + error.message);
+            message.error('Request Failed，' + error.message);
         }
         setLoading(false);
     };
@@ -73,11 +73,11 @@ const Index: React.FC = () => {
     }> = ({ totalNum, leftNum }) => (
         <div className={indexStyle.cardInfo}>
             <div>
-                <p>已调用次数</p>
+                <p>Number of Invocations</p>
                 <p>{totalNum}</p>
             </div>
             <div>
-                <p>剩余调用次数</p>
+                <p>Remaining Number of Invocations</p>
                 <p>{leftNum}</p>
             </div>
         </div>
@@ -89,7 +89,7 @@ const Index: React.FC = () => {
                 <Header style={headerStyle}>
                     <Search
                         size={'large'}
-                        placeholder="请输入接口名称"
+                        placeholder="Please Enter the Interface Name"
                         onSearch={onSearch}
                         enterButton
                     />
@@ -106,16 +106,16 @@ const Index: React.FC = () => {
                                     hoverable
                                     bodyStyle={{ paddingBottom: 20 }}
                                     actions={[
-                                        <Tooltip title="分享" key="share">
+                                        <Tooltip title="Share" key="share">
                                             <ShareAltOutlined />
                                         </Tooltip>,
-                                        <Tooltip title="在线调用" key="share">
+                                        <Tooltip title="Online Invocation" key="share">
                                             <div
                                                 onClick={() => {
                                                     history.push('/interface_info/' + item.id);
                                                 }}
                                             >
-                                                在线调用
+                                                Online Invocation
                                             </div>
                                         </Tooltip>,
                                     ]}

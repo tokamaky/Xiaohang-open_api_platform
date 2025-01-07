@@ -4,7 +4,7 @@ import '@umijs/max';
 import React from 'react';
 
 const Footer: React.FC = () => {
-    const defaultMessage = 'Nero';
+    const defaultMessage = 'Xiaohang Ji';
     const currentYear = new Date().getFullYear();
     return (
         <DefaultFooter

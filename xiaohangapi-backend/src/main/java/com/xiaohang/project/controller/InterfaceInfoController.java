@@ -228,10 +228,10 @@ public class InterfaceInfoController {
             // Invoke the method
             String invokeResult = xiaohangApiClient.invokeInterface(requestParams, url, method);
             if (StringUtils.isBlank(invokeResult)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface data is empty");
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface data is empty in func onlineInterfaceInfo");
             }
         } catch (Exception e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface validation failed");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface validation failedin func onlineInterfaceInfo");
         }
 
         // Change interface status to online
@@ -298,11 +298,12 @@ public class InterfaceInfoController {
         try {
             // Invoke the method
             invokeResult = xiaohangApiClient.invokeInterface(requestParams, url, method);
+            System.out.println("invokeResult:" + invokeResult);
             if (StringUtils.isBlank(invokeResult)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface data is empty");
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface data is empty in func invokeInterfaceInfo");
             }
         } catch (Exception e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface validation failed");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Interface validation failed in func invokeInterfaceInfo");
         }
         return ResultUtils.success(invokeResult);
     }

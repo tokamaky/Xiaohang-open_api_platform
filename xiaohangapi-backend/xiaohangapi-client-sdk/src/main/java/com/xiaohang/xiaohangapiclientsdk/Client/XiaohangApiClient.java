@@ -9,6 +9,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.xiaohang.xiaohangapiclientsdk.model.User;
+import lombok.extern.slf4j.Slf4j;
 
 
 import java.io.UnsupportedEncodingException;
@@ -22,6 +23,7 @@ import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.genSign;
  *
  * @author xiaohang
  */
+@Slf4j
 public class XiaohangApiClient {
 
     private static String GATEWAY_HOST = "http://localhost:8090";
@@ -39,23 +41,15 @@ public class XiaohangApiClient {
         GATEWAY_HOST = gatewayHost;
     }
 
-    public String getNameByGet(String name) {
-        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("name", name);
-        String result = HttpUtil.get(GATEWAY_HOST + "/api/name/", paramMap);
-        System.out.println(result);
-        return result;
-    }
+//    public String getNameByGet(String name) {
+//        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
+//        HashMap<String, Object> paramMap = new HashMap<>();
+//        paramMap.put("name", name);
+//        String result = HttpUtil.get(GATEWAY_HOST + "/api/name/", paramMap);
+//        System.out.println(result);
+//        return result;
+//    }
 
-    public String getNameByPost(String name) {
-        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("name", name);
-        String result = HttpUtil.post(GATEWAY_HOST + "/api/name/", paramMap);
-        System.out.println(result);
-        return result;
-    }
 
     private Map<String, String> getHeaderMap(String body, String method) throws UnsupportedEncodingException {
         HashMap<String, String> map = new HashMap<>();
@@ -70,11 +64,18 @@ public class XiaohangApiClient {
     }
 
     public String invokeInterface(String params, String url, String method) throws UnsupportedEncodingException {
+        // Log the request parameters and URL
+        log.info("original gateway host:{}", GATEWAY_HOST);
+        log.info("Invoking API with URL: " + GATEWAY_HOST + url);
+        log.info("Request Parameters: " + params);
+
         HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + url)
                 .header("Accept-Charset", CharsetUtil.UTF_8)
                 .addHeaders(getHeaderMap(params, method))
                 .body(params)
                 .execute();
+
+        log.info("HTTP Response Body: " + httpResponse.body());
         return JSONUtil.formatJsonStr(httpResponse.body());
     }
 }

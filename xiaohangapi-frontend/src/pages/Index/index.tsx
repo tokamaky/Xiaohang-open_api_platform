@@ -40,7 +40,7 @@ const Index: React.FC = () => {
                 setTotal(res?.data?.total ?? 0);
             });
         } catch (error: any) {
-            message.error('请求失败，' + error.message);
+            message.error('Request Failed，' + error.message);
         }
         setLoading(false);
     };
@@ -109,7 +109,7 @@ const Index: React.FC = () => {
                             history.push(`/interface_info/${record.id}`);
                         }}
                     >
-                        在线调用
+                        Online Invocation
                     </Button>
                 ) : (
                     <Button
