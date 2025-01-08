@@ -6,8 +6,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y maven && apt-get clean
 
 # Copy all local dependencies and the main application into the container
-COPY ../xiaohangapi-common /app/xiaohangapi-common
-COPY ../xiaohangapi-client-sdk /app/xiaohangapi-client-sdk
+COPY ./xiaohangapi-common /app/xiaohangapi-common
+COPY ./xiaohangapi-client-sdk /app/xiaohangapi-client-sdk
 COPY ./xiaohangapi-gateway /app/xiaohangapi-gateway
 
 # Install local dependencies
