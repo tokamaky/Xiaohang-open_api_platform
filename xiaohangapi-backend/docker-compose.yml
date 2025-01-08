@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  nacos:
+    image: nacos/nacos-server:latest
+    container_name: nacos-server
+    ports:
+      - "8848:8848"  # Expose Nacos on port 8848
+    environment:
+      - PREFER_HOST_MODE=hostname
+      - MODE=standalone  # Start Nacos in standalone mode
+    networks:
+      - backend_gateway_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - NACOS_SERVER=nacos-server:8848  # Point to the Nacos container
+    ports:
+      - "7529:7529"  # Expose Backend on port 7529 (from container to host)
+    depends_on:
+      - nacos  # Ensure Nacos starts before the Backend
+    networks:
+      - backend_gateway_network
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ./xiaohangapi-gateway/Dockerfile
+    environment:
+      - NACOS_SERVER=nacos-server:8848  # Point to the Nacos container
+    ports:
+      - "8090:8090"  # Expose Gateway on port 8090 (from container to host)
+    depends_on:
+      - nacos  # Ensure Nacos starts before the Gateway
+    networks:
+      - backend_gateway_network
+
+networks:
+  backend_gateway_network:
+    driver: bridge
