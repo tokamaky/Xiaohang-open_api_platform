@@ -35,7 +35,7 @@ mybatis-plus:
 
 xiaohang:
   gateway:
-    host: http://localhost:8090
+    host: https://gateway-pro.up.railway.app
 
 #xiaohangapi:
 #  client:

@@ -60,7 +60,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private static final long FIVE_MINUTES = 5 * 60 * 1000L;
 
-    private static final String INTERFACE_HOST = "http://localhost:8090";
+    private static final String INTERFACE_HOST = "https://gateway-pro.up.railway.app";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -78,10 +78,10 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         ServerHttpResponse response = exchange.getResponse();
 
         // 2. 黑白名单
-        if (!IP_WHITE_LIST.contains(IP_ADDRESS)) {
-            log.error("Unauthorized IP Address: {}", IP_ADDRESS);
-            return handleNoAuth(response);
-        }
+//        if (!IP_WHITE_LIST.contains(IP_ADDRESS)) {
+//            log.error("Unauthorized IP Address: {}", IP_ADDRESS);
+//            return handleNoAuth(response);
+//        }
 
         // 3. 用户鉴权 （判断 accessKey 和 secretKey 是否合法）
         HttpHeaders headers = request.getHeaders();
