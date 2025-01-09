@@ -26,7 +26,7 @@ interface ResponseStructure {
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const requestConfig: RequestConfig = {
-  baseURL: 'http://localhost:7529',
+  baseURL: 'https://backend-production-796b.up.railway.app/',
   withCredentials: true,
 
   // 请求拦截器
