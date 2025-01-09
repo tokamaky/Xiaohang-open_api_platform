@@ -143,20 +143,20 @@ export default defineConfig({
    * @description 基于 openapi 的规范生成serve 和mock，能减少很多样板代码
    * @doc https://pro.ant.design/zh-cn/docs/openapi/
    */
-  openAPI: [
-    {
-      requestLibPath: "import { request } from '@umijs/max'",
-      // 或者使用在线的版本
-      // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
-      schemaPath: join(__dirname, 'oneapi.json'),
-      mock: false,
-    },
-    {
-      requestLibPath: "import { request } from '@umijs/max'",
-      schemaPath: 'http://localhost:7529/api/v2/api-docs?group=2.X%E7%89%88%E6%9C%AC',
-      projectName: 'xiaohang-backend',
-    },
-  ],
+  // openAPI: [
+  //   {
+  //     requestLibPath: "import { request } from '@umijs/max'",
+  //     // 或者使用在线的版本
+  //     // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
+  //     schemaPath: join(__dirname, 'oneapi.json'),
+  //     mock: false,
+  //   },
+  //   {
+  //     requestLibPath: "import { request } from '@umijs/max'",
+  //     schemaPath: 'http://localhost:7529/api/v2/api-docs?group=2.X%E7%89%88%E6%9C%AC',
+  //     projectName: 'xiaohang-backend',
+  //   },
+  // ],
   /**
    * @name 是否开启 mako
    * @description 使用 mako 极速研发
