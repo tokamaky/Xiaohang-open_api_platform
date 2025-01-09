@@ -10,6 +10,8 @@ spring:
           uri: http://localhost:8123
           predicates:
             - Path=/**
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
 #        - id: add_request_header_route
 #          uri: http://localhost:8123
 #          predicates:
@@ -25,6 +27,8 @@ spring:
 #          uri: https://xiaohang.icu
 #          predicates:
 #            - Path=/fallback
+
+
 logging:
   level:
     org:
@@ -35,13 +39,16 @@ logging:
 
 dubbo:
   application:
+    qos-enable: true
+    qos-port: 33333
+    qos-accept-foreign-ip: false
     name: xiaohangapi-consumer
   protocol:
     name: dubbo
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://nacos-server:8848
-  qos:
-    port: 33333
+    address: nacos://localhost:8848
+
+
 
