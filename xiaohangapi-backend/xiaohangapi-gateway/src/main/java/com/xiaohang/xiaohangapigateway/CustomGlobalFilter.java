@@ -60,7 +60,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private static final long FIVE_MINUTES = 5 * 60 * 1000L;
 
-    private static final String INTERFACE_HOST = "https://gateway-pro.up.railway.app";
+    private static final String INTERFACE_HOST = "https://interface-production-b00a.up.railway.app";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
