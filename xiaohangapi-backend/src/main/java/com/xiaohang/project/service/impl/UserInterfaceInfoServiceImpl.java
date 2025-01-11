@@ -29,91 +29,89 @@ import java.util.List;
 */
 @Service
 public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserInterfaceInfo>
-    implements UserInterfaceInfoService{
+    implements UserInterfaceInfoService {
 
 
+    @Resource
+    private UserInterfaceInfoMapper userInterfaceInfoMapper;
 
-        @Resource
-        private UserInterfaceInfoMapper userInterfaceInfoMapper;
+    @Override
+    public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
+        if (userInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long userId = userInterfaceInfo.getUserId();
+        Long interfaceInfoId = userInterfaceInfo.getInterfaceInfoId();
+        Integer totalNum = userInterfaceInfo.getTotalNum();
+        Integer leftNum = userInterfaceInfo.getLeftNum();
 
-        @Override
-        public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
-            if (userInterfaceInfo == null) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR);
-            }
-            Long userId = userInterfaceInfo.getUserId();
-            Long interfaceInfoId = userInterfaceInfo.getInterfaceInfoId();
-            Integer totalNum = userInterfaceInfo.getTotalNum();
-            Integer leftNum = userInterfaceInfo.getLeftNum();
-
-            List<UserInterfaceInfo> list = this.lambdaQuery()
-                    .eq(UserInterfaceInfo::getUserId, userId)
-                    .eq(UserInterfaceInfo::getInterfaceInfoId, interfaceInfoId)
-                    .list();
-            if (!list.isEmpty()) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "The user already has access to this interface");
-            }
-
-            // When adding, parameters cannot be empty
-            if (add) {
-                ThrowUtils.throwIf(userId == null || interfaceInfoId == null, ErrorCode.PARAMS_ERROR);
-            }
+        List<UserInterfaceInfo> list = this.lambdaQuery()
+                .eq(UserInterfaceInfo::getUserId, userId)
+                .eq(UserInterfaceInfo::getInterfaceInfoId, interfaceInfoId)
+                .list();
+        if (!list.isEmpty()) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "The user already has access to this interface");
         }
 
-        /**
-         * Get the query wrapper
-         *
-         * @param interfaceInfoQueryRequest
-         * @return
-         */
-        @Override
-        public QueryWrapper<UserInterfaceInfo> getQueryWrapper(UserInterfaceInfoQueryRequest interfaceInfoQueryRequest) {
-
-            QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
-            if (interfaceInfoQueryRequest == null) {
-                return queryWrapper;
-            }
-
-            String searchText = interfaceInfoQueryRequest.getSearchText();
-            Long id = interfaceInfoQueryRequest.getId();
-            Long userId = interfaceInfoQueryRequest.getUserId();
-            Long interfaceInfoId = interfaceInfoQueryRequest.getInterfaceInfoId();
-            Integer totalNum = interfaceInfoQueryRequest.getTotalNum();
-            Integer leftNum = interfaceInfoQueryRequest.getLeftNum();
-            Integer status = interfaceInfoQueryRequest.getStatus();
-            String sortField = interfaceInfoQueryRequest.getSortField();
-            String sortOrder = interfaceInfoQueryRequest.getSortOrder();
-
-            // Construct query conditions
-            if (StringUtils.isNotBlank(searchText)) {
-                queryWrapper.like("name", searchText);
-            }
-            queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
-            queryWrapper.eq(ObjectUtils.isNotEmpty(totalNum), "totalNum", totalNum);
-            queryWrapper.eq(ObjectUtils.isNotEmpty(leftNum), "leftNum", leftNum);
-            queryWrapper.eq(ObjectUtils.isNotEmpty(interfaceInfoId), "interfaceInfoId", interfaceInfoId);
-            queryWrapper.eq(ObjectUtils.isNotEmpty(status), "status", status);
-            queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
-            queryWrapper.eq("isDelete", false);
-            queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
-                    sortField);
-            return queryWrapper;
-        }
-
-        @Override
-        public Page<UserInterfaceInfo> getUserInterfaceInfoVOPage(Page<UserInterfaceInfo> userInterfaceInfoPage, HttpServletRequest request) {
-            List<UserInterfaceInfo> interfaceInfoList = userInterfaceInfoPage.getRecords();
-            Page<UserInterfaceInfo> interfaceInfoVOPage = new Page<>(userInterfaceInfoPage.getCurrent(), userInterfaceInfoPage.getSize(), userInterfaceInfoPage.getTotal());
-            if (CollectionUtils.isEmpty(interfaceInfoList)) {
-                return interfaceInfoVOPage;
-            }
-            interfaceInfoVOPage.setRecords(interfaceInfoList);
-            return interfaceInfoVOPage;
-        }
-
-        @Override
-        public List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit) {
-            return userInterfaceInfoMapper.listTopInvokeInterfaceInfo(limit);
+        // When adding, parameters cannot be empty
+        if (add) {
+            ThrowUtils.throwIf(userId == null || interfaceInfoId == null, ErrorCode.PARAMS_ERROR);
         }
     }
 
+    /**
+     * Get the query wrapper
+     *
+     * @param interfaceInfoQueryRequest
+     * @return
+     */
+    @Override
+    public QueryWrapper<UserInterfaceInfo> getQueryWrapper(UserInterfaceInfoQueryRequest interfaceInfoQueryRequest) {
+
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+        if (interfaceInfoQueryRequest == null) {
+            return queryWrapper;
+        }
+
+        String searchText = interfaceInfoQueryRequest.getSearchText();
+        Long id = interfaceInfoQueryRequest.getId();
+        Long userId = interfaceInfoQueryRequest.getUserId();
+        Long interfaceInfoId = interfaceInfoQueryRequest.getInterfaceInfoId();
+        Integer totalNum = interfaceInfoQueryRequest.getTotalNum();
+        Integer leftNum = interfaceInfoQueryRequest.getLeftNum();
+        Integer status = interfaceInfoQueryRequest.getStatus();
+        String sortField = interfaceInfoQueryRequest.getSortField();
+        String sortOrder = interfaceInfoQueryRequest.getSortOrder();
+
+        // Construct query conditions
+        if (StringUtils.isNotBlank(searchText)) {
+            queryWrapper.like("name", searchText);
+        }
+        queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(totalNum), "totalNum", totalNum);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(leftNum), "leftNum", leftNum);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(interfaceInfoId), "interfaceInfoId", interfaceInfoId);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(status), "status", status);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
+        queryWrapper.eq("isDelete", false);
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
+        return queryWrapper;
+    }
+
+    @Override
+    public Page<UserInterfaceInfo> getUserInterfaceInfoVOPage(Page<UserInterfaceInfo> userInterfaceInfoPage, HttpServletRequest request) {
+        List<UserInterfaceInfo> interfaceInfoList = userInterfaceInfoPage.getRecords();
+        Page<UserInterfaceInfo> interfaceInfoVOPage = new Page<>(userInterfaceInfoPage.getCurrent(), userInterfaceInfoPage.getSize(), userInterfaceInfoPage.getTotal());
+        if (CollectionUtils.isEmpty(interfaceInfoList)) {
+            return interfaceInfoVOPage;
+        }
+        interfaceInfoVOPage.setRecords(interfaceInfoList);
+        return interfaceInfoVOPage;
+    }
+
+    @Override
+    public List<UserInterfaceInfo> listTopInvokeInterfaceInfo(long currentUserid, int limit) {
+        return userInterfaceInfoMapper.listTopInvokeInterfaceInfo(currentUserid, limit);
+    }
+}

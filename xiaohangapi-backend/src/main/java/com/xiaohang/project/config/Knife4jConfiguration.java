@@ -27,8 +27,6 @@ public class Knife4jConfiguration {
                 .apiInfo(new ApiInfoBuilder()
                         .title("xiaohangapi-backend")
                         .description("xiaohangapi-backend")
-                        .termsOfServiceUrl("https://github.com/lixiaohang")
-                        .contact(new Contact("xiaohang", "https://github.com/lixiaohang", "592789970@qq.com"))
                         .version("1.0")
                         .build())
                 .groupName("2.X版本")

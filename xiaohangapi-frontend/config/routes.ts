@@ -1,5 +1,6 @@
 ﻿export default [
-  { name: 'API Store', icon: 'HomeOutlined', path: '/', component: './Index' },
+  { name: 'Please Read', icon: 'ExclamationCircleOutlined', path: '/', component: './Infomation/PleaseRead' },
+  { name: 'API Store', icon: 'HomeOutlined', path: '/MyApi', component: './Index' },
   { name: 'My API', icon: 'StarOutlined', path: '/my_interface', component: './MyInterface' },
   {
     name: 'Check API',
@@ -34,5 +35,6 @@
     ],
   },
   { name: 'User Center', icon: 'UserOutlined', path: '/profile', component: './User/Profile' },
+  { name: 'Author To Do', icon: 'RobotOutlined', path: '/Todo', component: './Infomation/Todo' },
   { path: '*', layout: false, component: './404' },
 ];

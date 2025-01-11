@@ -22,10 +22,12 @@
         createTime,updateTime,isDelete
     </sql>
     <select id="listTopInvokeInterfaceInfo" resultType="com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo">
-        select interfaceInfoId, sum(totalNum) as totalNum
-        from user_interface_info
-        group by interfaceInfoId
-        order by totalNum desc
-            limit #{limit}
+        SELECT u.interfaceInfoId, SUM(u.totalNum) AS totalNum
+        FROM user_interface_info u
+                 INNER JOIN interface_info i ON u.interfaceInfoId = i.id
+        WHERE i.isDelete = 0 AND u.userId = #{currentUserid}
+        GROUP BY u.interfaceInfoId
+        ORDER BY totalNum DESC
+            LIMIT #{limit}
     </select>
 </mapper>

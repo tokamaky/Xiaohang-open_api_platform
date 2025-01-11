@@ -48,6 +48,6 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
      * @param limit Top n
      * @return List<UserInterfaceInfo>
      */
-    List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit);
+    List<UserInterfaceInfo> listTopInvokeInterfaceInfo(long currentUserid, int limit);
 
 }
