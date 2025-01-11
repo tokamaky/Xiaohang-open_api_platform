@@ -48,8 +48,10 @@ const Index: React.FC = () => {
         }
         setLoading(false);
     };
+
+
     useEffect(() => {
-        loadData();
+      loadData();
     }, []);
 
     const onSearch = (value: string) => {
@@ -66,6 +68,22 @@ const Index: React.FC = () => {
     const onSizeChange = (current: number, size: number) => {
         loadData(searchText, current, size);
     };
+// Function to handle sharing
+  const handleShare = (item: API.InterfaceInfoVO) => {
+    if (navigator.share) {
+      navigator.share({
+        title: item.name,
+        text: item.description || 'No description available.',
+        url: window.location.href + '/interface_info/' + item.id, // Share the link to the interface details page
+      })
+        .then(() => message.success('Successfully shared!'))
+        .catch((error) => message.error('Error sharing the page'));
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      message.info('Share URL copied to clipboard!');
+      navigator.clipboard.writeText(window.location.href + '/interface_info/' + item.id); // Copy link to clipboard
+    }
+  };
 
     const CardInfo: React.FC<{
         totalNum: React.ReactNode;
@@ -107,9 +125,9 @@ const Index: React.FC = () => {
                                     bodyStyle={{ paddingBottom: 20 }}
                                     actions={[
                                         <Tooltip title="Share" key="share">
-                                            <ShareAltOutlined />
+                                          <ShareAltOutlined onClick={() => handleShare(item)} />
                                         </Tooltip>,
-                                        <Tooltip title="Online Invocation" key="share">
+                                        <Tooltip title="Online Invocation" key="onlineInvocation">
                                             <div
                                                 onClick={() => {
                                                     history.push('/interface_info/' + item.id);

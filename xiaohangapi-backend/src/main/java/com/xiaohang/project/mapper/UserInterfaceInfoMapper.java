@@ -13,7 +13,7 @@ import java.util.List;
 * @Entity generator.domain.UserInterfaceInfo
 */
 public interface UserInterfaceInfoMapper extends BaseMapper<UserInterfaceInfo> {
-    List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit);
+    List<UserInterfaceInfo> listTopInvokeInterfaceInfo(long currentUserid, int limit);
 }
 
 

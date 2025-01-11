@@ -39,7 +39,7 @@ logging:
 
 dubbo:
   application:
-    qos-enable: true
+    qos-enable: false
     qos-port: 33333
     qos-accept-foreign-ip: false
     name: xiaohangapi-consumer

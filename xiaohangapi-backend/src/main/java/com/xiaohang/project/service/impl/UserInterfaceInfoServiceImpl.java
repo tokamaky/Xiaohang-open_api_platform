@@ -112,8 +112,8 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         }
 
         @Override
-        public List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit) {
-            return userInterfaceInfoMapper.listTopInvokeInterfaceInfo(limit);
+        public List<UserInterfaceInfo> listTopInvokeInterfaceInfo(long currentUserid,int limit) {
+            return userInterfaceInfoMapper.listTopInvokeInterfaceInfo(currentUserid, limit);
         }
     }
 
