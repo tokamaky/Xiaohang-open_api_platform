@@ -1,27 +1,54 @@
-# SpringBoot 项目初始模板
+# Backend For API Platform
+
+<!-- ## How to Debug APIs Online
+
+You can access and debug APIs online by visiting [**http://localhost:7529/api/doc.html**](http://localhost:7529/api/doc.html). -->
+
+## Overview
+The backend is the core of the API open platform, responsible for managing API services, user access control, data storage, and analytics. It ensures secure and efficient communication between users and APIs through robust backend functionalities.
+
+### Functionality
+- Spring Boot 2.7.0 
+- Spring MVC  
+- MySQL Driver  
+- MyBatis Plus  
+- Spring Session Redis for distributed login  
+- Spring AOP  
+- Apache Commons Lang3 utility classes  
+- Lombok annotations  
+- Swagger + Knife4j for API documentation  
+- Spring Boot debugging tools and project processors  
+- Global request and response interceptors (for logging)  
+- Global exception handler  
+- Custom error codes  
+- Encapsulated generic response class  
 
 
-Java SpringBoot 项目初始模板，整合了常用框架和示例代码，大家可以在此基础上快速开发自己的项目。
+### Features
+1. **API Management**:
+   - Create, update, delete, and publish APIs.
+   - Analyze API usage and statistics.
+   - Enforce API access control and rate limiting.
 
-## 模板功能
+2. **Authentication & Security**:
+   - Signature-based API authentication to prevent malicious access.
+   - Assign unique Access Key and Secret Key for secure API calls.
 
-- Spring Boot 2.7.0（贼新）
-- Spring MVC
-- MySQL 驱动
-- MyBatis
-- MyBatis Plus
-- Spring Session Redis 分布式登录
-- Spring AOP
-- Apache Commons Lang3 工具类
-- Lombok 注解
-- Swagger + Knife4j 接口文档
-- Spring Boot 调试工具和项目处理器
-- 全局请求响应拦截器（记录日志）
-- 全局异常处理器
-- 自定义错误码
-- 封装通用响应类
-- 示例用户注册、登录、搜索功能
-- 示例单元测试类
-- 示例 SQL（用户表）
+3. **Performance Optimization**:
+   - High-performance communication between microservices using Dubbo.
+   - Caching with Redis and search indexing with Elasticsearch for faster operations.
 
-访问 localhost:7529/api/doc.html 就能在线调试接口了，不需要前端配合啦~
+4. **Administrative Controls**:
+   - Provide tools for debugging and testing APIs.
+   - Monitor user activity and API performance in real-time.
+
+### Technology Stack
+- **Core Framework**: Spring Boot
+- **Microservices**: Spring Cloud Gateway, Dubbo
+- **Data Layer**: MyBatis-Plus, Redis, Elasticsearch
+- **Documentation**: Swagger, Knife4j
+
+### Modules
+1. **xiaohangapi-backend**: Core API management and analytics module.
+2. **xiaohangapi-gateway**: Unified entry point for API calls, handling routing, rate limiting, and traffic control.
+3. **xiaohangapi-common**: Shared utilities for logging, model definitions, and validation.
