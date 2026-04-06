@@ -52,5 +52,5 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://nacos-server:8848
+    address: nacos://${NACOS_SERVER:nacos-server:8848}
 
