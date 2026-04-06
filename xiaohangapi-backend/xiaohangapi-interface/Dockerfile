@@ -1,5 +1,5 @@
 # Use Maven with JDK 17 for building the project
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
 
