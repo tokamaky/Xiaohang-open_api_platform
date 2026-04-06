@@ -7,7 +7,7 @@ spring:
     gateway:
       routes:
         - id: api_route
-          uri: http://localhost:8123
+          uri: http://${{interface.RAILWAY_PRIVATE_DOMAIN}}:8123
           predicates:
             - Path=/**
     autoconfigure:
@@ -47,7 +47,7 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://nacos-server:8848
+    address: nacos://${NACOS_SERVER:nacos-server:8848}
   qos:
     port: 33333
 
