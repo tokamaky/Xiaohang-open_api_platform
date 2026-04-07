@@ -57,4 +57,4 @@ dubbo:
       namespace: public
       username: nacos
       password: nacos
-
+    check: false
