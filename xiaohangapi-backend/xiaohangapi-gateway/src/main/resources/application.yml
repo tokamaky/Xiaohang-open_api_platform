@@ -39,6 +39,7 @@ dubbo:
   application:
     application:
       qos-enable: true
+      metadata-type: local
       qos-port: 33333
       qos-accept-foreign-ip: false
     name: xiaohangapi-consumer
@@ -59,6 +60,7 @@ dubbo:
     enabled: false   # ← 加这行，服务提供者不存在时不报错
   metadata-report:
     enabled: false
+    address: N/A
   qos:
     port: 33333
 

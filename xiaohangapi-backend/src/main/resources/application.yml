@@ -47,6 +47,7 @@ dubbo:
     name: xiaohangapi-provider
   qos:
       enable: false
+  metadata-type: local
   protocol:
     name: dubbo
     port: -1
@@ -62,3 +63,4 @@ dubbo:
     enabled: false
   metadata-report:
     enabled: false
+    address: N/A
