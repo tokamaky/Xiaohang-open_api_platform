@@ -48,6 +48,10 @@ dubbo:
   registry:
     id: nacos-registry
     address: nacos://${NACOS_SERVER:nacos-server:8848}
+    parameters:
+      namespace: public
+      username: nacos
+      password: nacos
   qos:
     port: 33333
 
