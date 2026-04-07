@@ -58,3 +58,5 @@ dubbo:
       username: nacos
       password: nacos
     check: false
+  config-center:
+    enabled: false
