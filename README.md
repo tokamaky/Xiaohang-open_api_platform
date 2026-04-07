@@ -1,94 +1,182 @@
-## Project Overview
+# 🐼 Panda API — Open API Platform
 
-This project is an API open platform designed to provide developers with efficient, secure, and user-friendly API services. By leveraging modular design and technical integration, the platform supports API management, user permission control, usage analytics, and more, delivering a seamless experience for both developers and administrators.
+> A production-grade API marketplace built with React + Spring Boot + Dubbo + Spring Cloud Gateway
 
-### Features
+**🌐 Live Demo:** [xiaohang-openapiplatform-production.up.railway.app](https://xiaohang-openapiplatform-production.up.railway.app)
 
-1. **User Features**:
-   - User registration, login, and management.
-   - Enable or disable API access permissions.
-   - View API usage statistics.
+---
 
-2. **Administrator Features**:
-   - Manage APIs with CRUD operations.
-   - Publish, deprecate, or debug APIs.
-   - Control API access and rate limits.
+## 📌 Project Overview
 
-3. **API Call Features**:
-   - Provide high-performance API calls.
-   - Track and analyze API usage, with statistics by user and API.
-   - Secure API access with signature-based authentication to prevent malicious use.
+Panda API is a full-stack open API platform designed to provide developers with efficient, secure, and user-friendly API services. Through modular design and modern technology integration, the platform supports API management, user permission control, usage analytics, and more.
 
-4. **Technical Support**:
-   - Lightweight client SDK to simplify API integration for developers.
-   - Auto-generated API documentation and debugging tools using Swagger and Knife4j.
+- **Admins** can publish, manage, and deprecate APIs, and visualize call statistics via interactive charts
+- **Users** can browse APIs, enable access permissions, test them online, and integrate via a lightweight client SDK with a single line of code
 
-### Technology Stack
+---
 
-#### Frontend
-- Ant Design Pro
-- React
-- Umi
-- Umi Request (Axios wrapper)
+## 🏗️ Architecture
 
-#### Backend
-- Spring Boot
-- Spring Cloud Gateway
-- Dubbo
-- MyBatis-Plus
+```
+Frontend (React + Ant Design Pro)
+        │
+        ▼
+  Spring Cloud Gateway  ──────────────────────────────────────────┐
+  (Signature Auth · Access Control · Rate Limiting · Traffic Dye) │
+        │                                                          │
+        ▼  Dubbo RPC                                               ▼
+  Backend Service          ◄──────────────────►   Interface Service
+  (User · API CRUD                               (Live API endpoints
+   Permissions · Stats)                           + Online Debugger)
+        │
+        ├── MySQL  (Persistent data)
+        ├── Redis  (Session store)
+        └── Nacos  (Service registry + config center)
+```
+
+---
+
+## ✨ Key Features
+
+### 👤 User Features
+- User registration, login, and profile management
+- Enable or disable API call permissions per interface
+- View personal API usage statistics
+
+### 🛠️ Administrator Features
+- Full CRUD management for API interfaces
+- Publish, deprecate, or debug APIs
+- Visualize top-called APIs via pie charts (ECharts)
+
+### 🔐 API Signature Authentication
+Each user receives a unique `accessKey` / `secretKey` pair. Every API call is signed using a custom HMAC algorithm — ensuring security, traceability, and preventing malicious use.
+
+### 📦 Lightweight Client SDK
+Developers can call any platform API with **a single line of code** via the published Spring Boot Starter SDK — no manual HTTP or signing logic required.
+
+```java
+// Traditional approach: ~20 lines of HTTP + signing boilerplate
+// With Panda API SDK:
+String result = xiaohangApiClient.getUsernameByPost(user);
+```
+
+### 🌐 API Gateway
+Spring Cloud Gateway provides a unified entry point handling:
+- **Signature verification** — reject unsigned or tampered requests
+- **Access control** — check quota before forwarding
+- **Traffic labeling** — dye headers for distributed tracing
+- **Call counting** — atomically update stats via Dubbo RPC
+
+### 📊 Analytics Dashboard
+Admins can view a real-time visualization of the most-invoked APIs, powered by ECharts/AntV.
+
+### 📖 Auto-Generated API Docs
+Integrated Swagger + Knife4j automatically generates interactive API documentation. Frontend uses plugins to auto-generate request code from OpenAPI specs, reducing front-end/back-end collaboration overhead.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, Ant Design Pro, UmiJS, Umi Request, TypeScript |
+| Backend | Spring Boot 2.7, MyBatis Plus, Spring Session |
+| Microservices | Apache Dubbo 3.3, Nacos, Spring Cloud Gateway |
+| Database | MySQL 8, Redis |
+| Auth | Custom API Signature (AccessKey / SecretKey + HMAC) |
+| Docs | Swagger, Knife4j |
+| SDK | Spring Boot Starter (Client SDK) |
+| Deploy | Docker, Railway |
+
+---
+
+## 📁 Project Structure
+
+```
+Xiaohang-open_api_platform/
+├── xiaohangapi-backend/           # Core backend (Spring Boot)
+│   ├── xiaohangapi-common/        # Shared models, interfaces, utilities
+│   ├── xiaohangapi-gateway/       # API Gateway (Spring Cloud Gateway + Dubbo consumer)
+│   ├── xiaohangapi-interface/     # Live API implementations + online debugger
+│   └── xiaohangapi-client-sdk/   # Spring Boot Starter SDK for developers
+└── xiaohangapi-frontend/          # Frontend (React + Ant Design Pro)
+```
+
+### Module Responsibilities
+
+| Module | Responsibility |
+|---|---|
+| `xiaohangapi-backend` | User management, API CRUD, permissions, call statistics |
+| `xiaohangapi-gateway` | Routing, signature auth, access control, call counting |
+| `xiaohangapi-interface` | Actual API endpoints, interactive docs |
+| `xiaohangapi-client-sdk` | Standardized SDK with signing built-in |
+| `xiaohangapi-common` | Shared models, constants, Dubbo service interfaces |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Java 17+
+- Node.js 18+
+- MySQL 8
 - Redis
-- Elasticsearch
-- Swagger + Knife4j
+- Nacos (standalone)
 
-### Project Structure
+### Backend
 
-The project adopts a modular design and is divided into the following five submodules:
+```bash
+# 1. Start Nacos
+docker run -d -p 8848:8848 \
+  -e MODE=standalone \
+  -e NACOS_AUTH_ENABLE=true \
+  -e NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MA== \
+  nacos/nacos-server:v2.3.2
 
-1. **xiaohangapi-backend**:  
-   Core module responsible for API management, calls, and analytics.
-   - Provides CRUD operations for APIs.
-   - Manages user permissions and API access.
-   - Analyzes API usage data.
+# 2. Configure src/main/resources/application.yml
+#    (MySQL, Redis, Nacos addresses)
 
-2. **xiaohangapi-client-sdk**:  
-   Client SDK module to facilitate API integration with minimal effort.
-   - Provides standardized API call interfaces.
-   - Simplifies signature handling and response processing.
+# 3. Start backend, gateway, and interface services
+cd xiaohangapi-backend && mvn spring-boot:run
+cd xiaohangapi-gateway && mvn spring-boot:run
+cd xiaohangapi-interface && mvn spring-boot:run
+```
 
-3. **xiaohangapi-common**:  
-   Common module for shared functionalities and utilities.
-   - Includes model definitions, constants, logging, and validation utilities.
-   - Supports request and response conversions.
+### Frontend
 
-4. **xiaohangapi-gateway**:  
-   Gateway module for unified API entry and routing.
-   - Handles traffic control, circuit breaking, and rate limiting.
-   - Validates request parameters and signatures.
+```bash
+cd xiaohangapi-frontend
+npm install
+npm start
+```
 
-5. **xiaohangapi-interface**:  
-   Interface module showcasing available APIs and providing interactive debugging tools.
-   - Offers API documentation and interactive call pages.
-   - Enhances parameter construction with a built-in JSON editor.
+---
 
-### Key Highlights
+## 🌐 Deployment (Railway)
 
-1. **Efficient Collaboration**:  
-   Auto-generated API documentation with Swagger and Knife4j, along with front-end plugins for request code generation, reduces front-end and back-end collaboration overhead.
+This project is fully deployed on [Railway](https://railway.app):
 
-2. **Enhanced Security**:  
-   Implements signature-based authentication with unique Access Key and Secret Key for each user, ensuring secure and traceable API calls.
+| Service | Role |
+|---|---|
+| `backend` | Core Spring Boot application (port 7529) |
+| `Gateway` | Spring Cloud Gateway (port 8090) |
+| `interface` | API implementation service (port 8123) |
+| `nacos` | Service registry (`nacos/nacos-server:v2.3.2`) |
+| `Redis` | Session storage |
+| `MySQL` | Persistent database |
 
-3. **Lightweight SDK**:  
-   Developed a Spring Boot Starter-based SDK enabling API calls with minimal configuration, avoiding dependency conflicts and enhancing development experience.
+---
 
-4. **Performance Optimization**:  
-   High-performance communication between modules using Dubbo reduces redundancy and increases system efficiency.
+## 🏆 Highlights
 
-5. **User Experience**:  
-   Provides interactive API documentation, online testing tools, traffic protection, and detailed analytics, ensuring system stability and user satisfaction.
+1. **Modular Design** — Clear separation of concerns across 5 submodules, ensuring maintainability and scalability
+2. **Security First** — HMAC-based API signature authentication with per-user AK/SK, preventing unauthorized and malicious calls
+3. **Developer-Friendly SDK** — Spring Boot Starter with zero-config signing, designed to avoid dependency conflicts
+4. **High-Performance RPC** — Dubbo replaces REST for inter-service communication, reducing overhead and eliminating code duplication via shared common module
+5. **Comprehensive Tooling** — Swagger + Knife4j auto-docs, ECharts analytics, online API debugger, and frontend code generation
 
-### Advantages
+---
 
-- **Modular Design**: Clear separation of responsibilities through layered modules, ensuring maintainability and scalability.
-- **Modern Technology Stack**: Integration of mainstream frameworks balancing performance, efficiency, and usability.
-- **Developer-Friendly**: Comprehensive documentation and tools simplify the development process and lower the learning curve.
+## 📄 License
+
+MIT
