@@ -14,6 +14,10 @@ spring:
   session:
     timeout: 86400
     store-type: redis
+    cookie:
+      same-site: none    # ← 允许跨域携带 Cookie
+      secure: true       # ← same-site=none 必须配合 secure
+      http-only: true
   # redis 配置
   redis:
     host: ${SPRING_REDIS_HOST:localhost}
