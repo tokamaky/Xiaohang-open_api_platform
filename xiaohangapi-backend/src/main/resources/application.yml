@@ -28,6 +28,11 @@ server:
   port: 7529
   servlet:
     context-path: /api
+    session: # ← 加这一层
+     cookie:
+        same-site: none
+        secure: true
+        http-only: true
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
