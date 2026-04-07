@@ -56,7 +56,9 @@ dubbo:
   consumer:
     check: false
   config-center:
-    enabled: false# ← 加这行，服务提供者不存在时不报错
+    enabled: false   # ← 加这行，服务提供者不存在时不报错
+  metadata-report:
+    enabled: false
   qos:
     port: 33333
 
