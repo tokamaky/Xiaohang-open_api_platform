@@ -4,7 +4,7 @@ spring:
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${MYSQLHOST}:${MYSQLPORT}/${MYSQLDATABASE}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQLUSER}
     password: ${MYSQLPASSWORD}
   mvc:
@@ -58,7 +58,7 @@ dubbo:
       enable: false
   metadata-type: local
   protocol:
-    name: tri          # ← 从 dubbo 改成 tri
+    name: dubbo          # ← 从 dubbo 改成 tri
     port: -1
   registry:
     id: nacos-registry
