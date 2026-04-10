@@ -45,7 +45,7 @@ mybatis-plus:
 
 xiaohang:
   gateway:
-    host: https://interface-production-b00a.up.railway.app
+    host: https://gateway-production-b0f7.up.railway.app/
 
 #xiaohangapi:
 #  client:
