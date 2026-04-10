@@ -54,9 +54,9 @@ xiaohang:
 dubbo:
   application:
     name: xiaohangapi-provider
+    metadata-type: local
   qos:
       enable: false
-  metadata-type: local
   protocol:
     name: dubbo          # ← 从 dubbo 改成 tri
     port: -1
