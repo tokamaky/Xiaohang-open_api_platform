@@ -58,8 +58,8 @@ dubbo:
       enable: false
   metadata-type: local
   protocol:
-    name: dubbo
-    port: -1
+    name: tri          # ← 从 dubbo 改成 tri
+    port: 50051
   registry:
     id: nacos-registry
     address: nacos://${NACOS_SERVER:nacos-server:8848}
