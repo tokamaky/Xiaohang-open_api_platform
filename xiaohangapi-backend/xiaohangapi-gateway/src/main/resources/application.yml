@@ -65,8 +65,10 @@ dubbo:
     metadata-type: local    # ← 直接在 application 下，不是嵌套的 application
     qos-enable: false       # ← 关掉 qos 省事
   protocol:
-    name: dubbo           # ← 从 dubbo 改成 tri
+    name: dubbo
     port: -1
+    ext-protocol: tri
+    preferred-protocol: tri
   registry:
     id: nacos-registry
     address: nacos://${NACOS_SERVER:nacos-server:8848}
