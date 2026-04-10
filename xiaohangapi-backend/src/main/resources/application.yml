@@ -59,9 +59,10 @@ dubbo:
       enable: false
   protocol:
     name: dubbo
-    port: -1
+    port: 20880
     ext-protocol: tri
-    preferred-protocol: tri
+    preferred-protocol: tri                         # ✅ 固定端口，不要用 -1
+    host: ${RAILWAY_PRIVATE_DOMAIN}      # ✅ 用 Railway 域名注册，不用 IP
   registry:
     id: nacos-registry
     address: nacos://${NACOS_SERVER:nacos-server:8848}

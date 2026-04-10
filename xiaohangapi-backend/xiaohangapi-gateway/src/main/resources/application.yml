@@ -29,12 +29,9 @@ spring:
 #            - Path=/fallback
 logging:
   level:
-    org:
-      springframework:
-        cloud:
-          gateway: trace
-    level:
-      root: INFO
+    root: INFO
+    org.springframework.cloud.gateway: trace
+
 
 
 #dubbo:
