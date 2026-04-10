@@ -33,6 +33,8 @@ logging:
       springframework:
         cloud:
           gateway: trace
+    level:
+      root: INFO
 
 
 #dubbo:
