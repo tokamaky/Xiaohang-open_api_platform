@@ -66,7 +66,7 @@ dubbo:
     qos-enable: false       # ← 关掉 qos 省事
   protocol:
     name: tri          # ← 从 dubbo 改成 tri
-    port: 50051
+    port: -1
   registry:
     id: nacos-registry
     address: nacos://${NACOS_SERVER:nacos-server:8848}

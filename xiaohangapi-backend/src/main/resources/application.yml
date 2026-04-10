@@ -59,7 +59,7 @@ dubbo:
   metadata-type: local
   protocol:
     name: tri          # ← 从 dubbo 改成 tri
-    port: 50051
+    port: -1
   registry:
     id: nacos-registry
     address: nacos://${NACOS_SERVER:nacos-server:8848}
