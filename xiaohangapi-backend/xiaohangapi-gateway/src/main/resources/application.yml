@@ -37,11 +37,10 @@ logging:
 
 dubbo:
   application:
-    application:
-      qos-enable: true
-      metadata-type: local
-      qos-port: 33333
-      qos-accept-foreign-ip: false
+    qos-enable: true
+    metadata-type: local
+    qos-port: 33333
+    qos-accept-foreign-ip: false
     name: xiaohangapi-consumer
   protocol:
     name: dubbo
