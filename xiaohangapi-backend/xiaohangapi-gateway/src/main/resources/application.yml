@@ -35,13 +35,35 @@ logging:
           gateway: trace
 
 
+#dubbo:
+#  application:
+#    qos-enable: true
+#    metadata-type: local
+#    qos-port: 33333
+#    qos-accept-foreign-ip: false
+#    name: xiaohangapi-consumer
+#  protocol:
+#    name: dubbo
+#    port: -1
+#  registry:
+#    id: nacos-registry
+#    address: nacos://${NACOS_SERVER:nacos-server:8848}
+#    parameters:
+#      namespace: public
+#      username: nacos
+#      password: nacos
+#    check: false          # ← 加这行，注册中心不可用时不报错
+#  consumer:
+#    check: false
+#  config-center:
+#    enabled: false   # ← 加这行，服务提供者不存在时不报错
+#  qos:
+#    port: 33333
 dubbo:
   application:
-    qos-enable: true
-    metadata-type: local
-    qos-port: 33333
-    qos-accept-foreign-ip: false
     name: xiaohangapi-consumer
+    metadata-type: local    # ← 直接在 application 下，不是嵌套的 application
+    qos-enable: false       # ← 关掉 qos 省事
   protocol:
     name: dubbo
     port: -1
@@ -52,11 +74,8 @@ dubbo:
       namespace: public
       username: nacos
       password: nacos
-    check: false          # ← 加这行，注册中心不可用时不报错
+    check: false
   consumer:
     check: false
   config-center:
-    enabled: false   # ← 加这行，服务提供者不存在时不报错
-  qos:
-    port: 33333
-
+    enabled: false
