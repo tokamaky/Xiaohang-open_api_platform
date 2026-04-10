@@ -71,7 +71,7 @@ dubbo:
     preferred-protocol: tri
   registry:
     id: nacos-registry
-    address: nacos://${NACOS_SERVER:nacos-server:8848}
+    address: nacos://${NACOS_SERVER}
     parameters:
       namespace: public
       username: nacos
@@ -81,3 +81,5 @@ dubbo:
     check: false
   config-center:
     enabled: false
+  metadata-report: # ✅ 加这个！
+    address: local
