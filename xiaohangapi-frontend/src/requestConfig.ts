@@ -44,7 +44,7 @@ export const requestConfig: RequestConfig = {
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
 
-      if (data.code !== 0) {
+      if (data.code !== 0 && data.code !== 40102) {
         message.error(data.message).then(r => {})
       }
       return response;
