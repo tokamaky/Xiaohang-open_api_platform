@@ -7,7 +7,7 @@ spring:
     gateway:
       routes:
         - id: api_route
-          uri: http://${{interface.RAILWAY_PRIVATE_DOMAIN}}:8123
+          uri: https://interface-production-b00a.up.railway.app
           predicates:
             - Path=/**
     autoconfigure:
