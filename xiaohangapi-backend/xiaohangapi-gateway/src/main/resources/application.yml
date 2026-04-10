@@ -81,5 +81,3 @@ dubbo:
     check: false
   config-center:
     enabled: false
-  metadata-report: # ✅ 加这个！
-    address: local
