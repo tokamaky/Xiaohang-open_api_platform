@@ -22,7 +22,6 @@
 
 👉 **[https://xiaohang-openapiplatform-production.up.railway.app](https://xiaohang-openapiplatform-production.up.railway.app)**
 
-> **Try it out:** register an account, enable any API, copy your `accessKey` / `secretKey`, and invoke the interface from the online debugger — or install the SDK in your own Spring Boot app.
 
 ---
 
