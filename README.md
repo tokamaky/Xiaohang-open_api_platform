@@ -40,6 +40,93 @@ Most "API platform" demo projects stop at a single monolithic Spring Boot app. *
 
 ---
 
+## 🛠️ Tech Stack
+
+A deliberate, opinionated stack — every choice solves a specific problem.
+
+### 🖥️ Frontend
+| Tech | Version | Why it was chosen |
+|---|---|---|
+| **React** | 18 | Industry-standard component model, concurrent rendering, mature ecosystem |
+| **Ant Design Pro** | 6.x | Out-of-the-box enterprise-grade dashboard layouts (sidebar, breadcrumbs, RBAC routes) |
+| **UmiJS Max** | 4.x | Built-in routing, OpenAPI codegen, mock server, and dva state management |
+| **TypeScript** | 5.x | End-to-end type safety, especially valuable when paired with auto-generated API clients |
+| **ECharts + AntV** | 5.x | Rich, customizable charts for the analytics dashboard |
+| **Umi Request** | — | Promise-based HTTP client with built-in interceptors for auth |
+
+### ⚙️ Backend Core
+| Tech | Version | Why it was chosen |
+|---|---|---|
+| **Java** | 17 (LTS) | Modern language features (records, pattern matching), long-term support |
+| **Spring Boot** | 2.7 | Battle-tested foundation, massive ecosystem, ideal for microservices |
+| **Spring Cloud Gateway** | 2021.x | Reactive, non-blocking gateway built on WebFlux — perfect for high-throughput auth filtering |
+| **MyBatis Plus** | 3.5 | SQL-first ORM with code generation; far more flexible than JPA for complex queries |
+| **Spring Session** | 2.7 | Externalize HTTP sessions to Redis — required for horizontal scaling |
+| **Spring AOP** | 2.7 | Powers the `@AuthCheck` annotation for declarative RBAC |
+
+### 🌐 Microservices Infrastructure
+| Tech | Version | Why it was chosen |
+|---|---|---|
+| **Apache Dubbo** | 3.3 | High-performance RPC — significantly faster than REST for inter-service calls; native service discovery |
+| **Nacos** | 2.3 | Single tool for both **service registry** and **dynamic config center** — replaces Eureka + Spring Cloud Config |
+| **Spring Cloud Gateway** | 2021.x | Single entry point for signature auth, quota enforcement, and traffic routing |
+
+### 💾 Data Layer
+| Tech | Version | Why it was chosen |
+|---|---|---|
+| **MySQL** | 8.0 | Reliable RDBMS with strong consistency, JSON column support, and atomic counter updates |
+| **Redis** | 7.x | Session store + future-proof for caching and rate limiting |
+| **Aliyun OSS** | — | Object storage for user avatars and API icons; CDN-backed delivery |
+
+### 🔐 Security
+| Tech | Why it was chosen |
+|---|---|
+| **Custom HMAC (SHA-256)** | Industry-standard pattern for API authentication (used by AWS, Aliyun, Tencent Cloud) |
+| **Nonce + Timestamp window** | Prevents replay attacks even if a request is intercepted |
+| **Spring AOP `@AuthCheck`** | Declarative RBAC — no scattered `if (user.role != ADMIN)` checks |
+
+### 📖 Developer Experience
+| Tech | Why it was chosen |
+|---|---|
+| **Knife4j** | Enhanced Swagger UI with Chinese support, request/response examples, and offline export |
+| **Swagger 3** | OpenAPI 3.0 spec generation — feeds the frontend's auto-codegen pipeline |
+| **Spring Boot Starter pattern** | Auto-configuration for the SDK — users only need to set AK/SK in `application.yml` |
+| **Lombok** | Eliminates getter/setter/builder boilerplate |
+| **Hutool** | Pragmatic Java utility library — URL encoding, crypto, string manipulation |
+| **Gson** | JSON serialization with better support for generic types than Jackson in some edge cases |
+
+### 🐳 DevOps & Deployment
+| Tech | Why it was chosen |
+|---|---|
+| **Maven (multi-module)** | Native support for the 5-module structure with shared dependency management |
+| **Docker** | Per-service `Dockerfile` for reproducible builds; foundation for any orchestrator |
+| **Docker Compose** | One-command local dev stack (Nacos + backend + gateway) |
+| **Railway** | Zero-config cloud deployment with private networking between 7 linked services |
+
+### 📊 Observability & Tooling
+| Tech | Why it was chosen |
+|---|---|
+| **EasyExcel** | Streaming Excel export for admin reports — handles 100k+ rows without OOM |
+| **JUnit 4 + Spring Boot Test** | Standard test stack with `@SpringBootTest` integration testing |
+
+---
+
+## 🏆 Engineering Highlights
+
+| # | Highlight | Why it matters |
+|---|---|---|
+| 1 | **Microservices from day one** — 5 Maven modules, Dubbo RPC over Nacos | Demonstrates ability to design non-trivial distributed systems, not just a CRUD monolith |
+| 2 | **Custom HMAC signature at the gateway** | Shows depth in API security — nonce, timestamp window, replay protection |
+| 3 | **Published Spring Boot Starter SDK** | Proves understanding of library packaging, auto-configuration, and developer experience |
+| 4 | **Gateway as a reactive WebFlux filter chain** | Non-blocking I/O, response body decoration, atomic Dubbo calls on post-processing |
+| 5 | **Shared `common` module** for Dubbo interfaces + DTOs | Avoids code duplication across services — the textbook Dubbo pattern |
+| 6 | **Auth via Spring AOP + custom annotations** (`@AuthCheck`) | Clean, declarative RBAC instead of scattered `if` statements |
+| 7 | **Automated OpenAPI → TypeScript** code generation on the frontend | Removes manual API client drift between front and back end |
+| 8 | **Deployed to Railway with 7 linked services** | End-to-end DevOps — not just local demos |
+
+---
+
+
 ## 🏗️ System Architecture
 
 ```
@@ -137,22 +224,6 @@ Real-time pie / bar charts (ECharts + AntV) show the top-invoked APIs across the
 
 ### 📖 Auto-generated API Docs
 Swagger + **Knife4j** produce interactive docs at `/doc.html`. The frontend uses the UmiJS OpenAPI plugin to **auto-generate TypeScript request functions** from the Swagger spec — zero manual API client code.
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Stack |
-|---|---|
-| **Frontend** | React 18, Ant Design Pro 6, UmiJS Max, TypeScript, ECharts |
-| **Backend Core** | Spring Boot 2.7, MyBatis Plus 3.5, Spring Session + Redis |
-| **Microservices** | Apache Dubbo 3.3, Nacos 2.3 (registry + config), Spring Cloud Gateway (WebFlux) |
-| **Database** | MySQL 8, Redis 7 |
-| **Auth** | Custom AK/SK HMAC (SHA-256) + replay protection |
-| **Docs** | Swagger 3 + Knife4j |
-| **File storage** | Aliyun OSS |
-| **Build / Deploy** | Maven multi-module, Docker, **Railway** |
-| **Misc.** | Hutool, Lombok, EasyExcel, Gson |
 
 ---
 
@@ -302,21 +373,6 @@ Panda API is fully deployed on **Railway** as a multi-service project:
 | `frontend` | Static build served via Nginx | 80 |
 
 Each service is containerized via its own `Dockerfile` and linked through Railway's private network.
-
----
-
-## 🏆 Engineering Highlights (for recruiters)
-
-| # | Highlight | Why it matters |
-|---|---|---|
-| 1 | **Microservices from day one** — 5 Maven modules, Dubbo RPC over Nacos | Demonstrates ability to design non-trivial distributed systems, not just a CRUD monolith |
-| 2 | **Custom HMAC signature at the gateway** | Shows depth in API security — nonce, timestamp window, replay protection |
-| 3 | **Published Spring Boot Starter SDK** | Proves understanding of library packaging, auto-configuration, and developer experience |
-| 4 | **Gateway as a reactive WebFlux filter chain** | Non-blocking I/O, response body decoration, atomic Dubbo calls on post-processing |
-| 5 | **Shared `common` module** for Dubbo interfaces + DTOs | Avoids code duplication across services — the textbook Dubbo pattern |
-| 6 | **Auth via Spring AOP + custom annotations** (`@AuthCheck`) | Clean, declarative RBAC instead of scattered `if` statements |
-| 7 | **Automated OpenAPI → TypeScript** code generation on the frontend | Removes manual API client drift between front and back end |
-| 8 | **Deployed to Railway with 7 linked services** | End-to-end DevOps — not just local demos |
 
 ---
 
