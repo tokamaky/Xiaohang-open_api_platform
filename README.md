@@ -321,11 +321,6 @@ Each service is containerized via its own `Dockerfile` and linked through Railwa
 
 ---
 
-## 📸 Screenshots
-
-> *(Add 3–4 screenshots here for maximum recruiter impact: login, API catalog, admin dashboard, ECharts analytics.)*
-
----
 
 ## 📄 License
 
