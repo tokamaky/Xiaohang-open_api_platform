@@ -61,22 +61,20 @@ logging:
 dubbo:
   application:
     name: xiaohangapi-consumer
-    metadata-type: local    # ← 直接在 application 下，不是嵌套的 application
-    qos-enable: false       # ← 关掉 qos 省事
+    metadata-type: local
+    qos-enable: false
   protocol:
     name: dubbo
     port: -1
     ext-protocol: tri
     preferred-protocol: tri
   registry:
-    id: nacos-registry
-    address: nacos://${NACOS_SERVER}
-    parameters:
-      namespace: public
-      username: nacos
-      password: nacos
-    check: false
+    address: N/A
   consumer:
     check: false
   config-center:
     enabled: false
+  metadata-report:
+    enabled: false
+  provider:
+    url: ${BACKEND_DUBBO_URL:tri://interface-production-b00a.up.railway.app:20880}

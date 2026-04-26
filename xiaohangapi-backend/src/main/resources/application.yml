@@ -56,21 +56,17 @@ dubbo:
     name: xiaohangapi-provider
     metadata-type: local
   qos:
-      enable: false
+    enable: false
   protocol:
     name: dubbo
     port: 20880
     ext-protocol: tri
-    preferred-protocol: tri                         # ✅ 固定端口，不要用 -1
-    host: ${RAILWAY_PRIVATE_DOMAIN}      # ✅ 用 Railway 域名注册，不用 IP
+    preferred-protocol: tri
+    host: ${RAILWAY_PRIVATE_DOMAIN:0.0.0.0}
   registry:
-    id: nacos-registry
-    address: nacos://${NACOS_SERVER:nacos-server:8848}
-    parameters:
-      namespace: public
-      username: nacos
-      password: nacos
-    check: false
+    address: N/A
   config-center:
+    enabled: false
+  metadata-report:
     enabled: false
 
