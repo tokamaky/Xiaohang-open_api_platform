@@ -62,7 +62,7 @@ dubbo:
     port: 20880
     ext-protocol: tri
     preferred-protocol: tri
-    host: ${RAILWAY_PRIVATE_DOMAIN:0.0.0.0}
+    host: ${DUBBO_PROTOCOL_HOST:0.0.0.0}
   registry:
     address: N/A
   config-center:
