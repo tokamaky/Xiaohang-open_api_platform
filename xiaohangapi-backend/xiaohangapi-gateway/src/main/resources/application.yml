@@ -7,7 +7,8 @@ spring:
     gateway:
       routes:
         - id: api_route
-          uri: ${GATEWAY_DUBBO_URL:tri://backend-production-796b.up.railway.app:20880}
+          uri:  ${GATEWAY_INTERFACE_URL:https://interface-production-b00a.up.railway.app}
+
           predicates:
             - Path=/**
     autoconfigure:
@@ -77,4 +78,4 @@ dubbo:
   metadata-report:
     enabled: false
   provider:
-    url: ${GATEWAY_DUBBO_URL:tri://interface-production-b00a.up.railway.app:20880}
+    url: ${GATEWAY_DUBBO_URL:https://interface-production-b00a.up.railway.app}
