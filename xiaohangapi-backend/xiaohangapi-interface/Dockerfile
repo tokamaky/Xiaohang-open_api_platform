@@ -6,6 +6,7 @@ WORKDIR /app
 # Install Maven
 RUN apt-get update && apt-get install -y maven && apt-get clean
 
+
 # Copy local dependencies from the backend project directory
 COPY ./xiaohangapi-common /app/xiaohangapi-common
 COPY ./xiaohangapi-client-sdk /app/xiaohangapi-client-sdk
