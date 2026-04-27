@@ -7,7 +7,7 @@ spring:
     gateway:
       routes:
         - id: api_route
-          uri: https://interface-production-b00a.up.railway.app
+          uri: ${GATEWAY_DUBBO_URL:tri://backend-production-796b.up.railway.app:20880}
           predicates:
             - Path=/**
     autoconfigure:

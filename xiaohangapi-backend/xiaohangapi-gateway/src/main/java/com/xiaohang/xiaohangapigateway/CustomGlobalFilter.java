@@ -45,13 +45,13 @@ import java.util.Objects;
 @Component
 public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
-    @DubboReference(protocol = "tri", check = false, url = "${dubbo.provider.url:tri://interface-production-b00a.up.railway.app:20880}")
+    @DubboReference(protocol = "tri", check = false, url = url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
     private InnerUserService innerUserService;
 
-    @DubboReference(protocol = "tri", check = false, url = "${dubbo.provider.url:tri://interface-production-b00a.up.railway.app:20880}")
+    @DubboReference(protocol = "tri", check = false, url = url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
     private InnerInterfaceInfoService innerInterfaceInfoService;
 
-    @DubboReference(protocol = "tri", check = false, url = "${dubbo.provider.url:tri://interface-production-b00a.up.railway.app:20880}")
+    @DubboReference(protocol = "tri", check = false, url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
     private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
 
     private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1", "127.0.0.2", "0:0:0:0:0:0:0:1");
