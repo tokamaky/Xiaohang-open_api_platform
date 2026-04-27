@@ -384,5 +384,5 @@ MIT — free to use, fork, and learn from.
 ---
 
 <p align="center">
-  Built with ❤️ by Xiaohang Liu · <a href="mailto:your-email@example.com">Contact</a>
+  Built with ❤️ by Xiaohang Ji · <a href="mailto:your-email@example.com">Contact</a>
 </p>
