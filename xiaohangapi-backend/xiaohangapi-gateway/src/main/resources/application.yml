@@ -77,5 +77,3 @@ dubbo:
     enabled: false
   metadata-report:
     enabled: false
-  provider:
-    url: ${GATEWAY_DUBBO_URL:https://interface-production-b00a.up.railway.app}
