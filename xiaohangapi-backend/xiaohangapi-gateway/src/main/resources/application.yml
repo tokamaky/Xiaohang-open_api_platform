@@ -77,4 +77,4 @@ dubbo:
   metadata-report:
     enabled: false
   provider:
-    url: ${BACKEND_DUBBO_URL:tri://interface-production-b00a.up.railway.app:20880}
+    url: ${GATEWAY_DUBBO_URL:tri://interface-production-b00a.up.railway.app:20880}

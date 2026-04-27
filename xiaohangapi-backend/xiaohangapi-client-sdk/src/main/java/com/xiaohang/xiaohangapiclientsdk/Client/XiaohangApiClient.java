@@ -26,7 +26,7 @@ import static com.xiaohang.xiaohangapiclientsdk.utils.SignUtils.genSign;
 @Slf4j
 public class XiaohangApiClient {
 
-    private static String GATEWAY_HOST = "https://interface-production-b00a.up.railway.app";
+    private static String GATEWAY_HOST = "https://gateway-production-b0f7.up.railway.app";
 
     private String accessKey;
 
