@@ -45,10 +45,10 @@ import java.util.Objects;
 @Component
 public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
-    @DubboReference(protocol = "tri", check = false, url = url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
+    @DubboReference(protocol = "tri", check = false, url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
     private InnerUserService innerUserService;
 
-    @DubboReference(protocol = "tri", check = false, url = url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
+    @DubboReference(protocol = "tri", check = false, url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
     private InnerInterfaceInfoService innerInterfaceInfoService;
 
     @DubboReference(protocol = "tri", check = false, url = "${dubbo.provider.url:tri://backend-production-796b.up.railway.app:20880}")
