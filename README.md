@@ -1,338 +1,301 @@
-# 🐼 Panda API — Open API Marketplace Platform
+# Panda API — Open API Marketplace
 
-> **A production-grade, full-stack API marketplace built with a microservices architecture.**
-> Developers can publish APIs, sign up, obtain keys, and invoke any interface with a single line of code via the built-in Spring Boot Starter SDK.
+> A full-stack, distributed API marketplace where developers can publish APIs, manage credentials, and consume any endpoint with a single line of Java via a published Spring Boot Starter SDK.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white" />
-  <img src="https://img.shields.io/badge/Spring_Boot-2.7-6DB33F?logo=springboot&logoColor=white" />
-  <img src="https://img.shields.io/badge/Apache_Dubbo-3.3-1E8CBE?logo=apache&logoColor=white" />
-  <img src="https://img.shields.io/badge/Spring_Cloud_Gateway-2021-6DB33F?logo=spring&logoColor=white" />
-  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/Ant_Design_Pro-5.x-0170FE?logo=antdesign&logoColor=white" />
-  <img src="https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white" />
-  <img src="https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white" />
-  <img src="https://img.shields.io/badge/Nacos-2.3-1E8CBE" />
-  <img src="https://img.shields.io/badge/Deploy-Railway-0B0D0E?logo=railway&logoColor=white" />
-</p>
+[![Java](https://img.shields.io/badge/Java-17_(LTS)-orange?logo=openjdk)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-2.7-6DB33F?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Cloud Gateway](https://img.shields.io/badge/Spring_Cloud_Gateway-2021-6DB33F?logo=spring)](https://spring.io/projects/spring-cloud-gateway)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io/)
+[![Deployed on Railway](https://img.shields.io/badge/Deployed-Railway-0B0D0E?logo=railway)](https://railway.app)
+
+**🌐 [Live Demo](https://xiaohang-openapiplatform-production.up.railway.app)** &nbsp;·&nbsp; **📖 [API Docs](https://xiaohang-openapiplatform-production.up.railway.app/doc.html)**
 
 ---
 
-## 🌐 Live Demo
+## TL;DR
 
-👉 **[https://xiaohang-openapiplatform-production.up.railway.app](https://xiaohang-openapiplatform-production.up.railway.app)**
+A microservices-based API marketplace deployed across **7 linked services on Railway**, demonstrating production patterns I'd previously only read about: a reactive API gateway, HMAC request signing, RPC-based service-to-service communication, and a published client SDK that reduces integration code from ~30 lines to 1.
 
-
----
-
-## 📌 Why this project?
-
-Most "API platform" demo projects stop at a single monolithic Spring Boot app. **Panda API** is different — it's a **true microservices system** that solves three real engineering problems:
-
-1. **How do you authenticate thousands of untrusted API callers without exposing credentials?**
-   → Custom **AK/SK + HMAC signature** scheme enforced at the gateway layer, with replay-attack protection (nonce + 5-minute timestamp window).
-
-2. **How do you give developers a frictionless integration experience?**
-   → A published **Spring Boot Starter SDK** — users go from 20+ lines of manual HTTP + signing boilerplate to **a single method call**.
-
-3. **How do you keep the codebase maintainable across 5 modules?**
-   → **Dubbo RPC** over Nacos registry for inter-service calls, a shared `common` module for DTOs and service interfaces, and clear bounded contexts per submodule.
+**Built to learn:** distributed-system design, API security at scale, library packaging, and end-to-end DevOps.
 
 ---
 
-## 🛠️ Tech Stack
+## Table of Contents
 
-A deliberate, opinionated stack — every choice solves a specific problem.
-
-### 🖥️ Frontend
-| Tech | Version | Why it was chosen |
-|---|---|---|
-| **React** | 18 | Industry-standard component model, concurrent rendering, mature ecosystem |
-| **Ant Design Pro** | 6.x | Out-of-the-box enterprise-grade dashboard layouts (sidebar, breadcrumbs, RBAC routes) |
-| **UmiJS Max** | 4.x | Built-in routing, OpenAPI codegen, mock server, and dva state management |
-| **TypeScript** | 5.x | End-to-end type safety, especially valuable when paired with auto-generated API clients |
-| **ECharts + AntV** | 5.x | Rich, customizable charts for the analytics dashboard |
-| **Umi Request** | — | Promise-based HTTP client with built-in interceptors for auth |
-
-### ⚙️ Backend Core
-| Tech | Version | Why it was chosen |
-|---|---|---|
-| **Java** | 17 (LTS) | Modern language features (records, pattern matching), long-term support |
-| **Spring Boot** | 2.7 | Battle-tested foundation, massive ecosystem, ideal for microservices |
-| **Spring Cloud Gateway** | 2021.x | Reactive, non-blocking gateway built on WebFlux — perfect for high-throughput auth filtering |
-| **MyBatis Plus** | 3.5 | SQL-first ORM with code generation; far more flexible than JPA for complex queries |
-| **Spring Session** | 2.7 | Externalize HTTP sessions to Redis — required for horizontal scaling |
-| **Spring AOP** | 2.7 | Powers the `@AuthCheck` annotation for declarative RBAC |
-
-### 🌐 Microservices Infrastructure
-| Tech | Version | Why it was chosen |
-|---|---|---|
-| **Apache Dubbo** | 3.3 | High-performance RPC — significantly faster than REST for inter-service calls; native service discovery |
-| **Nacos** | 2.3 | Single tool for both **service registry** and **dynamic config center** — replaces Eureka + Spring Cloud Config |
-| **Spring Cloud Gateway** | 2021.x | Single entry point for signature auth, quota enforcement, and traffic routing |
-
-### 💾 Data Layer
-| Tech | Version | Why it was chosen |
-|---|---|---|
-| **MySQL** | 8.0 | Reliable RDBMS with strong consistency, JSON column support, and atomic counter updates |
-| **Redis** | 7.x | Session store + future-proof for caching and rate limiting |
-| **Aliyun OSS** | — | Object storage for user avatars and API icons; CDN-backed delivery |
-
-### 🔐 Security
-| Tech | Why it was chosen |
-|---|---|
-| **Custom HMAC (SHA-256)** | Industry-standard pattern for API authentication (used by AWS, Aliyun, Tencent Cloud) |
-| **Nonce + Timestamp window** | Prevents replay attacks even if a request is intercepted |
-| **Spring AOP `@AuthCheck`** | Declarative RBAC — no scattered `if (user.role != ADMIN)` checks |
-
-### 📖 Developer Experience
-| Tech | Why it was chosen |
-|---|---|
-| **Knife4j** | Enhanced Swagger UI with Chinese support, request/response examples, and offline export |
-| **Swagger 3** | OpenAPI 3.0 spec generation — feeds the frontend's auto-codegen pipeline |
-| **Spring Boot Starter pattern** | Auto-configuration for the SDK — users only need to set AK/SK in `application.yml` |
-| **Lombok** | Eliminates getter/setter/builder boilerplate |
-| **Hutool** | Pragmatic Java utility library — URL encoding, crypto, string manipulation |
-| **Gson** | JSON serialization with better support for generic types than Jackson in some edge cases |
-
-### 🐳 DevOps & Deployment
-| Tech | Why it was chosen |
-|---|---|
-| **Maven (multi-module)** | Native support for the 5-module structure with shared dependency management |
-| **Docker** | Per-service `Dockerfile` for reproducible builds; foundation for any orchestrator |
-| **Docker Compose** | One-command local dev stack (Nacos + backend + gateway) |
-| **Railway** | Zero-config cloud deployment with private networking between 7 linked services |
-
-### 📊 Observability & Tooling
-| Tech | Why it was chosen |
-|---|---|
-| **EasyExcel** | Streaming Excel export for admin reports — handles 100k+ rows without OOM |
-| **JUnit 4 + Spring Boot Test** | Standard test stack with `@SpringBootTest` integration testing |
+- [What it does](#what-it-does)
+- [Architecture](#architecture)
+- [Key engineering decisions](#key-engineering-decisions)
+- [Security: HMAC request signing](#security-hmac-request-signing)
+- [The SDK: from 30 lines to 1](#the-sdk-from-30-lines-to-1)
+- [Tech stack](#tech-stack)
+- [Tradeoffs and what I'd change](#tradeoffs-and-what-id-change)
+- [What I learned](#what-i-learned)
+- [Local development](#local-development)
+- [Deployment](#deployment)
 
 ---
 
-## 🏆 Engineering Highlights
+## What it does
 
-| # | Highlight | Why it matters |
-|---|---|---|
-| 1 | **Microservices from day one** — 5 Maven modules, Dubbo RPC over Nacos | Demonstrates ability to design non-trivial distributed systems, not just a CRUD monolith |
-| 2 | **Custom HMAC signature at the gateway** | Shows depth in API security — nonce, timestamp window, replay protection |
-| 3 | **Published Spring Boot Starter SDK** | Proves understanding of library packaging, auto-configuration, and developer experience |
-| 4 | **Gateway as a reactive WebFlux filter chain** | Non-blocking I/O, response body decoration, atomic Dubbo calls on post-processing |
-| 5 | **Shared `common` module** for Dubbo interfaces + DTOs | Avoids code duplication across services — the textbook Dubbo pattern |
-| 6 | **Auth via Spring AOP + custom annotations** (`@AuthCheck`) | Clean, declarative RBAC instead of scattered `if` statements |
-| 7 | **Automated OpenAPI → TypeScript** code generation on the frontend | Removes manual API client drift between front and back end |
-| 8 | **Deployed to Railway with 7 linked services** | End-to-end DevOps — not just local demos |
+Two audiences, one platform:
+
+**API consumers** sign up, generate an `accessKey` / `secretKey` pair, browse the public API catalog, and integrate any endpoint into their own Spring Boot apps with a single annotated method call.
+
+**API providers** (admins) publish new endpoints through a web console with an interactive request debugger, set per-user quotas, monitor invocation analytics, and deprecate old versions.
+
+Every call flows through a central gateway that authenticates the signature, enforces quotas, and records metrics — none of this lives in the business services themselves.
 
 ---
 
-
-## 🏗️ System Architecture
+## Architecture
 
 ```
-                   ┌────────────────────────────────────────┐
-                   │   React + Ant Design Pro (Frontend)    │
-                   │   • User dashboard                     │
-                   │   • Admin console                      │
-                   │   • ECharts analytics                  │
-                   └──────────────────┬─────────────────────┘
-                                      │ HTTPS
-                                      ▼
-                   ┌────────────────────────────────────────┐
-                   │   Spring Cloud Gateway (Port 8090)     │
-                   │   ──────────────────────────────────   │
-                   │   ✓ Signature verification (HMAC)      │
-                   │   ✓ IP black/white list                │
-                   │   ✓ Timestamp & nonce replay guard     │
-                   │   ✓ Quota check (via Dubbo)            │
-                   │   ✓ Traffic dyeing (X-Dye-Data)        │
-                   │   ✓ Atomic call-count increment        │
-                   └────┬────────────────────┬──────────────┘
-                        │                    │
-                 Dubbo RPC            Reactive route
-                        │                    │
-                        ▼                    ▼
-        ┌─────────────────────────┐   ┌─────────────────────────┐
-        │  Backend Service        │   │  Interface Service      │
-        │  (Port 7529)            │   │  (Port 8123)            │
-        │  ─────────────────────  │   │  ─────────────────────  │
-        │  • User CRUD / auth     │   │  • Live API endpoints   │
-        │  • API CRUD / publish   │   │  • Online debugger      │
-        │  • Quota & stats        │   │  • Swagger docs         │
-        │  • OSS file upload      │   │                         │
-        └──────────┬──────────────┘   └─────────────────────────┘
-                   │
-       ┌───────────┼────────────┬──────────────┐
-       ▼           ▼            ▼              ▼
-   ┌───────┐  ┌───────┐   ┌───────────┐  ┌───────────┐
-   │ MySQL │  │ Redis │   │   Nacos   │  │ Aliyun OSS│
-   │  8.0  │  │Session│   │ Registry  │  │ (images)  │
-   └───────┘  └───────┘   │ + Config  │  └───────────┘
-                          └───────────┘
+                  ┌────────────────────────────────────────┐
+                  │   React 18 + Ant Design Pro            │
+                  │   User dashboard · Admin console       │
+                  └──────────────────┬─────────────────────┘
+                                     │ HTTPS
+                                     ▼
+                  ┌────────────────────────────────────────┐
+                  │   Spring Cloud Gateway (reactive)      │
+                  │   • HMAC signature verification        │
+                  │   • Replay protection (nonce + window) │
+                  │   • Quota enforcement (RPC call)       │
+                  │   • Atomic invocation counter          │
+                  │   • Request/response logging           │
+                  └────┬────────────────────┬──────────────┘
+                       │ RPC                │ Reactive routing
+                       ▼                    ▼
+       ┌─────────────────────────┐   ┌─────────────────────────┐
+       │  Backend Service        │   │  Interface Service      │
+       │  • User & API CRUD      │   │  • Live API endpoints   │
+       │  • Quota management     │   │  • Online debugger      │
+       │  • Statistics           │   │  • Swagger docs         │
+       └──────────┬──────────────┘   └─────────────────────────┘
+                  │
+       ┌──────────┼─────────────┬──────────────┐
+       ▼          ▼             ▼              ▼
+   ┌───────┐ ┌─────────┐  ┌────────────┐  ┌────────────┐
+   │ MySQL │ │  Redis  │  │  Service   │  │   Object   │
+   │  8.0  │ │ Session │  │  Registry  │  │  Storage   │
+   └───────┘ └─────────┘  │  + Config  │  └────────────┘
+                          └────────────┘
 ```
+
+**Why a gateway?** Every authentication, rate-limit, and metrics decision lives in one place. Business services stay focused on business logic and never see an unauthenticated request.
+
+**Why RPC for internal calls?** The gateway needs to fetch the user's `secretKey` and check their quota *before* the request reaches the target service. REST round-trips would add latency to every external call. RPC over a service registry gives sub-millisecond internal lookups.
 
 ---
 
-## ✨ Features at a Glance
+## Key engineering decisions
 
-### 👤 For Users
-- Register / login with Spring Session (Redis-backed)
-- Browse the API catalog, enable access per interface
-- View personal call statistics and remaining quota
-- **One-line SDK integration** — no HTTP boilerplate
-- Download `accessKey` / `secretKey` pair from the dashboard
+### 1. Reactive gateway, blocking services
 
-### 🛠️ For Administrators
-- Full CRUD on API interfaces (publish / deprecate / edit)
-- **Online API debugger** — send test requests directly from the UI
-- **ECharts analytics dashboard** — top-invoked APIs, call trends, user distribution
-- Role-Based Access Control via a custom `@AuthCheck` annotation + Spring AOP interceptor
+The gateway is built on Spring Cloud Gateway (WebFlux-based, non-blocking). The backend services are traditional Spring MVC. **This is intentional**: the gateway is I/O-bound (lots of small auth + quota checks across many concurrent connections), while the backend is logic-heavy and benefits from the simpler programming model of MVC.
 
-### 🔐 HMAC-based Signature Authentication
-Every API call is signed client-side and verified at the gateway. Tampering with **any byte** of the request invalidates the signature.
+### 2. Shared `common` module for service contracts
 
-**Signature algorithm:**
-```
-signature = SHA256(body + secretKey)
-```
+DTOs and RPC interfaces live in a separate Maven module that all services depend on. This means:
+- **Compile-time safety** across service boundaries — rename a field in the User DTO and every service that reads it fails to build
+- **Single source of truth** for entity definitions — no drifting copies of `UserVO` across 5 modules
 
-Headers enforced by the gateway:
-| Header | Purpose |
-|---|---|
-| `accessKey` | Identifies the caller |
-| `nonce` | Random int — replay prevention |
-| `timestamp` | Unix seconds — must be within 5 minutes |
-| `sign` | SHA256 digest |
-| `body` | URL-encoded request body |
+### 3. Declarative authorization via Spring AOP
 
-### 📦 Zero-Config Client SDK
+Instead of scattering `if (currentUser.getRole() != ADMIN)` checks across controllers, I built a custom `@AuthCheck(mustRole = "admin")` annotation backed by an AOP aspect:
 
 ```java
-// Traditional approach — 20+ lines of HTTP client + signing boilerplate 😩
-// With the Panda API SDK — one line 😎
+@AuthCheck(mustRole = "admin")
+@PostMapping("/interface/publish")
+public BaseResponse<Boolean> publishInterface(@RequestBody InterfacePublishRequest req) {
+    return ResultUtils.success(interfaceService.publish(req));
+}
+```
 
+The aspect resolves the user from the session, checks the role, and either proceeds or throws a `BusinessException(40100, "Forbidden")`. Authorization logic exists in **exactly one file**.
+
+### 4. Auto-generated TypeScript clients from OpenAPI
+
+The frontend doesn't hand-write API call functions. A UmiJS plugin reads the backend's Swagger 3 spec at build time and generates typed `request*` functions. Add a new endpoint on the backend → run `npm run openapi` → use it on the frontend with full TypeScript autocomplete. **Zero manual API client maintenance.**
+
+---
+
+## Security: HMAC request signing
+
+Every API call from the SDK to the gateway carries five headers:
+
+| Header | Purpose |
+|---|---|
+| `accessKey` | Identifies the caller (public, like a username) |
+| `nonce` | Random value — prevents replay of intercepted requests |
+| `timestamp` | Unix seconds — request rejected if outside a 5-minute window |
+| `body` | URL-encoded request payload (included in the signed string) |
+| `sign` | `SHA256(accessKey + nonce + timestamp + body + secretKey)` |
+
+The gateway:
+1. Looks up the user's `secretKey` from the backend service via RPC
+2. Recomputes the signature with the same algorithm
+3. Compares against the `sign` header — mismatch → 401
+4. Checks `nonce` hasn't been seen recently and `timestamp` is within window → otherwise 401
+5. Calls the backend via RPC to check the user's remaining quota → 403 if exhausted
+6. Routes the request, then atomically increments the user's invocation count on success
+
+This is the same pattern used by AWS, Aliyun, and Tencent Cloud. The `secretKey` never travels over the wire — only its derived signature does.
+
+---
+
+## The SDK: from 30 lines to 1
+
+**Before** (what consumers would have to write without the SDK):
+
+```java
+// Build headers, hash with secretKey, encode body, set timeout, parse response...
+HttpHeaders headers = new HttpHeaders();
+String nonce = String.valueOf(new Random().nextInt());
+String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+String body = URLEncoder.encode(JSON.toJSONString(payload), StandardCharsets.UTF_8);
+String sign = DigestUtils.sha256Hex(accessKey + nonce + timestamp + body + secretKey);
+headers.set("accessKey", accessKey);
+headers.set("nonce", nonce);
+headers.set("timestamp", timestamp);
+headers.set("body", body);
+headers.set("sign", sign);
+// ... and then the actual HTTP call, error handling, response parsing
+```
+
+**After** (with the SDK):
+
+```java
 @Resource
-private XiaohangApiClient xiaohangApiClient;
+private XiaohangApiClient client;
 
-String result = xiaohangApiClient.getUsernameByPost(user);
+String result = client.getUsernameByPost(new User("world"));
 ```
 
-The SDK is published as a **Spring Boot Starter** — drop it into your `pom.xml`, set your AK/SK in `application.yml`, and you're done. Signing, headers, and error handling are all handled transparently.
+The SDK is published as a **Spring Boot Starter** with auto-configuration:
 
-### 📊 Analytics Dashboard
-Real-time pie / bar charts (ECharts + AntV) show the top-invoked APIs across the platform. Data flows through the gateway → Dubbo → `UserInterfaceInfoMapper` (atomic `UPDATE ... SET totalNum = totalNum + 1`).
+```yaml
+# application.yml
+xiaohang:
+  client:
+    access-key: ${YOUR_AK}
+    secret-key: ${YOUR_SK}
+```
 
-### 📖 Auto-generated API Docs
-Swagger + **Knife4j** produce interactive docs at `/doc.html`. The frontend uses the UmiJS OpenAPI plugin to **auto-generate TypeScript request functions** from the Swagger spec — zero manual API client code.
+Spring Boot's auto-config picks up the properties, instantiates the `XiaohangApiClient` bean, wires in the signing interceptor, and exposes it for `@Resource` injection. Consumers never see HTTP, signing, or header construction.
+
+This was the most rewarding piece of the project to build — it forced me to understand `META-INF/spring.factories`, the `@ConditionalOnProperty` family, and how starter packaging actually works under the hood.
 
 ---
 
-## 📁 Project Structure
+## Tech stack
 
-```
-Xiaohang-open_api_platform/
-│
-├── xiaohangapi-backend/              # ⚙️  Core backend (Spring Boot monolith)
-│   ├── src/main/java/
-│   │   ├── controller/               # REST endpoints (User, Interface, Analysis, File)
-│   │   ├── service/ + mapper/        # Business logic + MyBatis Plus mappers
-│   │   ├── aop/                      # AuthInterceptor, LogInterceptor
-│   │   ├── annotation/               # @AuthCheck (RBAC)
-│   │   ├── exception/                # Global exception handler + BusinessException
-│   │   ├── provider/                 # Dubbo service implementations
-│   │   └── config/                   # Knife4j, CORS, MyBatis, Aliyun OSS
-│   ├── sql/                          # DDL scripts
-│   ├── Dockerfile
-│   └── docker-compose.yml            # Nacos + backend + gateway (local dev)
-│
-├── xiaohangapi-common/               # 📦 Shared DTOs + Dubbo service interfaces
-│   ├── model/entity/                 # User, InterfaceInfo, UserInterfaceInfo
-│   └── service/                      # Inner*Service (Dubbo contracts)
-│
-├── xiaohangapi-gateway/              # 🛡️  API Gateway (Spring Cloud Gateway)
-│   └── CustomGlobalFilter.java       # ⭐ Signature auth + rate + stats filter
-│
-├── xiaohangapi-interface/            # 🎯 Live API implementations
-│
-├── xiaohangapi-client-sdk/           # 🎁 Spring Boot Starter (published SDK)
-│
-└── xiaohangapi-frontend/             # 🖥️  Ant Design Pro frontend
-    ├── src/pages/                    # Login, InterfaceInfo, Admin, Analysis
-    ├── src/components/               # Reusable UI components
-    └── config/                       # UmiJS + proxy config
-```
+### Backend
+- **Java 17** (LTS) — records, pattern matching, sealed classes
+- **Spring Boot 2.7** — REST APIs, dependency injection, validation
+- **Spring Cloud Gateway 2021.x** — reactive WebFlux gateway
+- **Spring AOP** — `@AuthCheck` declarative authorization
+- **MyBatis Plus 3.5** — SQL-first ORM with code generation
+- **Spring Session** — Redis-backed HTTP sessions for horizontal scaling
 
-### Module responsibilities
+### Microservices infrastructure
+- **Apache Dubbo 3.3** — high-performance RPC (analogous to gRPC; chosen here because of its tight integration with the Spring ecosystem)
+- **Nacos 2.3** — service registry + dynamic configuration center (analogous to Consul + Spring Cloud Config combined)
 
-| Module | Role | Talks to |
-|---|---|---|
-| `xiaohangapi-backend` | User mgmt, API CRUD, quota, statistics | MySQL, Redis, Nacos |
-| `xiaohangapi-gateway` | Auth filter, routing, rate limiting | Dubbo (all services), Nacos |
-| `xiaohangapi-interface` | Real API endpoints, online debugger | (stateless) |
-| `xiaohangapi-client-sdk` | Signing + HTTP client, published as starter | Gateway |
-| `xiaohangapi-common` | Shared DTOs + Dubbo service interfaces | — |
+> If you're more familiar with the Netflix/HashiCorp stack: Dubbo ≈ gRPC, Nacos ≈ Consul + Vault for config. The patterns are identical; the implementations differ.
+
+### Data
+- **MySQL 8.0** — relational store with strong consistency
+- **Redis 7** — session store, replay-protection nonce cache
+- **Object Storage (S3-compatible)** — user avatars, API icons
+
+### Frontend
+- **React 18** + **TypeScript 5**
+- **Ant Design Pro 6** — enterprise dashboard layout, RBAC routes, breadcrumbs
+- **UmiJS Max 4** — routing, build, OpenAPI codegen
+- **ECharts** — analytics dashboard
+
+### DevOps
+- **Maven multi-module** — 5-module project structure
+- **Docker** (multi-stage builds) — one Dockerfile per service
+- **Railway** — multi-service deployment with private internal networking
+- **Knife4j + Swagger 3** — interactive API documentation
 
 ---
 
-## 🚀 Quick Start (Local)
+## Tradeoffs and what I'd change
+
+I want to be honest about the limits of the current implementation:
+
+**1. Single-tenant SDK signing.** The signing logic assumes one `accessKey` per app instance. For a real SaaS product, the SDK would need to support multi-tenant key rotation and per-request key selection.
+
+**2. Nonce store is in-memory on the gateway.** This means nonce uniqueness only holds within a single gateway instance. A horizontally scaled gateway would need Redis-backed nonce storage to prevent cross-instance replay.
+
+**3. No circuit breakers.** If the backend RPC service goes down, the gateway will keep trying every request until timeout, cascading the failure. Adding Resilience4j (or Sentinel) would be the next step.
+
+**4. Quota check is eventually consistent.** Because the invocation counter is incremented after the request succeeds, a burst of concurrent requests can briefly exceed the configured quota. For a paid API, this would need to be replaced with a token-bucket pre-check.
+
+**5. Dubbo + Nacos is uncommon outside the Chinese tech ecosystem.** If I rebuilt this for a North American team, I'd use **gRPC + Consul** (or just plain Spring Cloud OpenFeign + Eureka) for better team familiarity, even though the architectural patterns are identical.
+
+---
+
+## What I learned
+
+This was my first project where I had to think about **where state lives**. In a monolith, "the database" is the answer to every state question. In a distributed system, you have to ask: does this user's quota live in the gateway's memory, in Redis, or in MySQL? What's the latency cost of each choice? What happens when the cache and the database disagree?
+
+Specific concrete things I now understand that I didn't before:
+
+- **Why reactive matters at the edge.** A blocking gateway thread per connection caps you at a few thousand concurrent requests. WebFlux on the same hardware handles tens of thousands.
+- **Why service contracts matter.** When the User DTO changed from `Long id` to `String id`, the shared `common` module made every consumer fail to compile in CI. Without it, I would have shipped broken code to production.
+- **Why auto-configuration is non-trivial.** My first SDK draft required users to manually `@Import` a config class. Reading how `spring-boot-starter-data-jpa` actually works was a small revelation — Spring's "magic" is just `META-INF/spring.factories` plus `@ConditionalOnXxx`.
+- **Why `docker-compose.yml` saves your sanity.** The first week I was running Nacos, MySQL, Redis, and three Spring Boot apps by hand in 6 terminals. Docker Compose was a 30-line investment that paid back daily.
+
+---
+
+## Local development
 
 ### Prerequisites
 - JDK 17+
 - Maven 3.8+
 - Node.js 18+
 - MySQL 8 / Redis 7
-- Nacos 2.3 (standalone)
+- Nacos 2.3 (or use Docker Compose below)
 
-### 1. Spin up infrastructure
+### Quick start with Docker Compose
 
 ```bash
-# Nacos
-docker run -d --name nacos -p 8848:8848 \
-  -e MODE=standalone \
-  -e NACOS_AUTH_ENABLE=true \
-  -e NACOS_AUTH_TOKEN=U2VjcmV0S2V5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MA== \
-  nacos/nacos-server:v2.3.2
-
-# MySQL + Redis (or use your own)
-docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root mysql:8
-docker run -d --name redis -p 6379:6379 redis:7
+docker compose -f xiaohangapi-backend/docker-compose.yml up -d
 ```
 
-### 2. Initialize the database
+This brings up Nacos, MySQL, and Redis in one command.
+
+### Initialize the database
 
 ```bash
 mysql -uroot -p < xiaohangapi-backend/sql/db.sql
 ```
 
-### 3. Configure `application.yml`
-
-Update MySQL, Redis, and Nacos addresses in:
-- `xiaohangapi-backend/src/main/resources/application.yml`
-- `xiaohangapi-gateway/src/main/resources/application.yml`
-- `xiaohangapi-interface/src/main/resources/application.yml`
-
-### 4. Start services (in 3 terminals)
+### Run services
 
 ```bash
-# Terminal 1
-cd xiaohangapi-backend && mvn spring-boot:run        # :7529
+# Terminal 1 — Backend (port 7529)
+cd xiaohangapi-backend && mvn spring-boot:run
 
-# Terminal 2
-cd xiaohangapi-gateway && mvn spring-boot:run        # :8090
+# Terminal 2 — Gateway (port 8090)
+cd xiaohangapi-gateway && mvn spring-boot:run
 
-# Terminal 3
-cd xiaohangapi-interface && mvn spring-boot:run      # :8123
+# Terminal 3 — Interface service (port 8123)
+cd xiaohangapi-interface && mvn spring-boot:run
+
+# Terminal 4 — Frontend (port 8000)
+cd xiaohangapi-frontend && npm install && npm run start
 ```
 
-### 5. Start the frontend
+Open `http://localhost:8000`.
 
-```bash
-cd xiaohangapi-frontend
-npm install
-npm run start          # http://localhost:8000
-```
-
-### 6. Use the SDK in your own app
+### Use the SDK in your own project
 
 ```xml
 <dependency>
@@ -358,31 +321,42 @@ String result = client.getUsernameByPost(new User("world"));
 
 ---
 
-## 🌐 Deployment — Railway
+## Deployment
 
-Panda API is fully deployed on **Railway** as a multi-service project:
+Deployed on Railway as 7 linked services with private internal networking:
 
-| Railway Service | Role | Port |
-|---|---|---|
-| `backend` | Spring Boot core service | 7529 |
-| `gateway` | Spring Cloud Gateway | 8090 |
-| `interface` | API implementation service | 8123 |
-| `nacos` | `nacos/nacos-server:v2.3.2` | 8848 |
-| `redis` | Session store | 6379 |
-| `mysql` | Persistent database | 3306 |
-| `frontend` | Static build served via Nginx | 80 |
+| Service | Role |
+|---|---|
+| `frontend` | Static React build served via Nginx |
+| `gateway` | Spring Cloud Gateway (entry point) |
+| `backend` | Core service: users, APIs, quotas |
+| `interface` | Public API implementations |
+| `nacos` | Service registry + config center |
+| `mysql` | Persistent data |
+| `redis` | Session store |
 
-Each service is containerized via its own `Dockerfile` and linked through Railway's private network.
+Each service has its own `Dockerfile` and is built via Railway's Nixpacks. Inter-service calls use Railway's private networking (`*.railway.internal`); only the gateway and frontend are exposed publicly.
 
 ---
 
+## Project structure
 
-## 📄 License
+```
+panda-api/
+├── xiaohangapi-common/         Shared DTOs + RPC service interfaces
+├── xiaohangapi-backend/        Core service (users, APIs, quotas)
+├── xiaohangapi-gateway/        Spring Cloud Gateway (auth, routing, metrics)
+├── xiaohangapi-interface/      Public API implementations
+├── xiaohangapi-client-sdk/     Published Spring Boot Starter
+└── xiaohangapi-frontend/       React + Ant Design Pro
+```
+
+---
+
+## License
 
 MIT — free to use, fork, and learn from.
 
 ---
 
-<p align="center">
-  Built with ❤️ by Xiaohang Ji · <a href="mailto:your-email@example.com">Contact</a>
-</p>
+<sub>Built by Xiaohang Ji · [GitHub](https://github.com/tokamaky) · [LinkedIn](https://www.linkedin.com/in/xiaohang-ji)</sub>
