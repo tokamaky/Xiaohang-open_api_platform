@@ -1,182 +1,360 @@
 /* ============================================================
    API Marketplace Platform — Login Page Styles
-   Modern SaaS/API aesthetic with indigo color scheme
+   Two-column layout: left side decorative, right side form
    ============================================================ */
 
-/* ---------- Color Variables ---------- */
 @primary-color: #6366F1;
 @primary-light: #818CF8;
 @primary-lighter: #A5B4FC;
 @primary-dark: #4F46E5;
 @bg-dark: #0F172A;
-@bg-card: rgba(255, 255, 255, 0.85);
+@bg-card: rgba(255, 255, 255, 0.9);
 @text-primary: #1E293B;
 @text-secondary: #64748B;
+@text-muted: rgba(255, 255, 255, 0.5);
 @border-color: rgba(99, 102, 241, 0.2);
-@shadow-color: rgba(99, 102, 241, 0.15);
 
-/* ---------- Page Wrapper ---------- */
+/* ---------- Page Wrapper — Two-Column Layout ---------- */
 .login-page-wrapper {
   position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%);
+  background: @bg-dark;
   overflow: hidden;
   display: flex;
+  width: 100vw;
+}
+
+/* =============================================
+   LEFT SIDE — Decorative Panel
+   ============================================= */
+.login-left-panel {
+  position: relative;
+  flex: 0 0 50%;
+  background: linear-gradient(160deg, #0F172A 0%, #1E1B4B 40%, #0F172A 100%);
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
 }
 
-/* ---------- Animated Background Grid ---------- */
-.login-bg-grid {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+/* Left panel content */
+.login-left-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 480px;
+}
+
+.login-left-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 28px;
+  filter: drop-shadow(0 8px 24px rgba(99, 102, 241, 0.4));
+  animation: logoFloat 6s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+.login-left-brand {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+
+  span {
+    background: linear-gradient(135deg, @primary-light, @primary-lighter);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.login-left-tagline {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 40px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Feature highlights on left panel */
+.login-left-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.login-left-feature {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(99, 102, 241, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: @primary-lighter;
+  }
+
+  .feature-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 4px;
+  }
+
+  .feature-desc {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1.4;
+  }
+}
+
+/* Stats row */
+.login-left-stats {
+  display: flex;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.login-stat {
+  flex: 1;
+  text-align: center;
+  padding: 0 16px;
+
+  &:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .stat-number {
+    font-size: 22px;
+    font-weight: 700;
+    color: @primary-lighter;
+    font-family: 'SF Mono', Consolas, monospace;
+    letter-spacing: -0.5px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* Floating decorative hexagons */
+.login-hex-decor {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.06;
+  z-index: 1;
+}
+
+.login-hex-1 {
+  top: 8%;
+  left: 8%;
+  width: 160px;
+  animation: hexRotate 30s linear infinite;
+}
+
+.login-hex-2 {
+  bottom: 12%;
+  right: 8%;
+  width: 120px;
+  animation: hexRotate 25s linear infinite reverse;
+}
+
+.login-hex-3 {
+  top: 40%;
+  right: 5%;
+  width: 80px;
+  animation: hexRotate 20s linear infinite;
+  opacity: 0.04;
+}
+
+@keyframes hexRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Ambient glow on left panel */
+.login-left-panel .panel-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
   z-index: 0;
-  background-image:
-    linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
-  animation: gridPulse 8s ease-in-out infinite;
 }
 
-@keyframes gridPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+.panel-glow-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  top: -100px;
+  left: -100px;
 }
 
-/* ---------- Floating Particles ---------- */
-.login-particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.panel-glow-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%);
+  bottom: -50px;
+  right: -50px;
+}
+
+/* Floating particles — left panel only */
+.login-left-particles {
+  position: absolute;
+  inset: 0;
   z-index: 1;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   background: @primary-lighter;
   border-radius: 50%;
   opacity: 0;
   animation: floatParticle linear infinite;
 }
 
-.particle-1  { left: 10%; top: 20%; animation-duration: 18s; animation-delay: 0s; }
-.particle-2  { left: 85%; top: 15%; animation-duration: 22s; animation-delay: -3s; }
-.particle-3  { left: 25%; top: 70%; animation-duration: 16s; animation-delay: -6s; }
-.particle-4  { left: 70%; top: 80%; animation-duration: 20s; animation-delay: -9s; }
-.particle-5  { left: 50%; top: 10%; animation-duration: 25s; animation-delay: -2s; }
-.particle-6  { left: 5%;  top: 60%; animation-duration: 19s; animation-delay: -12s; }
-.particle-7  { left: 90%; top: 55%; animation-duration: 21s; animation-delay: -5s; }
-.particle-8  { left: 40%; top: 85%; animation-duration: 17s; animation-delay: -8s; }
-.particle-9  { left: 60%; top: 30%; animation-duration: 23s; animation-delay: -1s; }
-.particle-10 { left: 15%; top: 40%; animation-duration: 15s; animation-delay: -14s; }
-.particle-11 { left: 80%; top: 45%; animation-duration: 24s; animation-delay: -7s; }
-.particle-12 { left: 35%; top: 5%;  animation-duration: 20s; animation-delay: -11s; }
+.particle-1  { left: 15%; animation-duration: 20s; top: 10%; animation-delay: 0s; }
+.particle-2  { left: 80%; animation-duration: 24s; top: 20%; animation-delay: -4s; }
+.particle-3  { left: 30%; animation-duration: 18s; top: 60%; animation-delay: -8s; }
+.particle-4  { left: 70%; animation-duration: 22s; top: 75%; animation-delay: -12s; }
+.particle-5  { left: 50%; animation-duration: 26s; top: 40%; animation-delay: -3s; }
+.particle-6  { left: 10%; animation-duration: 19s; top: 85%; animation-delay: -7s; }
+.particle-7  { left: 88%; animation-duration: 21s; top: 50%; animation-delay: -10s; }
+.particle-8  { left: 42%; animation-duration: 17s; top: 90%; animation-delay: -2s; }
 
 @keyframes floatParticle {
   0%   { opacity: 0; transform: translateY(0) scale(0.5); }
-  10%  { opacity: 0.6; }
-  50%  { opacity: 0.3; }
-  90%  { opacity: 0.6; }
-  100% { opacity: 0; transform: translateY(-100vh) scale(1.2); }
+  10%  { opacity: 0.5; }
+  50%  { opacity: 0.2; }
+  90%  { opacity: 0.5; }
+  100% { opacity: 0; transform: translateY(-80vh) scale(1); }
 }
 
-/* ---------- Glow Orbs ---------- */
-.glow-orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(100px);
-  pointer-events: none;
-  z-index: 1;
-  animation: orbFloat 12s ease-in-out infinite;
-}
-
-.glow-orb-1 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
-  top: -150px;
-  left: -100px;
-  animation-delay: 0s;
-}
-
-.glow-orb-2 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(129, 140, 248, 0.15) 0%, transparent 70%);
-  bottom: -100px;
-  right: -50px;
-  animation-delay: -6s;
-}
-
-@keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(30px, -20px) scale(1.05); }
-  66%       { transform: translate(-20px, 20px) scale(0.95); }
-}
-
-/* ---------- Content Area ---------- */
-.login-content-area {
-  position: relative;
-  z-index: 10;
-  flex: 1;
+/* =============================================
+   RIGHT SIDE — Login Form
+   ============================================= */
+.login-right-panel {
+  flex: 0 0 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 16px;
+  padding: 60px 40px;
+  position: relative;
+  background: rgba(15, 23, 42, 0.5);
 }
 
-/* ---------- Custom Login Form Overrides ---------- */
+/* Ambient glow on right panel */
+.login-right-panel .panel-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+  right: -150px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ---------- Custom Login Form ---------- */
 .custom-login-form {
-  --ant-pro-login-page-bg: transparent !important;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  background: @bg-card;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid @border-color;
+  border-radius: 20px;
+  box-shadow:
+    0 25px 50px -12px rgba(99, 102, 241, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 0 60px -20px rgba(99, 102, 241, 0.15);
+  overflow: hidden;
+  padding: 0;
 
   .ant-pro-login-page-container {
-    background: @bg-card !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid @border-color;
-    border-radius: 20px !important;
-    box-shadow:
-      0 25px 50px -12px rgba(99, 102, 241, 0.15),
-      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-      0 0 80px -20px rgba(99, 102, 241, 0.2) !important;
-    max-width: 440px !important;
-    width: 100%;
-    overflow: hidden;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 
   .ant-pro-login-page-logo {
-    margin-bottom: 8px !important;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px !important;
+    margin-top: 32px !important;
   }
 
-  .ant-pro-login-page-logo img,
   .login-logo-img {
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
     object-fit: contain;
-    filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+    filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.25));
     transition: transform 0.3s ease;
-  }
 
-  .login-logo-img:hover {
-    transform: rotate(15deg) scale(1.05);
+    &:hover {
+      transform: rotate(15deg) scale(1.05);
+    }
   }
 
   .ant-pro-login-page-title {
-    font-size: 24px !important;
+    text-align: center !important;
+    font-size: 22px !important;
     font-weight: 700 !important;
     color: @text-primary !important;
-    letter-spacing: -0.5px;
-    margin-bottom: 4px !important;
+    margin-bottom: 2px !important;
   }
 
   .login-title-text {
@@ -184,62 +362,109 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 800;
     letter-spacing: -0.5px;
   }
 
   .ant-pro-login-page-desc {
+    text-align: center !important;
     color: @text-secondary !important;
-    font-size: 14px !important;
-    line-height: 1.6 !important;
-    min-height: 20px !important;
+    font-size: 13px !important;
+    min-height: auto !important;
+    margin-bottom: 0 !important;
+    padding: 0 20px !important;
   }
 
   .login-subtitle-wrapper {
-    text-align: center;
-  }
-
-  .login-subtitle-main {
-    color: @text-secondary;
-    font-size: 14px;
-    font-weight: 500;
-    margin: 0 0 12px;
-    letter-spacing: 0.2px;
-  }
-
-  .login-features {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .feature-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 12px;
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    border-radius: 20px;
-    font-size: 12px;
-    color: @primary-color;
-    font-weight: 500;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(99, 102, 241, 0.12);
-      border-color: rgba(99, 102, 241, 0.3);
+    .login-subtitle-main {
+      color: @text-secondary;
+      font-size: 13px;
+      margin: 0 0 8px;
+      font-weight: 500;
     }
 
-    .anticon {
-      font-size: 12px;
+    .login-features {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .feature-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      background: rgba(99, 102, 241, 0.07);
+      border: 1px solid rgba(99, 102, 241, 0.12);
+      border-radius: 20px;
+      font-size: 11px;
+      color: @primary-color;
+      font-weight: 500;
+
+      .anticon { font-size: 11px; }
+    }
+  }
+
+  .ant-pro-login-page-tabs {
+    padding: 0 28px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .login-tabs {
+    .ant-tabs-nav {
+      margin-bottom: 0 !important;
+
+      &::before {
+        border-bottom: 1px solid rgba(99, 102, 241, 0.1) !important;
+      }
+    }
+
+    .ant-tabs-tab {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      padding: 10px 0 !important;
+      color: @text-secondary !important;
+      transition: color 0.2s ease;
+
+      &:hover { color: @primary-color !important; }
+      &.ant-tabs-tab-active .ant-tabs-tab-btn { color: @primary-color !important; }
+    }
+
+    .ant-tabs-ink-bar {
+      background: linear-gradient(135deg, @primary-color, @primary-light) !important;
+      height: 3px !important;
+      border-radius: 3px 3px 0 0;
+    }
+  }
+
+  .ant-pro-login-page-form {
+    padding: 16px 28px 8px !important;
+
+    .ant-input-affix-wrapper,
+    .ant-input-affix-wrapper-lg {
+      border-radius: 10px !important;
+      border-color: rgba(99, 102, 241, 0.2) !important;
+      transition: all 0.2s ease !important;
+      box-shadow: none !important;
+
+      &:hover { border-color: rgba(99, 102, 241, 0.4) !important; }
+      &:focus, &.ant-input-affix-wrapper-focused {
+        border-color: @primary-color !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08) !important;
+      }
+    }
+
+    .ant-input-prefix {
+      color: rgba(99, 102, 241, 0.45) !important;
+      margin-right: 8px !important;
     }
   }
 
   .ant-pro-login-page-submit {
-    margin-top: 8px !important;
+    margin: 12px 28px !important;
 
     button {
       height: 44px !important;
@@ -251,6 +476,7 @@
       box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
       transition: all 0.25s ease !important;
       letter-spacing: 0.3px;
+      width: 100%;
 
       &:hover {
         box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
@@ -265,97 +491,22 @@
     }
   }
 
-  .ant-pro-login-page-container .ant-pro-login-page-tabs {
-    margin-bottom: 20px !important;
-  }
-
-  .login-tabs {
-    .ant-tabs-nav {
-      margin-bottom: 20px !important;
-
-      &::before {
-        border-bottom: 1px solid rgba(99, 102, 241, 0.12) !important;
-      }
-    }
-
-    .ant-tabs-tab {
-      font-size: 15px !important;
-      font-weight: 600 !important;
-      padding: 12px 0 !important;
-      color: @text-secondary !important;
-      transition: color 0.2s ease;
-
-      &:hover {
-        color: @primary-color !important;
-      }
-
-      &.ant-tabs-tab-active .ant-tabs-tab-btn {
-        color: @primary-color !important;
-      }
-    }
-
-    .ant-tabs-ink-bar {
-      background: linear-gradient(135deg, @primary-color, @primary-light) !important;
-      height: 3px !important;
-      border-radius: 3px 3px 0 0;
-    }
-  }
-
-  .ant-pro-login-page-container .ant-pro-login-page-form {
-    padding: 0 24px 24px !important;
-
-    .ant-pro-login-page-input {
-      border-radius: 10px !important;
-
-      input {
-        border-radius: 10px !important;
-      }
-    }
-
-    .ant-input-affix-wrapper,
-    .ant-input-affix-wrapper-lg {
-      border-radius: 10px !important;
-      border-color: rgba(99, 102, 241, 0.2) !important;
-      transition: all 0.2s ease !important;
-
-      &:hover {
-        border-color: rgba(99, 102, 241, 0.4) !important;
-      }
-
-      &:focus,
-      &.ant-input-affix-wrapper-focused {
-        border-color: @primary-color !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-      }
-    }
-
-    .ant-input-prefix {
-      color: rgba(99, 102, 241, 0.5) !important;
-      margin-right: 8px !important;
-    }
-  }
-
   .login-form-options {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    padding: 0 28px;
+    margin-bottom: 0;
   }
 
-  .remember-me-text {
-    font-size: 13px;
-    color: @text-secondary;
-  }
+  .remember-me-text { font-size: 13px; color: @text-secondary; }
 
   .forgot-link {
     font-size: 13px;
     color: @primary-color !important;
     font-weight: 500;
-
-    &:hover {
-      color: @primary-dark !important;
-      text-decoration: none;
-    }
+    cursor: pointer;
+    &:hover { color: @primary-dark !important; text-decoration: none; }
   }
 
   .ant-checkbox-checked .ant-checkbox-inner {
@@ -368,9 +519,9 @@
     border-color: @primary-color !important;
   }
 
-  /* ---------- Bottom Notice (DB Wakeup Alert) ---------- */
+  /* DB Notice Alert */
   .login-bottom-notice {
-    padding: 0 24px 8px;
+    padding: 0 28px 8px;
   }
 
   .db-notice-alert {
@@ -381,75 +532,64 @@
     .ant-alert-message {
       font-weight: 600 !important;
       color: @primary-dark !important;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .ant-alert-description {
       color: @text-secondary !important;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.5;
     }
 
-    .ant-alert-icon {
-      color: @primary-color !important;
-    }
-
-    .ant-alert-close-icon .anticon-close {
-      color: @text-secondary !important;
-    }
+    .ant-alert-icon { color: @primary-color !important; }
   }
 }
 
-/* ---------- Footer Info ---------- */
-.login-footer-info {
-  margin-top: 16px;
+/* ---------- Test Account Hint ---------- */
+.login-test-hint {
+  position: relative;
+  z-index: 2;
   text-align: center;
-}
-
-.test-account-hint {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
-  margin: 0;
-
-  .hint-label {
-    font-weight: 500;
-  }
+  margin-top: 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
 
   code {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
-    font-size: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 11px;
     color: @primary-lighter;
   }
 }
 
-/* ---------- Footer Override on Login Page ---------- */
+/* ---------- Footer Override ---------- */
 .login-page-wrapper .ant-pro-global-footer {
-  margin-top: 0 !important;
-  padding: 16px 0 !important;
-  position: relative;
-  z-index: 10;
-  background: transparent !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 12px 0 !important;
+  z-index: 100 !important;
+  background: rgba(15, 23, 42, 0.8) !important;
+  backdrop-filter: blur(12px);
 
   .ant-pro-global-footer-copyright {
-    color: rgba(255, 255, 255, 0.35) !important;
-    font-size: 13px;
+    color: rgba(255, 255, 255, 0.3) !important;
+    font-size: 12px;
   }
 
   a {
-    color: rgba(255, 255, 255, 0.45) !important;
-    transition: color 0.2s ease;
-
-    &:hover {
-      color: @primary-lighter !important;
-    }
+    color: rgba(255, 255, 255, 0.4) !important;
+    &:hover { color: @primary-lighter !important; }
   }
 }
 
-/* ---------- Input Focus Ring ---------- */
+/* ---------- Input Focus ---------- */
 .custom-login-form {
   .ant-input:focus,
   .ant-input-affix-wrapper:focus,
@@ -459,26 +599,61 @@
 }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .login-page-wrapper {
+    flex-direction: column;
+  }
+
+  .login-left-panel {
+    flex: 0 0 auto;
+    min-height: 280px;
+    padding: 40px 24px;
+  }
+
+  .login-left-content {
+    max-width: 100%;
+  }
+
+  .login-left-brand {
+    font-size: 24px;
+  }
+
+  .login-left-stats {
+    padding: 14px;
+  }
+
+  .login-stat .stat-number {
+    font-size: 18px;
+  }
+
+  .login-right-panel {
+    flex: 1;
+    padding: 32px 24px 80px;
+    background: rgba(15, 23, 42, 0.3);
+  }
+
+  .login-hex-decor {
+    display: none;
+  }
+
+  .custom-login-form {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 480px) {
-  .login-content-area {
-    padding: 20px 12px;
+  .login-left-features {
+    grid-template-columns: 1fr;
   }
 
-  .custom-login-form .ant-pro-login-page-container {
-    border-radius: 16px !important;
-    max-width: 100% !important;
+  .login-left-stats {
+    flex-wrap: wrap;
   }
 
-  .login-title-text {
-    font-size: 22px !important;
-  }
+  .login-stat {
+    flex: 0 0 50%;
+    margin-bottom: 12px;
 
-  .login-features {
-    gap: 6px;
-  }
-
-  .feature-tag {
-    font-size: 11px !important;
-    padding: 3px 10px !important;
+    &:not(:last-child) { border-right: none; }
   }
 }
