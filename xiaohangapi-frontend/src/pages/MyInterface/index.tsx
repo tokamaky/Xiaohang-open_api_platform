@@ -6,6 +6,7 @@ import { Card, Layout, List, message, Pagination, PaginationProps, Tooltip } fro
 import Search from 'antd/es/input/Search';
 import { Content, Footer } from 'antd/es/layout/layout';
 import React, { useEffect, useState } from 'react';
+import indexStyle from './index.less';
 import './index.less';
 
 const Index: React.FC = () => {
