@@ -14,31 +14,31 @@ const PleaseRead: React.FC = () => {
         <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
           <Card
             style={{
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(99, 102, 241, 0.08)',
               background: '#ffffff',
             }}
             bodyStyle={{ padding: '30px' }}
           >
-            <Title level={2} style={{ textAlign: 'center', marginBottom: '20px' }}>
-              Welcome to Panda API! 🐼
+            <Title level={2} style={{ textAlign: 'center', marginBottom: '24px', color: '#1E293B' }}>
+              Welcome to API Marketplace Platform
             </Title>
 
-            {/* Section 1: Why Things Might Not Update Instantly */}
             <Card
               bordered={false}
               style={{
-                background: '#e6f7ff',
+                background: 'rgba(99, 102, 241, 0.04)',
                 marginBottom: '20px',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 padding: '20px',
+                border: '1px solid rgba(99, 102, 241, 0.12)',
               }}
             >
               <Title
                 level={4}
                 style={{
                   marginBottom: '10px',
-                  color: '#1890ff',
+                  color: '#6366F1',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
@@ -48,27 +48,27 @@ const PleaseRead: React.FC = () => {
                 Why Things Might Not Update Instantly
               </Title>
               <Paragraph>
-                Due to the high deployment fees, I’ve opted for a slower server. This means:
+                Due to the high deployment fees, I have opted for a slower server. This means:
               </Paragraph>
               <Paragraph>
                 <b>1.</b> The <b>Remaining Number of Invocations</b> and <b>Number of Invocations</b> may not
                 update immediately after you invoke. However, the numbers will be correct the next time you open
-                the web app. Thank you for your patience! 😊
+                the web app. Thank you for your patience!
               </Paragraph>
               <Paragraph>
                 <b>2.</b> The first time you click "Invoke" in the <b>Online Invocation</b> section, you might
-                encounter an error. This is due to the slower server speed. Don’t worry, just try again! 🚀
+                encounter an error. This is due to the slower server speed. Do not worry, just try again!
               </Paragraph>
             </Card>
 
-            {/* Section 2: Logic Diagram */}
             <Card
               bordered={false}
               style={{
-                background: '#f6ffed',
+                background: 'rgba(82, 196, 26, 0.04)',
                 marginBottom: '20px',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 padding: '20px',
+                border: '1px solid rgba(82, 196, 26, 0.12)',
               }}
             >
               <Title
@@ -89,7 +89,7 @@ const PleaseRead: React.FC = () => {
                 operations.
               </Paragraph>
               <Image
-                src={logicImg} // Replace with the actual image path
+                src={logicImg}
                 alt="Logic Diagram"
                 preview={true}
                 style={{
@@ -101,14 +101,14 @@ const PleaseRead: React.FC = () => {
               />
             </Card>
 
-            {/* Section 3: Feedback and Suggestions */}
             <Card
               bordered={false}
               style={{
-                background: '#fffbe6',
+                background: 'rgba(250, 173, 20, 0.04)',
                 marginBottom: '20px',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 padding: '20px',
+                border: '1px solid rgba(250, 173, 20, 0.12)',
               }}
             >
               <Title
@@ -125,24 +125,24 @@ const PleaseRead: React.FC = () => {
                 Feedback and Suggestions
               </Title>
               <Paragraph>
-                I’m always looking to improve this application! If you have any ideas or encounter issues,
-                please don’t hesitate to reach out. You can email me at:
+                I am always looking to improve this application! If you have any ideas or encounter issues,
+                please do not hesitate to reach out. You can email me at:
               </Paragraph>
               <Button
                 type="link"
                 href="mailto:jxh186045@gmail.com"
                 icon={<MailOutlined />}
-                style={{ fontSize: '16px', padding: 0 }}
+                style={{ fontSize: '16px', padding: 0, color: '#6366F1' }}
               >
                 jxh186045@gmail.com
               </Button>
               <Paragraph>
-                Your feedback means the world to me! 💌
+                Your feedback means the world to me!
               </Paragraph>
             </Card>
 
-            <Paragraph style={{ textAlign: 'center', marginTop: '30px' }}>
-              Thank you for your understanding and support! 🎉
+            <Paragraph style={{ textAlign: 'center', marginTop: '30px', color: '#64748B' }}>
+              Thank you for your understanding and support!
             </Paragraph>
           </Card>
         </Content>

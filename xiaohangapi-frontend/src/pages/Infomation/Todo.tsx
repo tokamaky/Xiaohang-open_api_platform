@@ -11,7 +11,7 @@ const Todo: React.FC = () => {
   const tasks = [
     {
       section: 'Database',
-      icon: <DatabaseOutlined style={{ color: '#1890ff', fontSize: '20px' }} />,
+      icon: <DatabaseOutlined style={{ color: '#6366F1', fontSize: '20px' }} />,
       items: [
         { description: 'Add Redis data structure server', importance: 'high' }, // high priority
       ],
@@ -67,7 +67,7 @@ const Todo: React.FC = () => {
             bodyStyle={{ padding: '30px' }}
           >
             <Title level={2} style={{ textAlign: 'center', marginBottom: '20px' }}>
-              Todo List 📝
+              Todo List
             </Title>
 
             <Paragraph style={{ textAlign: 'center', marginBottom: '30px', fontSize: '16px', color: '#595959' }}>

@@ -1,0 +1,484 @@
+/* ============================================================
+   API Marketplace Platform — Login Page Styles
+   Modern SaaS/API aesthetic with indigo color scheme
+   ============================================================ */
+
+/* ---------- Color Variables ---------- */
+@primary-color: #6366F1;
+@primary-light: #818CF8;
+@primary-lighter: #A5B4FC;
+@primary-dark: #4F46E5;
+@bg-dark: #0F172A;
+@bg-card: rgba(255, 255, 255, 0.85);
+@text-primary: #1E293B;
+@text-secondary: #64748B;
+@border-color: rgba(99, 102, 241, 0.2);
+@shadow-color: rgba(99, 102, 241, 0.15);
+
+/* ---------- Page Wrapper ---------- */
+.login-page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Animated Background Grid ---------- */
+.login-bg-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ---------- Floating Particles ---------- */
+.login-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: @primary-lighter;
+  border-radius: 50%;
+  opacity: 0;
+  animation: floatParticle linear infinite;
+}
+
+.particle-1  { left: 10%; top: 20%; animation-duration: 18s; animation-delay: 0s; }
+.particle-2  { left: 85%; top: 15%; animation-duration: 22s; animation-delay: -3s; }
+.particle-3  { left: 25%; top: 70%; animation-duration: 16s; animation-delay: -6s; }
+.particle-4  { left: 70%; top: 80%; animation-duration: 20s; animation-delay: -9s; }
+.particle-5  { left: 50%; top: 10%; animation-duration: 25s; animation-delay: -2s; }
+.particle-6  { left: 5%;  top: 60%; animation-duration: 19s; animation-delay: -12s; }
+.particle-7  { left: 90%; top: 55%; animation-duration: 21s; animation-delay: -5s; }
+.particle-8  { left: 40%; top: 85%; animation-duration: 17s; animation-delay: -8s; }
+.particle-9  { left: 60%; top: 30%; animation-duration: 23s; animation-delay: -1s; }
+.particle-10 { left: 15%; top: 40%; animation-duration: 15s; animation-delay: -14s; }
+.particle-11 { left: 80%; top: 45%; animation-duration: 24s; animation-delay: -7s; }
+.particle-12 { left: 35%; top: 5%;  animation-duration: 20s; animation-delay: -11s; }
+
+@keyframes floatParticle {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  10%  { opacity: 0.6; }
+  50%  { opacity: 0.3; }
+  90%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-100vh) scale(1.2); }
+}
+
+/* ---------- Glow Orbs ---------- */
+.glow-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 1;
+  animation: orbFloat 12s ease-in-out infinite;
+}
+
+.glow-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+  top: -150px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.glow-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.15) 0%, transparent 70%);
+  bottom: -100px;
+  right: -50px;
+  animation-delay: -6s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, -20px) scale(1.05); }
+  66%       { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* ---------- Content Area ---------- */
+.login-content-area {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+/* ---------- Custom Login Form Overrides ---------- */
+.custom-login-form {
+  --ant-pro-login-page-bg: transparent !important;
+
+  .ant-pro-login-page-container {
+    background: @bg-card !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid @border-color;
+    border-radius: 20px !important;
+    box-shadow:
+      0 25px 50px -12px rgba(99, 102, 241, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+      0 0 80px -20px rgba(99, 102, 241, 0.2) !important;
+    max-width: 440px !important;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .ant-pro-login-page-logo {
+    margin-bottom: 8px !important;
+  }
+
+  .ant-pro-login-page-logo img,
+  .login-logo-img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+    transition: transform 0.3s ease;
+  }
+
+  .login-logo-img:hover {
+    transform: rotate(15deg) scale(1.05);
+  }
+
+  .ant-pro-login-page-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: @text-primary !important;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px !important;
+  }
+
+  .login-title-text {
+    background: linear-gradient(135deg, @primary-color, @primary-light);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .ant-pro-login-page-desc {
+    color: @text-secondary !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    min-height: 20px !important;
+  }
+
+  .login-subtitle-wrapper {
+    text-align: center;
+  }
+
+  .login-subtitle-main {
+    color: @text-secondary;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 12px;
+    letter-spacing: 0.2px;
+  }
+
+  .login-features {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 20px;
+    font-size: 12px;
+    color: @primary-color;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .anticon {
+      font-size: 12px;
+    }
+  }
+
+  .ant-pro-login-page-submit {
+    margin-top: 8px !important;
+
+    button {
+      height: 44px !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      border-radius: 10px !important;
+      background: linear-gradient(135deg, @primary-color, @primary-dark) !important;
+      border: none !important;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
+      transition: all 0.25s ease !important;
+      letter-spacing: 0.3px;
+
+      &:hover {
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, @primary-light, @primary-color) !important;
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+      }
+    }
+  }
+
+  .ant-pro-login-page-container .ant-pro-login-page-tabs {
+    margin-bottom: 20px !important;
+  }
+
+  .login-tabs {
+    .ant-tabs-nav {
+      margin-bottom: 20px !important;
+
+      &::before {
+        border-bottom: 1px solid rgba(99, 102, 241, 0.12) !important;
+      }
+    }
+
+    .ant-tabs-tab {
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      padding: 12px 0 !important;
+      color: @text-secondary !important;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: @primary-color !important;
+      }
+
+      &.ant-tabs-tab-active .ant-tabs-tab-btn {
+        color: @primary-color !important;
+      }
+    }
+
+    .ant-tabs-ink-bar {
+      background: linear-gradient(135deg, @primary-color, @primary-light) !important;
+      height: 3px !important;
+      border-radius: 3px 3px 0 0;
+    }
+  }
+
+  .ant-pro-login-page-container .ant-pro-login-page-form {
+    padding: 0 24px 24px !important;
+
+    .ant-pro-login-page-input {
+      border-radius: 10px !important;
+
+      input {
+        border-radius: 10px !important;
+      }
+    }
+
+    .ant-input-affix-wrapper,
+    .ant-input-affix-wrapper-lg {
+      border-radius: 10px !important;
+      border-color: rgba(99, 102, 241, 0.2) !important;
+      transition: all 0.2s ease !important;
+
+      &:hover {
+        border-color: rgba(99, 102, 241, 0.4) !important;
+      }
+
+      &:focus,
+      &.ant-input-affix-wrapper-focused {
+        border-color: @primary-color !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+      }
+    }
+
+    .ant-input-prefix {
+      color: rgba(99, 102, 241, 0.5) !important;
+      margin-right: 8px !important;
+    }
+  }
+
+  .login-form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .remember-me-text {
+    font-size: 13px;
+    color: @text-secondary;
+  }
+
+  .forgot-link {
+    font-size: 13px;
+    color: @primary-color !important;
+    font-weight: 500;
+
+    &:hover {
+      color: @primary-dark !important;
+      text-decoration: none;
+    }
+  }
+
+  .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: @primary-color !important;
+    border-color: @primary-color !important;
+  }
+
+  .ant-checkbox-wrapper:hover .ant-checkbox-inner,
+  .ant-checkbox:hover .ant-checkbox-inner {
+    border-color: @primary-color !important;
+  }
+
+  /* ---------- Bottom Notice (DB Wakeup Alert) ---------- */
+  .login-bottom-notice {
+    padding: 0 24px 8px;
+  }
+
+  .db-notice-alert {
+    border-radius: 10px !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    background: rgba(99, 102, 241, 0.04) !important;
+
+    .ant-alert-message {
+      font-weight: 600 !important;
+      color: @primary-dark !important;
+      font-size: 13px;
+    }
+
+    .ant-alert-description {
+      color: @text-secondary !important;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .ant-alert-icon {
+      color: @primary-color !important;
+    }
+
+    .ant-alert-close-icon .anticon-close {
+      color: @text-secondary !important;
+    }
+  }
+}
+
+/* ---------- Footer Info ---------- */
+.login-footer-info {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.test-account-hint {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+
+  .hint-label {
+    font-weight: 500;
+  }
+
+  code {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-family: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 12px;
+    color: @primary-lighter;
+  }
+}
+
+/* ---------- Footer Override on Login Page ---------- */
+.login-page-wrapper .ant-pro-global-footer {
+  margin-top: 0 !important;
+  padding: 16px 0 !important;
+  position: relative;
+  z-index: 10;
+  background: transparent !important;
+
+  .ant-pro-global-footer-copyright {
+    color: rgba(255, 255, 255, 0.35) !important;
+    font-size: 13px;
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.45) !important;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: @primary-lighter !important;
+    }
+  }
+}
+
+/* ---------- Input Focus Ring ---------- */
+.custom-login-form {
+  .ant-input:focus,
+  .ant-input-affix-wrapper:focus,
+  .ant-input-affix-wrapper-focused {
+    outline: none !important;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .login-content-area {
+    padding: 20px 12px;
+  }
+
+  .custom-login-form .ant-pro-login-page-container {
+    border-radius: 16px !important;
+    max-width: 100% !important;
+  }
+
+  .login-title-text {
+    font-size: 22px !important;
+  }
+
+  .login-features {
+    gap: 6px;
+  }
+
+  .feature-tag {
+    font-size: 11px !important;
+    padding: 3px 10px !important;
+  }
+}

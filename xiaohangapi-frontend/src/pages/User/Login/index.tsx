@@ -1,63 +1,49 @@
 import Footer from '@/components/Footer';
-import {userLoginUsingPost, userRegisterUsingPost} from '@/services/xiaohang-backend/userController';
-import {LockOutlined, UserOutlined,} from '@ant-design/icons';
-import {LoginFormPage, ProFormCheckbox, ProFormInstance, ProFormText,} from '@ant-design/pro-components';
-import {useModel} from '@umijs/max';
-import {message, Tabs} from 'antd';
-import type {CSSProperties} from 'react';
-import React, {useRef, useState} from 'react';
-import pandaBackImg from '../../../../public/panda2.jpg';
-import logo from '../../../../public/logo.png';
+import { userLoginUsingPost, userRegisterUsingPost } from '@/services/xiaohang-backend/userController';
+import { LockOutlined, UserOutlined, ApiOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { LoginFormPage, ProFormCheckbox, ProFormInstance, ProFormText } from '@ant-design/pro-components';
+import { useModel } from '@umijs/max';
+import { Alert, message, Tabs } from 'antd';
+import type { CSSProperties } from 'react';
+import React, { useRef, useState } from 'react';
+import './index.less';
 
-type LoginType = 'account' | 'register' | 'forgetPassword';
+type LoginType = 'account' | 'register';
 
 const iconStyles: CSSProperties = {
-    color: 'rgba(0, 0, 0, 0.2)',
-    fontSize: '18px',
-    verticalAlign: 'middle',
-    cursor: 'pointer',
+  color: 'rgba(99, 102, 241, 0.4)',
+  fontSize: '16px',
+  verticalAlign: 'middle',
+  cursor: 'pointer',
 };
-const Login: React.FC = () => {
-    const {initialState, setInitialState} = useModel('@@initialState');
-    const [loginType, setLoginType] = useState<LoginType>('account');
-    const formRef = useRef<ProFormInstance>();
 
+const Login: React.FC = () => {
+  const { setInitialState } = useModel('@@initialState');
+  const [loginType, setLoginType] = useState<LoginType>('account');
+  const formRef = useRef<ProFormInstance>();
 
   const handleSubmit = async (values: API.UserRegisterRequest) => {
     const { userPassword, checkPassword } = values;
     if (checkPassword) {
-      // Register
       if (userPassword !== checkPassword) {
         message.error('The passwords do not match!');
         return;
       }
       const res = await userRegisterUsingPost(values);
       if (res.code === 0) {
-        // Registration success
         const defaultRegisterSuccessMessage = 'Registration successful!';
         message.success(defaultRegisterSuccessMessage);
-        // Switch to login
         setLoginType('account');
-        // Reset form
         formRef.current?.resetFields();
       }
-
     } else {
-      // Login
-      const res = await userLoginUsingPost({
-        ...values,
-      });
+      const res = await userLoginUsingPost({ ...values });
       if (res.data) {
         const defaultLoginSuccessMessage = 'Login successful!';
         message.success(defaultLoginSuccessMessage);
-        // Handle login success
         const urlParams = new URL(window.location.href).searchParams;
-        // Redirect to the location specified by the redirect parameter
         location.href = urlParams.get('redirect') || '/';
-        // Save login state
-        setInitialState({
-          loginUser: res.data,
-        });
+        setInitialState({ loginUser: res.data });
       } else {
         message.error(res.message);
       }
@@ -65,48 +51,64 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div>
-      <div
-        style={{
-          backgroundColor: 'white',
-          height: 'calc(100vh - 100px)',
-          margin: 0,
-        }}
-      >
+    <div className="login-page-wrapper">
+      {/* Animated background grid */}
+      <div className="login-bg-grid" />
+      {/* Floating particles */}
+      <div className="login-particles">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className={`particle particle-${i + 1}`} />
+        ))}
+      </div>
+      {/* Glow orbs */}
+      <div className="glow-orb glow-orb-1" />
+      <div className="glow-orb glow-orb-2" />
+
+      <div className="login-content-area">
         <LoginFormPage
-          backgroundImageUrl={pandaBackImg}
-          logo={logo}
-          title="Panda API BETA"
-          //subTitle="The Best Free API Interface Platform in History"
+          logo={<img src="/api-logo.svg" alt="API Marketplace" className="login-logo-img" />}
+          title={<span className="login-title-text">API Marketplace Platform</span>}
           subTitle={
-            <>
-              The Best Free API Interface Platform in History
-              <br />
-              The default permissions for newly registered accounts are user.
-              <br />
-              Please use the following administrator account for testing:
-              <br />
-              <strong>Account:</strong> xiaohang <br />
-              <strong>Password:</strong> 12345678
-            </>
+            <div className="login-subtitle-wrapper">
+              <p className="login-subtitle-main">Discover, Integrate, and Scale Your APIs</p>
+              <div className="login-features">
+                <span className="feature-tag">
+                  <ApiOutlined /> Unified Access
+                </span>
+                <span className="feature-tag">
+                  <SafetyCertificateOutlined /> Secure by Default
+                </span>
+              </div>
+            </div>
           }
-          initialValues={{
-            autoLogin: false,
-          }}
+          initialValues={{ autoLogin: false }}
           onFinish={async (values) => {
             await handleSubmit(values as API.UserRegisterRequest);
           }}
-        >
-          {
-            <Tabs
-              centered
-              activeKey={loginType}
-              onChange={(activeKey) => setLoginType(activeKey as LoginType)}
-            >
-              <Tabs.TabPane key={'account'} tab={'Login'} />
-              <Tabs.TabPane key={'register'} tab={'Register'} />
-            </Tabs>
+          actions={
+            <div className="login-bottom-notice">
+              <Alert
+                message="First-time login notice"
+                description="If you encounter a database error on first login, don't worry — the database needs a moment to wake up. Simply try logging in again."
+                type="info"
+                showIcon
+                icon={<SafetyCertificateOutlined />}
+                className="db-notice-alert"
+              />
+            </div>
           }
+          className="custom-login-form"
+        >
+          <Tabs
+            centered
+            activeKey={loginType}
+            onChange={(activeKey) => setLoginType(activeKey as LoginType)}
+            className="login-tabs"
+            items={[
+              { key: 'account', label: 'Sign In' },
+              { key: 'register', label: 'Create Account' },
+            ]}
+          />
           {loginType === 'account' && (
             <>
               <ProFormText
@@ -115,13 +117,8 @@ const Login: React.FC = () => {
                   size: 'large',
                   prefix: <UserOutlined />,
                 }}
-                placeholder={'Please enter your username'}
-                rules={[
-                  {
-                    required: true,
-                    message: 'Username is required!',
-                  },
-                ]}
+                placeholder={'Username'}
+                rules={[{ required: true, message: 'Username is required!' }]}
               />
               <ProFormText.Password
                 name="userPassword"
@@ -129,28 +126,14 @@ const Login: React.FC = () => {
                   size: 'large',
                   prefix: <LockOutlined />,
                 }}
-                placeholder={'Please enter your password'}
-                rules={[
-                  {
-                    required: true,
-                    message: 'Password is required!',
-                  },
-                ]}
+                placeholder={'Password'}
+                rules={[{ required: true, message: 'Password is required!' }]}
               />
-              <div
-                style={{
-                  marginBottom: 24,
-                }}
-              >
+              <div className="login-form-options">
                 <ProFormCheckbox noStyle name="autoLogin">
-                  Auto-login
+                  <span className="remember-me-text">Remember me</span>
                 </ProFormCheckbox>
-                <a
-                  style={{
-                    float: 'right',
-                  }}
-                  onClick={() => setLoginType('forgetPassword')}
-                >
+                <a className="forgot-link" onClick={() => message.info('Please contact the administrator to reset your password.')}>
                   Forgot password?
                 </a>
               </div>
@@ -159,65 +142,46 @@ const Login: React.FC = () => {
           {loginType === 'register' && (
             <>
               <ProFormText
-                fieldProps={{
-                  size: 'large',
-                  prefix: <UserOutlined />,
-                }}
+                fieldProps={{ size: 'large', prefix: <UserOutlined /> }}
                 name="userAccount"
-                placeholder={'Please enter your username'}
+                placeholder={'Username (min 4 characters)'}
                 rules={[
-                  {
-                    required: true,
-                    message: 'Username is required!',
-                  },
-                  {
-                    min: 4,
-                    message: 'Length cannot be less than 4 characters!',
-                  },
+                  { required: true, message: 'Username is required!' },
+                  { min: 4, message: 'Length cannot be less than 4 characters!' },
                 ]}
               />
               <ProFormText.Password
-                fieldProps={{
-                  size: 'large',
-                  prefix: <LockOutlined />,
-                }}
+                fieldProps={{ size: 'large', prefix: <LockOutlined /> }}
                 name="userPassword"
-                placeholder={'Please enter your password'}
+                placeholder={'Password (min 8 characters)'}
                 rules={[
-                  {
-                    required: true,
-                    message: 'Password is required!',
-                  },
-                  {
-                    min: 8,
-                    message: 'Length cannot be less than 8 characters!',
-                  },
+                  { required: true, message: 'Password is required!' },
+                  { min: 8, message: 'Length cannot be less than 8 characters!' },
                 ]}
               />
               <ProFormText.Password
-                fieldProps={{
-                  size: 'large',
-                  prefix: <LockOutlined />,
-                }}
+                fieldProps={{ size: 'large', prefix: <LockOutlined /> }}
                 name="checkPassword"
-                placeholder={'Please re-enter your password'}
+                placeholder={'Confirm password'}
                 rules={[
-                  {
-                    required: true,
-                    message: 'Password is required!',
-                  },
-                  {
-                    min: 8,
-                    message: 'Length cannot be less than 8 characters!',
-                  },
+                  { required: true, message: 'Please confirm your password!' },
+                  { min: 8, message: 'Length cannot be less than 8 characters!' },
                 ]}
               />
             </>
           )}
         </LoginFormPage>
+
+        <div className="login-footer-info">
+          <p className="test-account-hint">
+            <span className="hint-label">Demo Account:</span>
+            <code>xiaohang</code> / <code>12345678</code>
+          </p>
+        </div>
       </div>
       <Footer />
     </div>
   );
 };
+
 export default Login;
