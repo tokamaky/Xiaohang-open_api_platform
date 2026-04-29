@@ -1,0 +1,249 @@
+@import '@/styles/theme.less';
+
+/* ============================================================
+   Homepage — Dark API Marketplace Style
+   ============================================================ */
+
+.home-page {
+  padding: 0 0 40px;
+  animation: fadeSlideUp 0.5s ease both;
+}
+
+/* ---- Terminal-style search ---- */
+.home-search-bar {
+  padding: 32px 24px 24px;
+}
+
+.search-terminal {
+  max-width: 720px;
+  margin: 0 auto;
+  background: rgba(4, 8, 16, 0.7);
+  border: 1px solid @border-mid;
+  border-radius: @radius-lg;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  animation: fadeSlideUp 0.5s ease 0.1s both;
+}
+
+.search-terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(0, 212, 170, 0.03);
+  border-bottom: 1px solid @border-mid;
+
+  .terminal-dots {
+    display: flex;
+    gap: 5px;
+    span {
+      display: block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      &:nth-child(1) { background: #FF5C5C; opacity: 0.65; }
+      &:nth-child(2) { background: #F0B429; opacity: 0.65; }
+      &:nth-child(3) { background: @primary; opacity: 0.65; }
+    }
+  }
+
+  .terminal-title {
+    flex: 1;
+    font-size: 11px;
+    color: @text-muted;
+    text-align: center;
+    letter-spacing: 0.5px;
+    font-family: @font-mono;
+  }
+
+  .terminal-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: @primary;
+    box-shadow: 0 0 8px @primary;
+    animation: livePulse 1.5s ease-in-out infinite;
+  }
+}
+
+.search-terminal-body {
+  padding: 20px 20px 16px;
+
+  .ant-search {
+    .ant-input-group {
+      .ant-input-affix-wrapper {
+        background: rgba(4, 8, 16, 0.8) !important;
+        border-color: @border-mid !important;
+        border-right: none !important;
+        border-radius: @radius-md 0 0 @radius-md !important;
+        height: 48px;
+        padding-left: 16px !important;
+        &:hover { border-color: @border-active !important; }
+        &:focus, &.ant-input-affix-wrapper-focused {
+          border-color: @primary !important;
+          box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.08) !important;
+        }
+        .ant-input { font-size: 15px; color: @text-primary !important; }
+        .ant-input::placeholder { color: @text-muted !important; }
+      }
+
+      .ant-input-group-addon {
+        background: transparent !important;
+        border-color: @border-mid !important;
+        border-left: none !important;
+        border-radius: 0 @radius-md @radius-md 0 !important;
+        padding: 0;
+
+        .ant-btn {
+          height: 48px;
+          border-radius: 0 @radius-md @radius-md 0 !important;
+          padding: 0 24px !important;
+        }
+      }
+    }
+  }
+}
+
+.search-enter-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: @bg-deep;
+}
+
+.search-hint {
+  text-align: center;
+  margin: 16px auto 0;
+  font-size: 13px;
+  color: @text-muted;
+  max-width: 720px;
+
+  strong {
+    color: @primary;
+    font-weight: 700;
+  }
+}
+
+/* ---- Table wrapper ---- */
+.home-table-wrap {
+  padding: 0 24px;
+  animation: fadeSlideUp 0.5s ease 0.2s both;
+
+  .ant-pro-table {
+    .ant-pro-table-list-toolbar {
+      display: none; /* hide the default toolbar since we have our own search */
+    }
+  }
+
+  .ant-table-wrapper {
+    background: @bg-card;
+    border: 1px solid @border-subtle;
+    border-radius: @radius-lg;
+    overflow: hidden;
+
+    .ant-spin-nested-loading,
+    .ant-spin-container {
+      border-radius: @radius-lg;
+    }
+  }
+}
+
+/* ---- API name cell ---- */
+.api-name-cell {
+  font-weight: 600;
+  color: @text-primary;
+  font-size: 14px;
+}
+
+/* ---- Method badges ---- */
+.method-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: @font-mono;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+}
+
+.method-get {
+  color: #5CB85C;
+  background: rgba(92, 184, 92, 0.08);
+  border-color: rgba(92, 184, 92, 0.2);
+}
+
+.method-post {
+  color: #F0AD4E;
+  background: rgba(240, 173, 78, 0.08);
+  border-color: rgba(240, 173, 78, 0.2);
+}
+
+.method-put {
+  color: #5BC0DE;
+  background: rgba(91, 192, 222, 0.08);
+  border-color: rgba(91, 192, 222, 0.2);
+}
+
+.method-delete {
+  color: #D9534F;
+  background: rgba(217, 83, 79, 0.08);
+  border-color: rgba(217, 83, 79, 0.2);
+}
+
+.method-default {
+  color: @text-secondary;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: @border-mid;
+}
+
+/* ---- Status indicators ---- */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+
+  &.status-online { color: @primary; }
+  &.status-offline { color: @text-muted; }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  &.status-online .status-dot { animation: livePulse 1.5s ease-in-out infinite; }
+}
+
+/* ---- Action buttons ---- */
+.action-btn {
+  font-size: 12px !important;
+  padding: 4px 14px !important;
+  height: 30px !important;
+  border-radius: @radius-sm !important;
+  font-weight: 500 !important;
+  background: rgba(0, 212, 170, 0.06) !important;
+  border: 1px solid rgba(0, 212, 170, 0.15) !important;
+  color: @primary !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background: rgba(0, 212, 170, 0.12) !important;
+    border-color: @primary !important;
+    transform: translateY(-1px);
+  }
+
+  &.action-btn-invoke {
+    background: linear-gradient(135deg, rgba(0, 212, 170, 0.15), rgba(0, 168, 138, 0.15)) !important;
+    border-color: rgba(0, 212, 170, 0.25) !important;
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2) !important;
+    }
+  }
+}

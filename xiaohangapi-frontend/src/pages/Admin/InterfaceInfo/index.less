@@ -1,0 +1,131 @@
+@import '@/styles/theme.less';
+
+/* ============================================================
+   Admin InterfaceInfo — Dark Table Management
+   ============================================================ */
+
+.admin-page {
+  padding: 24px;
+  animation: fadeSlideUp 0.5s ease both;
+}
+
+.admin-table {
+  .ant-pro-table-list-toolbar {
+    background: transparent !important;
+    border: 1px solid @border-subtle;
+    border-radius: @radius-lg;
+    padding: 16px 20px !important;
+    margin-bottom: 16px;
+  }
+
+  .ant-table-wrapper {
+    background: @bg-card;
+    border: 1px solid @border-subtle;
+    border-radius: @radius-lg;
+    overflow: hidden;
+  }
+}
+
+.table-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: @text-primary;
+
+  svg { color: @primary; }
+}
+
+/* ---- Status ---- */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+
+  &.status-online { color: @primary; }
+  &.status-offline { color: @text-muted; }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  &.status-online .status-dot { animation: livePulse 1.5s ease-in-out infinite; }
+}
+
+/* ---- Method badges ---- */
+.method-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: @font-mono;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+}
+
+.method-get { color: #5CB85C; background: rgba(92, 184, 92, 0.08); border-color: rgba(92, 184, 92, 0.2); }
+.method-post { color: #F0AD4E; background: rgba(240, 173, 78, 0.08); border-color: rgba(240, 173, 78, 0.2); }
+.method-put { color: #5BC0DE; background: rgba(91, 192, 222, 0.08); border-color: rgba(91, 192, 222, 0.2); }
+.method-delete { color: #D9534F; background: rgba(217, 83, 79, 0.08); border-color: rgba(217, 83, 79, 0.2); }
+
+/* ---- Admin buttons ---- */
+.admin-btn {
+  font-size: 12px !important;
+  padding: 3px 12px !important;
+  height: 28px !important;
+  border-radius: @radius-sm !important;
+  font-weight: 500 !important;
+  background: rgba(0, 212, 170, 0.06) !important;
+  border: 1px solid rgba(0, 212, 170, 0.12) !important;
+  color: @text-secondary !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    color: @primary !important;
+    border-color: @border-active !important;
+    background: rgba(0, 212, 170, 0.1) !important;
+  }
+
+  &.admin-btn-publish {
+    color: @primary !important;
+    border-color: rgba(0, 212, 170, 0.2) !important;
+    background: rgba(0, 212, 170, 0.08) !important;
+    font-weight: 600 !important;
+    &:hover { background: rgba(0, 212, 170, 0.15) !important; }
+  }
+
+  &.admin-btn-create {
+    height: 34px !important;
+    padding: 0 18px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, @primary, @primary-dark) !important;
+    border: none !important;
+    color: @bg-deep !important;
+    box-shadow: @shadow-btn !important;
+
+    .anticon { font-size: 13px; }
+
+    &:hover {
+      box-shadow: @shadow-btn-hover !important;
+      transform: translateY(-1px);
+    }
+  }
+
+  &.admin-btn-danger {
+    &:hover { background: rgba(255, 92, 92, 0.08) !important; border-color: rgba(255, 92, 92, 0.25) !important; }
+  }
+}
+
+.admin-api-name {
+  font-weight: 600;
+  color: @text-primary;
+}

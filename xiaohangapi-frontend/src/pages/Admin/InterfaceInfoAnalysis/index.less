@@ -1,0 +1,53 @@
+@import '@/styles/theme.less';
+
+/* ============================================================
+   Admin Analysis — Dark Chart Page
+   ============================================================ */
+
+.analysis-page {
+  padding: 24px;
+  animation: fadeSlideUp 0.5s ease both;
+}
+
+.analysis-card {
+  background: @bg-card;
+  border: 1px solid @border-subtle;
+  border-radius: @radius-lg;
+  box-shadow: @shadow-card;
+  padding: 28px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.analysis-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+
+  svg { color: @primary; }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: @text-primary;
+    margin: 0;
+  }
+}
+
+.analysis-chart {
+  width: 100%;
+  height: 400px;
+}
+
+.analysis-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 0;
+  color: @text-muted;
+
+  p { font-size: 14px; margin: 0; }
+}

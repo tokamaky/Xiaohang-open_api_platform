@@ -1,0 +1,274 @@
+@import '@/styles/theme.less';
+
+/* ============================================================
+   InterfaceInfo — API Documentation + Live Invocation
+   ============================================================ */
+
+.interface-info-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  animation: fadeSlideUp 0.5s ease both;
+}
+
+/* ---- Cards ---- */
+.info-card {
+  background: @bg-card !important;
+  border: 1px solid @border-subtle !important;
+  border-radius: @radius-lg !important;
+  box-shadow: @shadow-card !important;
+  overflow: hidden;
+
+  .ant-card-head {
+    border-bottom: 1px solid @border-subtle !important;
+    color: @text-primary !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    min-height: 48px !important;
+
+    .ant-card-head-title {
+      color: @text-primary !important;
+    }
+  }
+}
+
+/* ---- Info Header ---- */
+.info-header {
+  padding: 8px 0 24px;
+}
+
+.info-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.info-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: @text-primary;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.info-desc {
+  font-size: 14px;
+  color: @text-secondary;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ---- Descriptions ---- */
+.info-descriptions {
+  padding-top: 16px;
+  border-top: 1px solid @border-subtle;
+
+  .ant-descriptions-item-label {
+    color: @text-muted !important;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding-bottom: 8px !important;
+  }
+
+  .ant-descriptions-item-content {
+    color: @text-primary !important;
+    font-size: 14px;
+    padding-bottom: 8px !important;
+  }
+}
+
+.info-code {
+  display: inline-block;
+  font-family: @font-mono;
+  font-size: 12px;
+  background: rgba(0, 212, 170, 0.05);
+  border: 1px solid @border-mid;
+  border-radius: @radius-sm;
+  padding: 2px 8px;
+  color: @primary;
+}
+
+/* ---- Card title accent ---- */
+.card-title-accent {
+  color: @primary;
+  font-family: @font-mono;
+  font-size: 13px;
+  margin-right: 4px;
+  opacity: 0.7;
+}
+
+/* ---- Params Table ---- */
+.params-table {
+  .ant-table {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .ant-table-thead > tr > th {
+    background: rgba(0, 212, 170, 0.04) !important;
+    border-bottom: 1px solid @border-subtle !important;
+    color: @text-secondary !important;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid @border-subtle !important;
+    color: @text-primary !important;
+    font-size: 13px;
+  }
+}
+
+/* ---- Required/Optional badges ---- */
+.req-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.req-required {
+  color: #FF8C8C;
+  background: rgba(255, 140, 140, 0.08);
+  border: 1px solid rgba(255, 140, 140, 0.15);
+}
+
+.req-optional {
+  color: @text-muted;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid @border-subtle;
+}
+
+/* ---- Invoke Card ---- */
+.invoke-card {
+  .ant-card-head {
+    background: rgba(0, 212, 170, 0.02) !important;
+  }
+}
+
+.invoke-header {
+  padding: 4px 0 20px;
+}
+
+.invoke-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: @text-primary;
+  margin-bottom: 8px;
+
+  svg { color: @primary; }
+}
+
+.invoke-hint {
+  font-size: 13px;
+  color: @text-secondary;
+  margin: 0;
+}
+
+.invoke-form {
+  .ant-form-item-label > label {
+    color: @text-secondary !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+}
+
+.invoke-input {
+  font-family: @font-mono !important;
+  font-size: 13px !important;
+  background: rgba(4, 8, 16, 0.7) !important;
+  border-color: @border-mid !important;
+  border-radius: @radius-md !important;
+  color: @terminal-green !important;
+  resize: none;
+  line-height: 1.6 !important;
+
+  &::placeholder { color: @text-muted !important; }
+  &:hover { border-color: @border-active !important; }
+  &:focus { border-color: @primary !important; box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.08) !important; }
+}
+
+.invoke-btn {
+  height: 40px !important;
+  padding: 0 24px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* ---- Response ---- */
+.response-wrap {
+  margin-top: 20px;
+  border: 1px solid @border-subtle;
+  border-radius: @radius-md;
+  overflow: hidden;
+}
+
+.response-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid @border-subtle;
+
+  &.response-success { border-top: 2px solid @primary; }
+  &.response-error { border-top: 2px solid @error; }
+}
+
+.response-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: @text-muted;
+}
+
+.response-status {
+  font-family: @font-mono;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  &.response-status-success {
+    color: @primary;
+    background: rgba(0, 212, 170, 0.08);
+    border: 1px solid rgba(0, 212, 170, 0.15);
+  }
+
+  &.response-status-error {
+    color: @error;
+    background: rgba(255, 92, 92, 0.08);
+    border: 1px solid rgba(255, 92, 92, 0.15);
+  }
+}
+
+.response-output {
+  background: rgba(4, 8, 16, 0.85) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 12px !important;
+  min-height: 200px;
+}
+
+/* ---- Status ---- */
+.status-online { color: @primary; font-weight: 600; }
+.status-offline { color: @text-muted; }

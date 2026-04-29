@@ -1,13 +1,10 @@
 import type { ProLayoutProps } from '@ant-design/pro-components';
-/**
- * @name
- */
+
 const Settings: ProLayoutProps & {
   pwa?: boolean;
   logo?: string;
 } = {
-  navTheme: 'dark',
-  // API Marketplace — cyan/emerald cyberpunk palette
+  navTheme: 'realDark',
   colorPrimary: '#00D4AA',
   layout: 'mix',
   contentWidth: 'Fluid',
@@ -19,9 +16,50 @@ const Settings: ProLayoutProps & {
   logo: '/api-logo.svg',
   iconfontUrl: '',
   token: {
-    // 参见ts声明，demo 见文档，通过token 修改样式
-    //https://procomponents.ant.design/components/layout#%E9%80%9A%E8%BF%87-token-%E4%BF%AE%E6%94%B9%E6%A0%B7%E5%BC%8F
-  },
+    colorPrimary: '#00D4AA',
+    colorPrimaryHover: '#00BFA0',
+    colorPrimaryActive: '#009A80',
+    colorPrimaryBg: 'rgba(0, 212, 170, 0.06)',
+    colorPrimaryBgHover: 'rgba(0, 212, 170, 0.1)',
+    colorPrimaryBorder: 'rgba(0, 212, 170, 0.25)',
+    colorPrimaryBorderHover: 'rgba(0, 212, 170, 0.4)',
+    colorSuccess: '#00D4AA',
+    colorSuccessBg: 'rgba(0, 212, 170, 0.06)',
+    colorSuccessBorder: 'rgba(0, 212, 170, 0.15)',
+    colorWarning: '#F0B429',
+    colorWarningBg: 'rgba(240, 180, 41, 0.06)',
+    colorWarningBorder: 'rgba(240, 180, 41, 0.15)',
+    colorError: '#FF5C5C',
+    colorErrorBg: 'rgba(255, 92, 92, 0.06)',
+    colorErrorBorder: 'rgba(255, 92, 92, 0.15)',
+    colorInfo: '#00A3FF',
+    colorInfoBg: 'rgba(0, 163, 255, 0.06)',
+    colorInfoBorder: 'rgba(0, 163, 255, 0.15)',
+    colorText: '#E2EAF4',
+    colorTextSecondary: '#8892A4',
+    colorTextTertiary: 'rgba(136, 146, 164, 0.6)',
+    colorTextQuaternary: 'rgba(136, 146, 164, 0.35)',
+    colorBgContainer: '#0A1424',
+    colorBgElevated: '#0C1929',
+    colorBgLayout: '#060B14',
+    colorBorder: 'rgba(255, 255, 255, 0.07)',
+    colorBorderSecondary: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 10,
+    borderRadiusLG: 14,
+    borderRadiusSM: 8,
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    fontSize: 14,
+    fontSizeHeading1: 38,
+    fontSizeHeading2: 30,
+    fontSizeHeading3: 26,
+    fontSizeHeading4: 20,
+    fontSizeHeading5: 16,
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)',
+    boxShadowSecondary: '0 6px 24px rgba(0, 0, 0, 0.4)',
+    controlHeight: 38,
+    controlHeightLG: 46,
+    controlHeightSM: 30,
+  } as any,
 };
 
 export default Settings;

@@ -1,0 +1,92 @@
+/* ============================================================
+   API Marketplace Platform — Design Token Library
+   All pages should import this file to share design tokens.
+   ============================================================ */
+
+/* ---- Color Palette ---- */
+@primary: #00D4AA;
+@primary-dark: #00A88A;
+@primary-glow: rgba(0, 212, 170, 0.25);
+@accent: #00A3FF;
+@accent-glow: rgba(0, 163, 255, 0.2);
+
+@bg-deep: #060B14;
+@bg-panel: #0A1424;
+@bg-card: #0C1929;
+@bg-card-hover: #0E1E30;
+
+@text-primary: #E2EAF4;
+@text-secondary: #8892A4;
+@text-muted: rgba(136, 146, 164, 0.45);
+@text-accent: @primary;
+
+@border-subtle: rgba(255, 255, 255, 0.05);
+@border-mid: rgba(0, 212, 170, 0.1);
+@border-active: rgba(0, 212, 170, 0.3);
+@border-accent: rgba(0, 212, 170, 0.2);
+
+@error: #FF5C5C;
+@error-bg: rgba(255, 92, 92, 0.06);
+@success: #00D4AA;
+@success-bg: rgba(0, 212, 170, 0.06);
+@warning: #F0B429;
+@warning-bg: rgba(240, 180, 41, 0.06);
+
+@terminal-green: #00D4AA;
+@terminal-dim: rgba(0, 212, 170, 0.35);
+
+/* ---- Layout ---- */
+@panel-width: 480px;
+@radius-sm: 8px;
+@radius-md: 10px;
+@radius-lg: 14px;
+@radius-xl: 20px;
+@radius-pill: 9999px;
+
+/* ---- Typography ---- */
+@font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+@font-size-xs: 11px;
+@font-size-sm: 12px;
+@font-size-base: 14px;
+@font-size-lg: 16px;
+@font-size-xl: 20px;
+@font-size-2xl: 26px;
+@font-size-3xl: 38px;
+
+/* ---- Shadows ---- */
+@shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35), 0 1px 4px rgba(0, 0, 0, 0.25);
+@shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
+@shadow-glow: 0 0 20px rgba(0, 212, 170, 0.15);
+@shadow-glow-strong: 0 0 32px rgba(0, 212, 170, 0.25);
+@shadow-btn: 0 4px 14px rgba(0, 212, 170, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+@shadow-btn-hover: 0 6px 20px rgba(0, 212, 170, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+/* ---- Animations ---- */
+@ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+@ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px @primary; }
+  50% { opacity: 0.35; box-shadow: 0 0 2px @primary; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ---- Gradient Helpers ---- */
+@gradient-primary: linear-gradient(135deg, @primary, @primary-dark);
+@gradient-bg: linear-gradient(160deg, @bg-deep 0%, @bg-panel 50%, @bg-deep 100%);
+@gradient-text: linear-gradient(135deg, @primary, @accent);
+@gradient-border: linear-gradient(90deg, transparent, rgba(0, 212, 170, 0.35), transparent);

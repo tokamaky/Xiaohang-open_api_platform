@@ -4,49 +4,29 @@ import {
 } from '@/services/xiaohang-backend/interfaceInfoController';
 import { useParams } from '@@/exports';
 import { PageContainer } from '@ant-design/pro-components';
-import { Badge, Button, Card, Descriptions, Divider, Form, Input, message, Table } from 'antd';
+import { Badge, Button, Card, Descriptions, Divider, Form, Input, message, Space, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import './index.less';
 
 const requestColumns: ColumnsType<API.RequestParamsRemarkVO> = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    width: '100px',
+  { title: 'Name', dataIndex: 'name', width: 160 },
+  { title: 'Required', dataIndex: 'isRequired', width: 100,
+    render: (v) => (
+      <span className={`req-badge ${v ? 'req-required' : 'req-optional'}`}>
+        {v ? 'Yes' : 'No'}
+      </span>
+    )
   },
-  {
-    title: 'Required',
-    key: 'isRequired',
-    dataIndex: 'isRequired',
-    width: '100px',
-  },
-  {
-    title: 'Type',
-    dataIndex: 'type',
-    width: '100px',
-  },
-  {
-    title: 'Description',
-    dataIndex: 'remark',
-  },
+  { title: 'Type', dataIndex: 'type', width: 120 },
+  { title: 'Description', dataIndex: 'remark' },
 ];
 
 const responseColumns: ColumnsType<API.RequestParamsRemarkVO> = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    width: '100px',
-  },
-  {
-    title: 'Type',
-    dataIndex: 'type',
-    width: '100px',
-  },
-  {
-    title: 'Description',
-    dataIndex: 'remark',
-  },
+  { title: 'Name', dataIndex: 'name', width: 160 },
+  { title: 'Type', dataIndex: 'type', width: 120 },
+  { title: 'Description', dataIndex: 'remark' },
 ];
 
 const Index: React.FC = () => {
@@ -54,132 +34,197 @@ const Index: React.FC = () => {
   const [data, setData] = useState<API.InterfaceInfoVO>();
   const params = useParams();
   const [invokeRes, setInvokeRes] = useState<any>();
+  const [invokeStatus, setInvokeStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [form] = Form.useForm();
 
   const loadData = async () => {
     try {
-      const interfaceInfoRes = await getInterfaceInfoVoByIdUsingGet({
-        id: Number(params.id),
-      });
-
-      const interfaceInfoData = interfaceInfoRes.data;
-
-      if (interfaceInfoData) {
-        setData(interfaceInfoData);
-      }
+      const res = await getInterfaceInfoVoByIdUsingGet({ id: Number(params.id) });
+      if (res.data) setData(res.data);
     } catch (error: any) {
-      message.error('Request Failed, ' + error.message);
+      message.error('Failed to load: ' + error.message);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const onFinish = async (values: any) => {
-    console.log('values:', values);
-    if (!params.id) {
-      message.error('Interface not found');
-      return;
-    }
     setInvokeLoading(true);
+    setInvokeStatus('idle');
+    setInvokeRes('');
     try {
-      const res = await invokeInterfaceInfoUsingPost({
-        id: params.id,
-        ...values,
-      });
-      console.log('API request data:', res);
+      const res = await invokeInterfaceInfoUsingPost({ id: params.id, ...values });
       if (res.data) {
-        res.data = res.data.replace(/\\/g, '');
-        setInvokeRes(res.data);
-        message.success('API request successful');
+        let formatted = res.data.replace(/\\/g, '');
+        try {
+          const parsed = JSON.parse(formatted);
+          formatted = JSON.stringify(parsed, null, 2);
+        } catch { /* keep raw */ }
+        setInvokeRes(formatted);
+        setInvokeStatus('success');
+        message.success('API invoked successfully');
       } else {
-        const messageObj = JSON.parse(res.message as string);
-        message.error(messageObj.message);
+        const msgObj = JSON.parse(res.message as string);
+        message.error(msgObj.message || 'Invoke failed');
+        setInvokeStatus('error');
+        setInvokeRes(JSON.stringify({ error: msgObj.message || 'Unknown error' }, null, 2));
       }
     } catch (error: any) {
-      message.error('API Request Failed');
+      message.error('Request failed');
+      setInvokeStatus('error');
+      setInvokeRes(JSON.stringify({ error: 'Network error or server unreachable' }, null, 2));
     }
     setInvokeLoading(false);
   };
 
   return (
     <PageContainer>
-      <Card>
-        {data ? (
-          <Descriptions title={data.name} column={4} layout={'vertical'}>
-            <Descriptions.Item label="Description">{data.description}</Descriptions.Item>
-            <Descriptions.Item label="API Status">
-              {data.status ? (
-                <Badge status="success" text={'Active'} />
-              ) : (
-                <Badge status="default" text={'Inactive'} />
-              )}
-            </Descriptions.Item>
-            <Descriptions.Item label="Host">{data.host}</Descriptions.Item>
-            <Descriptions.Item label="Request URL">{data.url}</Descriptions.Item>
-            <Descriptions.Item label="Request Method">{data.method}</Descriptions.Item>
-            <Descriptions.Item label="Request Parameter Example" span={4}>
-              {data.requestParams}
-            </Descriptions.Item>
-            <Descriptions.Item label="Request Parameters Description" span={4}>
-              <Table
-                style={{ width: '100%' }}
-                pagination={{
-                  hideOnSinglePage: true,
-                }}
-                columns={requestColumns}
-                dataSource={data.requestParamsRemark}
-              />
-            </Descriptions.Item>
-            <Descriptions.Item label="Response Parameters Description" span={4}>
-              <Table
-                style={{ width: '100%' }}
-                pagination={{
-                  hideOnSinglePage: true,
-                }}
-                columns={responseColumns}
-                dataSource={data.responseParamsRemark}
-              />
-            </Descriptions.Item>
-            <Descriptions.Item label="Request Headers">{data.requestHeader}</Descriptions.Item>
-            <Descriptions.Item label="Response Headers">{data.responseHeader}</Descriptions.Item>
-            <Descriptions.Item label="Creation Time">
-              {moment(data.createTime).format('YYYY-MM-DD HH:mm:ss')}
-            </Descriptions.Item>
-            <Descriptions.Item label="Update Time">
-              {moment(data.updateTime).format('YYYY-MM-DD HH:mm:ss')}
-            </Descriptions.Item>
-          </Descriptions>
-        ) : (
-          <>Interface not found</>
+      <div className="interface-info-page">
+        {/* API Overview Card */}
+        {data && (
+          <Card className="info-card" bordered={false}>
+            <div className="info-header">
+              <div className="info-title-row">
+                <span className={`method-badge method-${(data.method || 'get').toLowerCase()}`}>
+                  {data.method?.toUpperCase() || 'GET'}
+                </span>
+                <h2 className="info-name">{data.name}</h2>
+                <Badge
+                  status={data.status ? 'success' : 'default'}
+                  text={<span className={data.status ? 'status-online' : 'status-offline'}>{data.status ? 'Online' : 'Offline'}</span>}
+                />
+              </div>
+              <p className="info-desc">{data.description || 'No description provided.'}</p>
+            </div>
+
+            <Descriptions className="info-descriptions" column={4} layout="vertical">
+              <Descriptions.Item label="Host">
+                <code className="info-code">{data.host}</code>
+              </Descriptions.Item>
+              <Descriptions.Item label="Endpoint">
+                <code className="info-code">{data.url}</code>
+              </Descriptions.Item>
+              <Descriptions.Item label="Created">
+                {data.createTime ? moment(data.createTime).format('YYYY-MM-DD') : '—'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Updated">
+                {data.updateTime ? moment(data.updateTime).format('YYYY-MM-DD') : '—'}
+              </Descriptions.Item>
+            </Descriptions>
+          </Card>
         )}
-      </Card>
-      {data ? (
-        <>
-          <Divider />
-          <Card title={'Online Test'}>
-            <Form name="invoke" layout={'vertical'} onFinish={onFinish}>
+
+        {/* Parameters */}
+        {data?.requestParamsRemark?.length ? (
+          <Card className="info-card" title={<><span className="card-title-accent">///</span> Request Parameters</>} bordered={false}>
+            <Table
+              className="params-table"
+              columns={requestColumns}
+              dataSource={data.requestParamsRemark}
+              pagination={{ hideOnSinglePage: true }}
+              rowKey="name"
+              size="small"
+            />
+          </Card>
+        ) : null}
+
+        {data?.responseParamsRemark?.length ? (
+          <Card className="info-card" title={<><span className="card-title-accent">///</span> Response Parameters</>} bordered={false}>
+            <Table
+              className="params-table"
+              columns={responseColumns}
+              dataSource={data.responseParamsRemark}
+              pagination={{ hideOnSinglePage: true }}
+              rowKey="name"
+              size="small"
+            />
+          </Card>
+        ) : null}
+
+        {/* Invoke Card */}
+        {data ? (
+          <Card className="info-card invoke-card" bordered={false}>
+            <div className="invoke-header">
+              <div className="invoke-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                Online Invocation
+              </div>
+              <p className="invoke-hint">Fill in parameters and hit Invoke to test the API in real-time.</p>
+            </div>
+
+            <Form form={form} layout="vertical" onFinish={onFinish} className="invoke-form">
               <Form.Item
-                label={'Request Parameters'}
-                initialValue={data?.requestParams}
-                name={'requestParams'}
+                label="Request Parameters (JSON)"
+                name="requestParams"
+                initialValue={data.requestParams}
               >
-                <Input.TextArea defaultValue={data?.requestParams} rows={6} />
+                <Input.TextArea
+                  className="invoke-input"
+                  rows={8}
+                  placeholder='{"key": "value"}'
+                  spellCheck={false}
+                />
               </Form.Item>
 
-              <Form.Item wrapperCol={{ span: 16 }}>
-                <Button type="primary" htmlType="submit">
-                  Invoke
-                </Button>
+              <Form.Item>
+                <Space size={12}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={invokeLoading}
+                    className="invoke-btn"
+                    icon={
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    }
+                  >
+                    Invoke
+                  </Button>
+                  {invokeRes && (
+                    <Button
+                      onClick={() => {
+                        navigator.clipboard.writeText(invokeRes);
+                        message.success('Response copied to clipboard');
+                      }}
+                    >
+                      Copy Response
+                    </Button>
+                  )}
+                </Space>
               </Form.Item>
             </Form>
+
+            {invokeRes && (
+              <div className="response-wrap">
+                <div className={`response-header response-${invokeStatus}`}>
+                  <span className="response-label">
+                    {invokeStatus === 'success' ? 'Response (200 OK)' : 'Response (Error)'}
+                  </span>
+                  <span className={`response-status response-status-${invokeStatus}`}>
+                    {invokeStatus === 'success' ? '200' : 'ERR'}
+                  </span>
+                </div>
+                <Input.TextArea
+                  className="invoke-input response-output"
+                  value={invokeRes}
+                  rows={12}
+                  readOnly
+                  spellCheck={false}
+                />
+              </div>
+            )}
           </Card>
-          <Divider />
-          <Card title={'Response Results'} loading={invokeLoading}>
-            <Input.TextArea value={invokeRes} rows={10} />
+        ) : (
+          <Card className="info-card" bordered={false}>
+            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '40px 0' }}>
+              Interface not found.
+            </p>
           </Card>
-        </>
-      ) : null}
+        )}
+      </div>
     </PageContainer>
   );
 };

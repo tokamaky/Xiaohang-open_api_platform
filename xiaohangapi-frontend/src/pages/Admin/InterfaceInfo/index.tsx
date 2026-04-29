@@ -10,538 +10,237 @@ import {
     updateInterfaceInfoUsingPost,
 } from '@/services/xiaohang-backend/interfaceInfoController';
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
-import { PageContainer, ProDescriptions, ProTable } from '@ant-design/pro-components';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
+import { PageContainer, ProTable } from '@ant-design/pro-components';
 import '@umijs/max';
-import { Button, Drawer, message, Popconfirm } from 'antd';
+import { Button, message, Popconfirm } from 'antd';
 import React, { useRef, useState } from 'react';
+import './index.less';
 
 const TableList: React.FC = () => {
-    /**
-     * @en-US Pop-up window of new window
-     * @zh-CN 新建窗口的弹窗
-     *  */
-    const [createModalOpen, handleModalOpen] = useState<boolean>(false);
-    /**
-     * @en-US The pop-up window of the distribution update window
-     * @zh-CN 分布更新窗口的弹窗
-     * */
-    const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
-    const [showModalOpen, handleShowModalOpen] = useState<boolean>(false);
+  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
+  const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
+  const [showModalOpen, handleShowModalOpen] = useState<boolean>(false);
+  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const actionRef = useRef<ActionType>();
+  const [currentRow, setCurrentRow] = useState<API.InterfaceInfoVO>();
 
-    const [showDetail, setShowDetail] = useState<boolean>(false);
-    const actionRef = useRef<ActionType>();
-    const [currentRow, setCurrentRow] = useState<API.InterfaceInfoVO>();
-
-    /**
-     * @en-US Add node
-     * @zh-CN 添加节点
-     * @param fields
-     */
-    const handleAdd = async (fields: API.InterfaceInfoVO) => {
-        const hide = message.loading('adding');
-        try {
-            await addInterfaceInfoUsingPost({
-                ...fields,
-            });
-            hide();
-            message.success('Creation Successful');
-            handleModalOpen(false);
-            actionRef.current?.reload();
-            return true;
-        } catch (error: any) {
-            hide();
-            message.error('Creation Failed，' + error.message);
-            return false;
-        }
-    };
-
-    /**
-     * @en-US Update node
-     * @zh-CN 更新节点
-     *
-     * @param fields
-     */
-    const handleUpdate = async (fields: API.InterfaceInfoVO) => {
-        if (!currentRow) {
-            return;
-        }
-        const hide = message.loading('In Progress');
-        try {
-            await updateInterfaceInfoUsingPost({
-                id: currentRow.id,
-                ...fields,
-            });
-            hide();
-            message.success('Operation Successful');
-            return true;
-        } catch (error: any) {
-            hide();
-            message.error('Operation Failed' + error.message);
-            return false;
-        }
-    };
-
-    /**
-     *  Delete node
-     * @zh-CN 删除节点
-     *
-     * @param record
-     */
-    const handleRemove = async (record: API.InterfaceInfoVO) => {
-        const hide = message.loading('In Progress');
-        if (!record) return true;
-        try {
-            await deleteInterfaceInfoUsingPost({
-                id: record.id,
-            });
-            hide();
-            message.success('Operation Successful');
-            actionRef.current?.reload();
-            return true;
-        } catch (error) {
-            hide();
-            message.error('Operation Failed');
-            return false;
-        }
-    };
-
-    /**
-     *  发布接口
-     *
-     * @param record
-     */
-    const handleOnline = async (record: API.InterfaceInfoInvokeRequest) => {
-        const hide = message.loading('Publishing');
-        if (!record) return true;
-        try {
-            const res = await onlineInterfaceInfoUsingPost({
-                host: record.host,
-                id: record.id,
-                method: record.method,
-                requestParams: record.requestParams,
-            });
-            if (res.code === 0) {
-                message.success('Publishing Successful');
-            }
-            hide();
-            actionRef.current?.reload();
-            return true;
-        } catch (error) {
-            hide();
-            message.error('Publishing Failed');
-            return false;
-        }
-    };
-
-  /**
-   * Offline the interface
-   *
-   * @param record
-   */
-  const handleOffline = async (record: API.IdRequest) => {
-    const hide = message.loading('Offlining');
-    if (!record) return true;
+  const handleAdd = async (fields: API.InterfaceInfoVO) => {
+    const hide = message.loading('Adding...');
     try {
-      await offlineInterfaceInfoUsingPost({
-        id: record.id,
-      });
+      await addInterfaceInfoUsingPost({ ...fields });
       hide();
-      message.success('Offline successful');
+      message.success('Created successfully');
+      handleModalOpen(false);
       actionRef.current?.reload();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       hide();
-      message.error('Offline failed');
+      message.error('Failed: ' + error.message);
       return false;
     }
   };
 
-  /**
-   * Columns displayed in the table
-   */
+  const handleUpdate = async (fields: API.InterfaceInfoVO) => {
+    if (!currentRow) return;
+    const hide = message.loading('Updating...');
+    try {
+      await updateInterfaceInfoUsingPost({ id: currentRow.id, ...fields });
+      hide();
+      message.success('Updated successfully');
+      actionRef.current?.reload();
+      return true;
+    } catch (error: any) {
+      hide();
+      message.error('Failed: ' + error.message);
+      return false;
+    }
+  };
+
+  const handleRemove = async (record: API.InterfaceInfoVO) => {
+    const hide = message.loading('Deleting...');
+    if (!record) return true;
+    try {
+      await deleteInterfaceInfoUsingPost({ id: record.id });
+      hide();
+      message.success('Deleted successfully');
+      actionRef.current?.reload();
+      return true;
+    } catch {
+      hide();
+      message.error('Failed to delete');
+      return false;
+    }
+  };
+
+  const handleOnline = async (record: API.InterfaceInfoVO) => {
+    const hide = message.loading('Publishing...');
+    try {
+      await onlineInterfaceInfoUsingPost({
+        host: record.host, id: record.id, method: record.method,
+        requestParams: record.requestParams,
+      });
+      hide();
+      message.success('Published successfully');
+      actionRef.current?.reload();
+    } catch {
+      hide();
+      message.error('Publish failed');
+    }
+  };
+
+  const handleOffline = async (record: API.InterfaceInfoVO) => {
+    const hide = message.loading('Taking offline...');
+    try {
+      await offlineInterfaceInfoUsingPost({ id: record.id });
+      hide();
+      message.success('Taken offline');
+      actionRef.current?.reload();
+    } catch {
+      hide();
+      message.error('Failed');
+    }
+  };
+
   const columns: ProColumns<API.InterfaceInfoVO>[] = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      valueType: 'index',
+      title: 'ID', dataIndex: 'id', valueType: 'index', width: 70,
     },
     {
-      title: 'Interface Name',
-      dataIndex: 'name',
-      valueType: 'text',
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-          },
-        ],
-      },
+      title: 'Interface Name', dataIndex: 'name', valueType: 'text',
+      render: (_, record) => <span className="admin-api-name">{record.name}</span>,
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      valueType: 'textarea',
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-          },
-        ],
-      },
-    },
-    {
-      title: 'Request Method',
-      dataIndex: 'method',
-      valueType: 'text',
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-          },
-        ],
-      },
-    },
-    {
-      title: 'Host Name',
-      dataIndex: 'host',
-      valueType: 'text',
-      hideInTable: true,
-      hideInSearch: true,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-          },
-        ],
-      },
-    },
-    {
-      title: 'Interface Address',
-      dataIndex: 'url',
-      valueType: 'text',
-      hideInTable: true,
-      hideInSearch: true,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-          },
-        ],
-      },
-    },
-    {
-      title: 'Request Parameters',
-      dataIndex: 'requestParams',
-      valueType: 'jsonCode',
-      hideInTable: true,
-      hideInSearch: true,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-          },
-        ],
-      },
-    },
-    {
-      title: 'Request Header',
-      dataIndex: 'requestHeader',
-      valueType: 'jsonCode',
-      hideInTable: true,
-      hideInSearch: true,
-    },
-    {
-      title: 'Response Header',
-      dataIndex: 'responseHeader',
-      valueType: 'jsonCode',
-      hideInTable: true,
-      hideInSearch: true,
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      hideInForm: true,
-      valueEnum: {
-        0: {
-          text: 'Closed',
-          status: 'Default',
-        },
-        1: {
-          text: 'Open',
-          status: 'Processing',
-        },
-      },
-    },
-    {
-      title: 'Creation Time',
-      dataIndex: 'createTime',
-      valueType: 'dateTime',
-      hideInForm: true,
-    },
-    {
-      title: 'Update Time',
-      dataIndex: 'updateTime',
-      valueType: 'dateTime',
-      hideInForm: true,
-      hideInTable: true,
-      hideInSearch: true,
-    },
-    {
-      title: 'Actions',
-      dataIndex: 'option',
-      valueType: 'option',
+      title: 'Method', dataIndex: 'method', valueType: 'text', width: 90,
       render: (_, record) => {
-        return record.status === 0
-          ? [
-            <Button
-              key="detail"
-              onClick={() => {
-                handleShowModalOpen(true);
-                setCurrentRow(record);
-              }}
-            >
-              Detail
-            </Button>,
-            <Button
-              key="update"
-              onClick={() => {
-                handleUpdateModalOpen(true);
-                setCurrentRow(record);
-              }}
-            >
-              Edit
-            </Button>,
-            <Button
-              key="online"
-              onClick={() => {
-                handleOnline(record);
-              }}
-            >
-              Publish
-            </Button>,
-            <Button
-              danger
-              key="remove"
-              onClick={() => {
-                handleRemove(record);
-              }}
-            >
-              Delete
-            </Button>,
-          ]
-          : [
-            <Button
-              key="detail"
-              onClick={() => {
-                handleShowModalOpen(true);
-                setCurrentRow(record);
-              }}
-            >
-              Detail
-            </Button>,
-            <Button
-              key="update"
-              onClick={() => {
-                handleUpdateModalOpen(true);
-                setCurrentRow(record);
-              }}
-            >
-              Edit
-            </Button>,
-            <Button
-              key="offline"
-              onClick={() => {
-                handleOffline(record);
-              }}
-            >
-              Offline
-            </Button>,
-            <Popconfirm
-              title="Delete data"
-              key="remove"
-              description="Are you sure you want to delete this data?"
-              icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-              onConfirm={() => {
-                handleRemove(record);
-              }}
-            >
-              <Button danger>Delete</Button>
-            </Popconfirm>,
-          ];
+        const m = (record.method || 'GET').toUpperCase();
+        return <span className={`method-badge method-${m.toLowerCase()}`}>{m}</span>;
       },
+    },
+    {
+      title: 'Status', dataIndex: 'status', hideInForm: true,
+      valueEnum: {
+        0: { text: 'Offline', status: 'Default' },
+        1: { text: 'Online', status: 'Processing' },
+      },
+      width: 100,
+      render: (_, record) => (
+        <span className={`status-indicator ${record.status === 1 ? 'status-online' : 'status-offline'}`}>
+          <span className="status-dot" />
+          {record.status === 1 ? 'Online' : 'Offline'}
+        </span>
+      ),
+    },
+    {
+      title: 'Created', dataIndex: 'createTime', valueType: 'dateTime', hideInForm: true, width: 170,
+    },
+    {
+      title: 'Actions', dataIndex: 'option', valueType: 'option', width: 280,
+      render: (_, record) => record.status === 0 ? [
+        <Button key="detail" size="small" className="admin-btn" onClick={() => { handleShowModalOpen(true); setCurrentRow(record); }}>Detail</Button>,
+        <Button key="update" size="small" className="admin-btn" onClick={() => { handleUpdateModalOpen(true); setCurrentRow(record); }}>Edit</Button>,
+        <Button key="online" size="small" className="admin-btn admin-btn-publish" onClick={() => handleOnline(record)}>Publish</Button>,
+        <Popconfirm title="Delete this interface?" description="This action cannot be undone." okText="Delete" okButtonProps={{ danger: true }} icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+          onConfirm={() => handleRemove(record)}>
+          <Button size="small" className="admin-btn admin-btn-danger" danger>Delete</Button>
+        </Popconfirm>,
+      ] : [
+        <Button key="detail" size="small" className="admin-btn" onClick={() => { handleShowModalOpen(true); setCurrentRow(record); }}>Detail</Button>,
+        <Button key="update" size="small" className="admin-btn" onClick={() => { handleUpdateModalOpen(true); setCurrentRow(record); }}>Edit</Button>,
+        <Button key="offline" size="small" className="admin-btn" onClick={() => handleOffline(record)}>Offline</Button>,
+        <Popconfirm title="Delete this interface?" description="This action cannot be undone." okText="Delete" okButtonProps={{ danger: true }} icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+          onConfirm={() => handleRemove(record)}>
+          <Button size="small" className="admin-btn admin-btn-danger" danger>Delete</Button>
+        </Popconfirm>,
+      ],
     },
   ];
 
   const requestColumns: ProColumns<API.RequestParamsRemarkVO>[] = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      width: '15%',
-    },
-    {
-      title: 'Required',
-      key: 'isRequired',
-      dataIndex: 'isRequired',
-      valueType: 'select',
-      valueEnum: {
-        yes: {
-          text: 'Yes',
-        },
-        no: {
-          text: 'No',
-        },
-      },
-      width: '15%',
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      width: '15%',
-    },
-    {
-      title: 'Description',
-      dataIndex: 'remark',
-    },
-    {
-      title: 'Actions',
-      valueType: 'option',
-      width: '10%',
-      render: () => {
-        return null;
-      },
-    },
+    { title: 'Name', dataIndex: 'name', width: '15%' },
+    { title: 'Required', key: 'isRequired', dataIndex: 'isRequired', valueType: 'select',
+      valueEnum: { yes: { text: 'Yes' }, no: { text: 'No' } }, width: '15%' },
+    { title: 'Type', dataIndex: 'type', width: '15%' },
+    { title: 'Description', dataIndex: 'remark' },
+    { title: 'Actions', valueType: 'option', width: '10%', render: () => null },
   ];
 
   const responseColumns: ProColumns<API.RequestParamsRemarkVO>[] = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      width: '15%',
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      width: '15%',
-    },
-    {
-      title: 'Description',
-      dataIndex: 'remark',
-    },
-    {
-      title: 'Actions',
-      valueType: 'option',
-      width: '10%',
-      render: () => {
-        return null;
-      },
-    },
+    { title: 'Name', dataIndex: 'name', width: '15%' },
+    { title: 'Type', dataIndex: 'type', width: '15%' },
+    { title: 'Description', dataIndex: 'remark' },
+    { title: 'Actions', valueType: 'option', width: '10%', render: () => null },
   ];
 
   return (
     <PageContainer>
-      <ProTable<API.InterfaceInfoVO, API.PageParams>
-        headerTitle={'Query Table'}
-        actionRef={actionRef}
-        rowKey="key"
-        search={{
-          labelWidth: 120,
-        }}
-        toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleModalOpen(true);
-            }}
-          >
-            <PlusOutlined /> Create New
-          </Button>,
-        ]}
-                request={async (params) => {
-                    console.log('---------->', params);
-                    const res = await listInterfaceInfoVoByPageUsingPost({
-                        ...params,
-                    });
-                    if (res?.data) {
-                        return {
-                            data: res?.data.records ?? [],
-                            success: true,
-                            total: res.data.total ?? 0,
-                        };
-                    } else {
-                        return {
-                            data: [],
-                            success: false,
-                            total: 0,
-                        };
-                    }
-                }}
-                columns={columns}
-            />
-
-            <UpdateModal
-                columns={columns}
-                onSubmit={async (value) => {
-                    const success = await handleUpdate(value);
-                    if (success) {
-                        handleUpdateModalOpen(false);
-                        setCurrentRow(undefined);
-                        if (actionRef.current) {
-                            actionRef.current.reload();
-                        }
-                    }
-                }}
-                setVisible={handleUpdateModalOpen}
-                visible={updateModalOpen}
-                values={currentRow ?? {}}
-                requestColumns={requestColumns}
-                responseColumns={responseColumns}
-            />
-
-            <Drawer
-                width={600}
-                open={showDetail}
-                onClose={() => {
-                    setCurrentRow(undefined);
-                    setShowDetail(false);
-                }}
-                closable={false}
+      <div className="admin-page">
+        <ProTable<API.InterfaceInfoVO, API.PageParams>
+          className="admin-table"
+          headerTitle={
+            <div className="table-header-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" />
+              </svg>
+              API Management
+            </div>
+          }
+          actionRef={actionRef}
+          rowKey="id"
+          search={{ labelWidth: 120 }}
+          toolBarRender={() => [
+            <Button
+              key="create"
+              type="primary"
+              className="admin-btn admin-btn-create"
+              onClick={() => handleModalOpen(true)}
             >
-                {currentRow?.name && (
-                    <ProDescriptions<API.RuleListItem>
-                        column={2}
-                        title={currentRow?.name}
-                        request={async () => ({
-                            data: currentRow || {},
-                        })}
-                        params={{
-                            id: currentRow?.name,
-                        }}
-                        columns={columns as ProDescriptionsItemProps<API.RuleListItem>[]}
-                    />
-                )}
-            </Drawer>
+              <PlusOutlined /> Create Interface
+            </Button>,
+          ]}
+          request={async (params) => {
+            const res = await listInterfaceInfoVoByPageUsingPost({ ...params });
+            return res?.data ? {
+              data: res.data.records ?? [],
+              success: true,
+              total: res.data.total ?? 0,
+            } : { data: [], success: false, total: 0 };
+          }}
+          columns={columns}
+        />
+      </div>
 
-            <ShowModal
-                setVisible={handleShowModalOpen}
-                values={currentRow ?? {}}
-                visible={showModalOpen}
-                requestColumns={requestColumns}
-                responseColumns={responseColumns}
-            />
+      <UpdateModal
+        onSubmit={async (value) => {
+          const success = await handleUpdate(value);
+          if (success) { handleUpdateModalOpen(false); setCurrentRow(undefined); actionRef.current?.reload(); }
+        }}
+        setVisible={handleUpdateModalOpen}
+        visible={updateModalOpen}
+        values={currentRow ?? {}}
+        columns={columns}
+        requestColumns={requestColumns}
+        responseColumns={responseColumns}
+      />
 
-            <CreateModal
-                columns={columns}
-                setVisible={handleModalOpen}
-                onSubmit={(values) => {
-                    return handleAdd(values).then((r) => {});
-                }}
-                visible={createModalOpen}
-                requestColumns={requestColumns}
-                responseColumns={responseColumns}
-            />
-        </PageContainer>
-    );
+      <ShowModal
+        setVisible={handleShowModalOpen}
+        values={currentRow ?? {}}
+        visible={showModalOpen}
+        requestColumns={requestColumns}
+        responseColumns={responseColumns}
+      />
+
+      <CreateModal
+        columns={columns}
+        setVisible={handleModalOpen}
+        onSubmit={(values) => handleAdd(values).then(() => {})}
+        visible={createModalOpen}
+        requestColumns={requestColumns}
+        responseColumns={responseColumns}
+      />
+    </PageContainer>
+  );
 };
+
 export default TableList;

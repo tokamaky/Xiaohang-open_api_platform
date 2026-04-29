@@ -6,7 +6,8 @@ import {
 } from '@/services/xiaohang-backend/userController';
 import {useModel} from '@@/exports';
 import {
-    CommentOutlined,
+    CheckCircleOutlined,
+    CopyOutlined,
     FieldTimeOutlined,
     LoadingOutlined,
     LockOutlined,
@@ -16,33 +17,18 @@ import {
     VerifiedOutlined,
 } from '@ant-design/icons';
 import {PageContainer, ProForm, ProFormInstance, ProFormText} from '@ant-design/pro-components';
-import {Button, Card, Col, Divider, message, Modal, Row, Typography, Upload, UploadFile, UploadProps,} from 'antd';
+import {Button, Card, Col, Divider, message, Modal, Row, Typography, Upload, UploadFile, UploadProps} from 'antd';
 import {RcFile, UploadChangeParam} from 'antd/es/upload';
 import React, {useEffect, useRef, useState} from 'react';
-//import {uploadFileUsingPOST} from "@/services/xiaohang-backend/fileController";
+import './index.less';
 
 const { Paragraph } = Typography;
 
-const avatarStyle: React.CSSProperties = {
-    width: '100%',
-    textAlign: 'center',
-};
-const buttonStyle: React.CSSProperties = {
-    marginLeft: '30px',
-};
-/**
- * Pre-upload validation
- * @param file The file
- */
 const beforeUpload = (file: RcFile) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-  if (!isJpgOrPng) {
-    message.error('Only JPG/PNG format files are allowed!');
-  }
+  if (!isJpgOrPng) message.error('Only JPG/PNG files are allowed!');
   const isLt2M = file.size / 1024 / 1024 < 5;
-  if (!isLt2M) {
-    message.error('The maximum upload size is 5MB!');
-  }
+  if (!isLt2M) message.error('Max upload size is 5MB!');
   return isJpgOrPng && isLt2M;
 };
 
@@ -74,12 +60,8 @@ const Profile: React.FC = () => {
     }
   }, []);
 
-
-  // Show secret key
   const showSecretKey = async () => {
     let userPassword = formRef?.current?.getFieldValue('userPassword');
-
-    // Login
     const res = await userLoginUsingPost({
       userAccount: data?.userAccount,
       userPassword: userPassword,
@@ -91,48 +73,27 @@ const Profile: React.FC = () => {
     }
   };
 
-  // Update user avatar
   const updateUserAvatar = async (id: number, userAvatar: string) => {
-    const res = await updateUserUsingPost({
-      id,
-      userAvatar,
-    });
+    const res = await updateUserUsingPost({ id, userAvatar });
     if (res.code !== 0) {
-      message.success(`Failed to update user avatar`);
+      message.error(`Failed to update avatar`);
     } else {
       getUserInfo(id);
     }
   };
 
-  /**
-   * Handle image upload
-   * @param info
-   */
   const handleChange: UploadProps['onChange'] = (info: UploadChangeParam<UploadFile>) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      if (info.file.response.code === 0) {
-        message.success(`Upload successful`);
-        const id = initialState?.loginUser?.id as number;
-        const userAvatar = info.file.response.data.url;
-        setLoading(false);
-        setImageUrl(userAvatar);
-        updateUserAvatar(id, userAvatar);
-      }
+    if (info.file.status === 'uploading') { setLoading(true); return; }
+    if (info.file.status === 'done' && info.file.response?.code === 0) {
+      message.success(`Avatar updated`);
+      const id = initialState?.loginUser?.id as number;
+      const userAvatar = info.file.response.data.url;
+      setLoading(false);
+      setImageUrl(userAvatar);
+      updateUserAvatar(id, userAvatar);
     }
   };
 
-  const uploadButton = (
-    <div>
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </div>
-  );
-
-  // Reset secret key
   const resetSecretKey = async () => {
     try {
       let userPassword = formRef?.current?.getFieldValue('userPassword');
@@ -141,12 +102,10 @@ const Profile: React.FC = () => {
         userPassword: userPassword,
       });
       if (res.code === 0) {
-        const res = await updateSecretKeyUsingPost({
-          id: data?.id,
-        });
-        if (res.data) {
+        const res2 = await updateSecretKeyUsingPost({ id: data?.id });
+        if (res2.data) {
           getUserInfo(data?.id);
-          message.success('Reset successful!');
+          message.success('Secret key reset successfully!');
           setOpen(false);
         }
       }
@@ -157,152 +116,177 @@ const Profile: React.FC = () => {
 
   return (
     <PageContainer>
-      <Row gutter={24}>
-        <Col span={8}>
-          <Card title="Personal Information" bordered={false}>
-            <Row>
-              <Col style={avatarStyle}>
-                <Upload
-                  name="file"
-                  listType="picture-circle"
-                  showUploadList={false}
-                  action="http://124.70.63.241:8101/api/file/upload"
-                  beforeUpload={beforeUpload}
-                  onChange={handleChange}
-                >
-                  {imageUrl ? (
-                    <img
-                      src={data?.userAvatar}
-                      alt="avatar"
-                      style={{ width: '100%', borderRadius: '50%' }}
-                    />
-                  ) : (
-                    uploadButton
-                  )}
-                </Upload>
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col>
-                <UserOutlined /> Username: {data?.userName}
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col>
-                <CommentOutlined /> User Account: {data?.userAccount}
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col>
-                <VerifiedOutlined /> User Role: {data?.userRole}
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col>
-                <FieldTimeOutlined /> Registration Time: {data?.createTime}
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-        <Col span={16}>
-          <Card title="Secret Key Operations" bordered={false}>
-            <Row>
-              <Col>
-                {visible ? (
-                  <Paragraph
-                    copyable={{
-                      text: data?.accessKey,
-                    }}
-                  >
-                    <LockOutlined /> accessKey: {data?.accessKey}
-                  </Paragraph>
-                ) : (
-                  <Paragraph>
-                    <UnlockOutlined /> secretKey: *********
-                  </Paragraph>
-                )}
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col>
-                {visible ? (
-                  <Paragraph
-                    copyable={{
-                      text: data?.secretKey,
-                    }}
-                  >
-                    <UnlockOutlined /> secretKey: {data?.secretKey}
-                  </Paragraph>
-                ) : (
-                  <Paragraph>
-                    <UnlockOutlined /> secretKey: *********
-                  </Paragraph>
-                )}
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col>
-                {!visible ? (
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      setOpen(true);
-                      setFlag(true);
-                    }}
-                  >
-                    View Secret Key
-                  </Button>
-                ) : (
-                  <Button type="primary" onClick={() => setVisible(false)}>
-                    Hide Secret Key
-                  </Button>
-                )}
+      <div className="profile-page">
+        {/* Left — User Info */}
+        <Card className="profile-card profile-card-main" bordered={false}>
+          <div className="profile-avatar-wrap">
+            <Upload
+              name="file"
+              listType="picture-circle"
+              showUploadList={false}
+              action="http://124.70.63.241:8101/api/file/upload"
+              beforeUpload={beforeUpload}
+              onChange={handleChange}
+              className="avatar-uploader"
+            >
+              {imageUrl ? (
+                <img src={data?.userAvatar} alt="avatar" className="avatar-img" />
+              ) : (
+                <div className="avatar-placeholder">
+                  {loading ? <LoadingOutlined /> : <PlusOutlined />}
+                  <span>Upload</span>
+                </div>
+              )}
+            </Upload>
+            {data.userRole && (
+              <span className="role-badge">
+                <VerifiedOutlined /> {data.userRole}
+              </span>
+            )}
+          </div>
+
+          <Divider className="profile-divider" />
+
+          <div className="profile-info-list">
+            <div className="info-row">
+              <span className="info-icon"><UserOutlined /></span>
+              <span className="info-label">Username</span>
+              <span className="info-value">{data?.userName || '—'}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-icon"><UserOutlined /></span>
+              <span className="info-label">Account</span>
+              <span className="info-value">{data?.userAccount || '—'}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-icon"><FieldTimeOutlined /></span>
+              <span className="info-label">Registered</span>
+              <span className="info-value">{data?.createTime ? new Date(data.createTime).toLocaleDateString() : '—'}</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Right — Secret Keys */}
+        <Card className="profile-card profile-card-keys" bordered={false}>
+          <div className="keys-header">
+            <LockOutlined className="keys-icon" />
+            <h3 className="keys-title">API Credentials</h3>
+            <p className="keys-subtitle">Keep these secret. Do not share with anyone.</p>
+          </div>
+
+          <Divider className="profile-divider" />
+
+          <div className="key-block">
+            <div className="key-label-row">
+              <span className="key-name">Access Key</span>
+              {visible && (
                 <Button
-                  style={buttonStyle}
+                  className="copy-btn"
+                  size="small"
+                  icon={<CopyOutlined />}
                   onClick={() => {
-                    setOpen(true);
-                    setFlag(false);
+                    navigator.clipboard.writeText(data?.accessKey || '');
+                    message.success('Access Key copied!');
                   }}
-                  type="primary"
-                  danger
-                >
-                  Reset Secret Key
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
+                />
+              )}
+            </div>
+            <Paragraph
+              copyable={visible ? { text: data?.accessKey } : false}
+              className={`key-value ${!visible ? 'key-masked' : ''}`}
+            >
+              {visible ? data?.accessKey : '••••••••••••••••••••••••'}
+            </Paragraph>
+          </div>
+
+          <Divider className="profile-divider" />
+
+          <div className="key-block">
+            <div className="key-label-row">
+              <span className="key-name">Secret Key</span>
+              {visible && (
+                <Button
+                  className="copy-btn"
+                  size="small"
+                  icon={<CopyOutlined />}
+                  onClick={() => {
+                    navigator.clipboard.writeText(data?.secretKey || '');
+                    message.success('Secret Key copied!');
+                  }}
+                />
+              )}
+            </div>
+            <Paragraph
+              copyable={visible ? { text: data?.secretKey } : false}
+              className={`key-value ${!visible ? 'key-masked' : ''}`}
+            >
+              {visible ? data?.secretKey : '••••••••••••••••••••••••'}
+            </Paragraph>
+          </div>
+
+          <Divider className="profile-divider" />
+
+          <div className="key-actions">
+            {visible ? (
+              <Button
+                className="key-action-btn key-action-hide"
+                icon={<LockOutlined />}
+                onClick={() => setVisible(false)}
+              >
+                Hide Keys
+              </Button>
+            ) : (
+              <Button
+                className="key-action-btn"
+                icon={<UnlockOutlined />}
+                onClick={() => { setOpen(true); setFlag(true); }}
+              >
+                View Keys
+              </Button>
+            )}
+            <Button
+              className="key-action-btn key-action-reset"
+              icon={<CheckCircleOutlined />}
+              onClick={() => { setOpen(true); setFlag(false); }}
+              danger
+            >
+              Reset Keys
+            </Button>
+          </div>
+        </Card>
+      </div>
+
       <Modal
-        title="View Secret Key"
+        title={
+          <span className="modal-title">
+            <LockOutlined /> {flag ? 'View Secret Keys' : 'Reset Secret Keys'}
+          </span>
+        }
         open={open}
         onOk={flag ? showSecretKey : resetSecretKey}
         onCancel={() => setOpen(false)}
+        okText={flag ? 'Confirm' : 'Reset'}
+        okButtonProps={{ danger: !flag }}
+        className="profile-modal"
       >
+        <p className="modal-desc">
+          {flag
+            ? 'Enter your password to reveal your API credentials.'
+            : 'Resetting will generate new API credentials. Your old keys will stop working immediately.'}
+        </p>
         <ProForm<{ userPassword: string }>
           formRef={formRef}
-          formKey="check-user-password-form"
           autoFocusFirstInput
           submitter={{
-            resetButtonProps: {
-              style: {
-                display: 'none',
-              },
-            },
-            submitButtonProps: {
-              style: {
-                display: 'none',
-              },
-            },
+            resetButtonProps: { style: { display: 'none' } },
+            submitButtonProps: { style: { display: 'none' } },
           }}
         >
-          <ProFormText.Password name="userPassword" placeholder="Please enter user password" />
+          <ProFormText.Password
+            name="userPassword"
+            placeholder="Enter your password"
+            fieldProps={{ size: 'large' }}
+          />
         </ProForm>
       </Modal>
     </PageContainer>

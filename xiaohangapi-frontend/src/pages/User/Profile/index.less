@@ -1,0 +1,271 @@
+@import '@/styles/theme.less';
+
+/* ============================================================
+   Profile Page — Dark Identity + Key Management
+   ============================================================ */
+
+.profile-page {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  animation: fadeSlideUp 0.5s ease both;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ---- Cards ---- */
+.profile-card {
+  background: @bg-card !important;
+  border: 1px solid @border-subtle !important;
+  border-radius: @radius-lg !important;
+  box-shadow: @shadow-card !important;
+
+  &.profile-card-main { flex: 0 0 340px; }
+  &.profile-card-keys { flex: 1; }
+}
+
+/* ---- Avatar ---- */
+.profile-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.avatar-uploader {
+  .ant-upload {
+    width: 100px !important;
+    height: 100px !important;
+    border-radius: 50% !important;
+    overflow: hidden;
+
+    &:hover .avatar-img,
+    &:hover .avatar-placeholder {
+      border-color: @primary !important;
+    }
+  }
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid @border-mid;
+  transition: border-color 0.2s ease;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(0, 212, 170, 0.05);
+  border: 2px dashed @border-mid;
+  border-radius: 50%;
+  color: @text-muted;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  background: rgba(0, 212, 170, 0.08);
+  border: 1px solid rgba(0, 212, 170, 0.2);
+  border-radius: @radius-pill;
+  font-size: 12px;
+  font-weight: 600;
+  color: @primary;
+  text-transform: capitalize;
+
+  .anticon { font-size: 11px; }
+}
+
+/* ---- Profile info list ---- */
+.profile-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid @border-subtle;
+
+  &:last-child { border-bottom: none; }
+}
+
+.info-icon {
+  color: @primary;
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: @text-muted;
+  flex-shrink: 0;
+  width: 100px;
+}
+
+.info-value {
+  font-size: 14px;
+  color: @text-primary;
+  font-weight: 500;
+}
+
+/* ---- Keys section ---- */
+.keys-header {
+  padding: 4px 0;
+}
+
+.keys-icon {
+  color: @primary;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.keys-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: @text-primary;
+  margin: 0 0 6px;
+}
+
+.keys-subtitle {
+  font-size: 13px;
+  color: @text-secondary;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.key-block {
+  padding: 8px 0;
+}
+
+.key-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.key-name {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: @text-muted;
+}
+
+.key-value {
+  font-family: @font-mono !important;
+  font-size: 13px !important;
+  color: @primary !important;
+  background: rgba(0, 212, 170, 0.04);
+  border: 1px solid @border-mid;
+  border-radius: @radius-sm;
+  padding: 10px 14px !important;
+  word-break: break-all;
+  margin: 0 !important;
+
+  &.key-masked {
+    color: @text-muted !important;
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
+.key-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.key-action-btn {
+  flex: 1;
+  min-width: 140px;
+  height: 40px !important;
+  border-radius: @radius-md !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+
+  &.key-action-hide {
+    background: rgba(0, 212, 170, 0.08) !important;
+    border-color: @border-mid !important;
+    color: @primary !important;
+    &:hover { background: rgba(0, 212, 170, 0.14) !important; }
+  }
+
+  &.key-action-reset {
+    background: transparent !important;
+    border-color: rgba(255, 92, 92, 0.2) !important;
+    color: @error !important;
+    &:hover { background: rgba(255, 92, 92, 0.06) !important; border-color: rgba(255, 92, 92, 0.35) !important; }
+  }
+}
+
+.copy-btn {
+  background: rgba(0, 212, 170, 0.06) !important;
+  border-color: @border-mid !important;
+  color: @primary !important;
+  border-radius: @radius-sm !important;
+  font-size: 12px !important;
+  height: 28px !important;
+  padding: 0 10px !important;
+  &:hover { background: rgba(0, 212, 170, 0.12) !important; }
+}
+
+/* ---- Divider ---- */
+.profile-divider {
+  border-color: @border-subtle !important;
+  margin: 16px 0 !important;
+}
+
+/* ---- Modal ---- */
+.profile-modal {
+  .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 16px;
+    color: @text-primary;
+
+    .anticon { color: @primary; }
+  }
+
+  .modal-desc {
+    font-size: 13px;
+    color: @text-secondary;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .profile-page {
+    flex-direction: column;
+  }
+  .profile-card-main { flex: none !important; }
+}

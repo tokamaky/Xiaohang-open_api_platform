@@ -1,138 +1,124 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-components';
 import { Layout, Typography, Card, List, Tag, Button } from 'antd';
-import { DatabaseOutlined,  FileOutlined, DeploymentUnitOutlined, ExclamationCircleOutlined, WarningOutlined, CheckCircleOutlined, CloudOutlined } from '@ant-design/icons';
+import {
+  CloudOutlined, DatabaseOutlined, FileOutlined, DeploymentUnitOutlined,
+  ExclamationCircleOutlined, CheckCircleOutlined, WarningOutlined,
+} from '@ant-design/icons';
+import './index.less';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
 
-const Todo: React.FC = () => {
-  // Sample tasks with status, importance level, and icons
-  const tasks = [
-    {
-      section: 'Database',
-      icon: <DatabaseOutlined style={{ color: '#6366F1', fontSize: '20px' }} />,
-      items: [
-        { description: 'Add Redis data structure server', importance: 'high' }, // high priority
-      ],
-    },
-    {
-      section: 'Backend',
-      icon: <CloudOutlined style={{ color: '#722ed1', fontSize: '20px' }} />,
-      items: [
-        { description: 'Create file controller for updating user profile pics', importance: 'medium' }, // medium priority
-        { description: 'Use cloud services to store files', importance: 'low' }, // low priority
-      ],
-    },
-    {
-      section: 'Frontend',
-      icon: <FileOutlined style={{ color: '#fa8c16', fontSize: '20px' }} />,
-      items: [
-        { description: 'Create an "Update Profile" button', importance: 'high' },
-      ],
-    },
-    {
-      section: 'Deployment',
-      icon: <DeploymentUnitOutlined style={{ color: '#13c2c2', fontSize: '20px' }} />,
-      items: [
-        { description: 'Faster deployment', importance: 'low' },
-      ],
-    },
-  ];
+const tasks = [
+  {
+    section: 'Database',
+    icon: <DatabaseOutlined className="task-icon" />,
+    color: 'var(--primary)',
+    items: [
+      { description: 'Add Redis data structure server', importance: 'high' },
+    ],
+  },
+  {
+    section: 'Backend',
+    icon: <CloudOutlined className="task-icon" />,
+    color: 'var(--primary)',
+    items: [
+      { description: 'Create file controller for updating user profile pics', importance: 'medium' },
+      { description: 'Use cloud services to store files', importance: 'low' },
+    ],
+  },
+  {
+    section: 'Frontend',
+    icon: <FileOutlined className="task-icon" />,
+    color: 'var(--primary)',
+    items: [
+      { description: 'Create an "Update Profile" button', importance: 'high' },
+    ],
+  },
+  {
+    section: 'Deployment',
+    icon: <DeploymentUnitOutlined className="task-icon" />,
+    color: 'var(--primary)',
+    items: [
+      { description: 'Faster deployment infrastructure', importance: 'low' },
+    ],
+  },
+];
 
-  // Function to get the appropriate icon based on task importance
-  const getImportanceIcon = (importance: string) => {
-    switch (importance) {
-      case 'high':
-        return <ExclamationCircleOutlined style={{ color: 'red', fontSize: '20px' }} />;
-      case 'medium':
-        return <WarningOutlined style={{ color: 'orange', fontSize: '20px' }} />;
-      case 'low':
-        return <CheckCircleOutlined style={{ color: 'green', fontSize: '20px' }} />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <PageContainer>
-      <Layout style={{ padding: '20px', background: '#f0f2f5' }}>
-        <Content style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <Card
-            style={{
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-              background: '#ffffff',
-            }}
-            bodyStyle={{ padding: '30px' }}
-          >
-            <Title level={2} style={{ textAlign: 'center', marginBottom: '20px' }}>
-              Todo List
-            </Title>
-
-            <Paragraph style={{ textAlign: 'center', marginBottom: '30px', fontSize: '16px', color: '#595959' }}>
-              Here's a list of improvements I plan to make for this web application. Feel free to follow along or suggest new tasks!
-            </Paragraph>
-
-            {/* Section List */}
-            {tasks.map((taskSection, index) => (
-              <Card
-                key={index}
-                bordered={false}
-                style={{
-                  background: '#f6ffed',
-                  marginBottom: '20px',
-                  borderRadius: '8px',
-                  padding: '20px',
-                }}
-              >
-                <Title
-                  level={4}
-                  style={{
-                    marginBottom: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    color: '#52c41a',
-                  }}
-                >
-                  {taskSection.icon}
-                  {taskSection.section}
-                </Title>
-                <List
-                  itemLayout="horizontal"
-                  dataSource={taskSection.items}
-                  renderItem={(item) => (
-                    <List.Item
-                      actions={[
-                        <Tag color="default" style={{ width: '150px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
-                          {getImportanceIcon(item.importance)} {item.importance.charAt(0).toUpperCase() + item.importance.slice(1)} Priority
-                        </Tag>,
-                      ]}
-                    >
-                      <List.Item.Meta title={item.description} />
-                    </List.Item>
-                  )}
-                />
-              </Card>
-            ))}
-
-            <Paragraph style={{ textAlign: 'center', marginTop: '30px' }}>
-              Want to suggest a new task? Email me at{' '}
-              <Button
-                type="link"
-                href="mailto:jxh186045@gmail.com"
-                icon={<CloudOutlined />}
-                style={{ fontSize: '16px', padding: 0 }}
-              >
-                jxh186045@gmail.com
-              </Button>
-            </Paragraph>
-          </Card>
-        </Content>
-      </Layout>
-    </PageContainer>
-  );
+const getImportanceIcon = (importance: string) => {
+  switch (importance) {
+    case 'high': return <ExclamationCircleOutlined />;
+    case 'medium': return <WarningOutlined />;
+    case 'low': return <CheckCircleOutlined />;
+    default: return null;
+  }
 };
+
+const getPriorityLabel = (importance: string) => {
+  const map: Record<string, string> = { high: 'High', medium: 'Medium', low: 'Low' };
+  return map[importance] || importance;
+};
+
+const Todo: React.FC = () => (
+  <PageContainer>
+    <Layout style={{ padding: '24px', background: 'transparent' }}>
+      <Content style={{ maxWidth: '820px', margin: '0 auto' }} className="todo-page">
+        <Card className="todo-card-main" bodyStyle={{ padding: '36px' }}>
+          <div className="todo-header">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+            </svg>
+            <div>
+              <Title level={2} className="todo-main-title">Roadmap &amp; Todos</Title>
+              <Paragraph className="todo-subtitle">Planned improvements for this platform. Follow along or suggest new ideas.</Paragraph>
+            </div>
+          </div>
+
+          {tasks.map((section, idx) => (
+            <div key={idx} className="todo-section">
+              <div className="todo-section-header">
+                {section.icon}
+                <span className="todo-section-title">{section.section}</span>
+                <span className="todo-section-count">{section.items.length} item{section.items.length !== 1 ? 's' : ''}</span>
+              </div>
+
+              <List
+                itemLayout="horizontal"
+                dataSource={section.items}
+                renderItem={(item) => (
+                  <List.Item className="todo-list-item">
+                    <div className="todo-item-content">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4">
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                      <span className="todo-item-desc">{item.description}</span>
+                    </div>
+                    <Tag className={`todo-priority-tag priority-${item.importance}`}>
+                      {getImportanceIcon(item.importance)}
+                      <span>{getPriorityLabel(item.importance)}</span>
+                    </Tag>
+                  </List.Item>
+                )}
+              />
+            </div>
+          ))}
+
+          <div className="todo-footer">
+            <p>Want to suggest a new feature?</p>
+            <Button
+              type="link"
+              href="mailto:jxh186045@gmail.com"
+              icon={<CloudOutlined />}
+              className="todo-email-link"
+            >
+              jxh186045@gmail.com
+            </Button>
+          </div>
+        </Card>
+      </Content>
+    </Layout>
+  </PageContainer>
+);
 
 export default Todo;

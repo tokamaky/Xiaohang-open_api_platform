@@ -6,6 +6,7 @@ import { Card, Layout, List, message, Pagination, PaginationProps, Tooltip } fro
 import Search from 'antd/es/input/Search';
 import { Content, Footer } from 'antd/es/layout/layout';
 import React, { useEffect, useState } from 'react';
+import indexStyle from './index.less';
 import './index.less';
 
 const Index: React.FC = () => {
@@ -65,6 +66,7 @@ const Index: React.FC = () => {
   return (
     <PageContainer>
       <Layout className="myinterface-layout">
+        {/* Search bar */}
         <div className="myinterface-search">
           <Search
             size="large"
@@ -74,6 +76,7 @@ const Index: React.FC = () => {
           />
         </div>
 
+        {/* Card grid */}
         <Content className="myinterface-content">
           <List<API.InterfaceInfoVO>
             className={indexStyle.filterCardList}
@@ -127,6 +130,7 @@ const Index: React.FC = () => {
           />
         </Content>
 
+        {/* Pagination */}
         <Footer className="myinterface-footer">
           <Pagination
             showQuickJumper
