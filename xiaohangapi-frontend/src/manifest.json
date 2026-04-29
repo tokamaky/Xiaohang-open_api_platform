@@ -1,10 +1,10 @@
 {
-  "name": "Ant Design Pro",
-  "short_name": "Ant Design Pro",
+  "name": "API Marketplace Platform",
+  "short_name": "API Platform",
   "display": "standalone",
   "start_url": "./?utm_source=homescreen",
-  "theme_color": "#002140",
-  "background_color": "#001529",
+  "theme_color": "#060B14",
+  "background_color": "#060B14",
   "icons": [
     {
       "src": "icons/icon-192x192.png",

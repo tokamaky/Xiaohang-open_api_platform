@@ -6,9 +6,9 @@ const Settings: ProLayoutProps & {
   pwa?: boolean;
   logo?: string;
 } = {
-  navTheme: 'light',
-  // 拂晓蓝
-  colorPrimary: '#6366F1',
+  navTheme: 'dark',
+  // API Marketplace — cyan/emerald cyberpunk palette
+  colorPrimary: '#00D4AA',
   layout: 'mix',
   contentWidth: 'Fluid',
   fixedHeader: false,
