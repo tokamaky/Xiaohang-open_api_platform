@@ -25,3 +25,19 @@ export async function listCurrentUserInvokeInterfaceInfoUsingGet(options?: { [ke
     ...(options || {}),
   });
 }
+
+/** listUserInvokeInterfaceInfo GET /api/analysis/admin/user/{userId}/interface/invoke */
+export async function listUserInvokeInterfaceInfoUsingGet(userId: number, options?: { [key: string]: any }) {
+  return request<API.BaseResponseListInterfaceInfoVO_>(`/api/analysis/admin/user/${userId}/interface/invoke`, {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** listAllUsers GET /api/analysis/admin/user/list */
+export async function listAllUsersUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseListUser_>('/api/analysis/admin/user/list', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}

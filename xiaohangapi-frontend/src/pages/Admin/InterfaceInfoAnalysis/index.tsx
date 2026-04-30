@@ -1,36 +1,78 @@
 import { PageContainer } from '@ant-design/pro-components';
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { Radio, Card, Space } from 'antd';
+import { Radio, Card, Space, Select } from 'antd';
 import {
   UserOutlined,
   AppstoreOutlined,
   TeamOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
-import { listAllInvokeInterfaceInfoUsingGet, listCurrentUserInvokeInterfaceInfoUsingGet } from '@/services/xiaohang-backend/analysisController';
+import {
+  listAllInvokeInterfaceInfoUsingGet,
+  listCurrentUserInvokeInterfaceInfoUsingGet,
+  listUserInvokeInterfaceInfoUsingGet,
+  listAllUsersUsingGet,
+} from '@/services/xiaohang-backend/analysisController';
 import { useModel } from '@umijs/max';
 import './index.less';
 
-type ViewMode = 'mine' | 'all';
+type AdminView = 'mine' | 'all' | 'user';
 
 const InterfaceAnalysis: React.FC = () => {
   const { initialState } = useModel('@@initialState');
   const isAdmin = initialState?.loginUser?.userRole === 'admin';
+  const myUserId = initialState?.loginUser?.id;
 
-  const [viewMode, setViewMode] = useState<ViewMode>('mine');
+  const [adminView, setAdminView] = useState<AdminView>('mine');
   const [data, setData] = useState<API.InterfaceInfoVO[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // All users list for admin selector
+  const [users, setUsers] = useState<{ id: number; userName: string }[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
+  // Load all users once when admin enters the page
   useEffect(() => {
+    if (isAdmin) {
+      listAllUsersUsingGet().then((res) => {
+        if (res.data) {
+          const userList = res.data.map((u: any) => ({
+            id: u.id,
+            userName: u.userName || u.userAccount || `User ${u.id}`,
+          }));
+          setUsers(userList);
+          if (userList.length > 0 && !selectedUserId) {
+            setSelectedUserId(userList[0].id);
+          }
+        }
+      });
+    }
+  }, [isAdmin]);
+
+  // Load chart data based on current view
+  useEffect(() => {
+    // Skip if admin and no user selected yet
+    if (isAdmin && adminView === 'user' && !selectedUserId) return;
+
     setLoading(true);
-    const request = viewMode === 'mine'
-      ? listCurrentUserInvokeInterfaceInfoUsingGet()
-      : listAllInvokeInterfaceInfoUsingGet();
+    let request: Promise<any>;
+
+    if (!isAdmin) {
+      request = listCurrentUserInvokeInterfaceInfoUsingGet();
+    } else if (adminView === 'mine') {
+      request = listCurrentUserInvokeInterfaceInfoUsingGet();
+    } else if (adminView === 'all') {
+      request = listAllInvokeInterfaceInfoUsingGet();
+    } else {
+      request = listUserInvokeInterfaceInfoUsingGet(selectedUserId!);
+    }
+
     request.then((res) => {
       if (res.data) setData(res.data);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [viewMode]);
+  }, [adminView, selectedUserId, isAdmin]);
 
   const chartData = data
     .filter((item) => item.totalNum !== undefined)
@@ -40,18 +82,34 @@ const InterfaceAnalysis: React.FC = () => {
 
   const totalInvoke = chartData.reduce((sum, d) => sum + d.value, 0);
 
-  const chartTitle = viewMode === 'mine'
-    ? 'My API Calls'
-    : 'Platform Total Calls';
-  const chartSubtext = viewMode === 'mine'
-    ? `Top 20 interfaces I invoked · ${totalInvoke.toLocaleString()} total`
-    : `Top 20 interfaces platform-wide · ${totalInvoke.toLocaleString()} total`;
+  const getChartTitle = () => {
+    if (!isAdmin) return 'My API Calls';
+    if (adminView === 'mine') return 'My API Calls';
+    if (adminView === 'all') return 'Platform Total Calls';
+    const selectedUser = users.find((u) => u.id === selectedUserId);
+    return `${selectedUser?.userName || `User ${selectedUserId}`} — API Calls`;
+  };
+
+  const getChartSubtext = () => {
+    if (!isAdmin) {
+      return `Top 20 interfaces I invoked · ${totalInvoke.toLocaleString()} total`;
+    }
+    if (adminView === 'mine') {
+      return `Top 20 interfaces I invoked · ${totalInvoke.toLocaleString()} total`;
+    }
+    if (adminView === 'all') {
+      return `Top 20 interfaces platform-wide · ${totalInvoke.toLocaleString()} total`;
+    }
+    return `Top 20 interfaces called by this user · ${totalInvoke.toLocaleString()} total`;
+  };
+
+  const selectedUserName = users.find((u) => u.id === selectedUserId)?.userName;
 
   const option = {
     backgroundColor: 'transparent',
     title: {
-      text: chartTitle,
-      subtext: chartSubtext,
+      text: getChartTitle(),
+      subtext: getChartSubtext(),
       left: 'center',
       textStyle: { color: '#E2EAF4', fontSize: 18, fontWeight: 800 },
       subtextStyle: { color: '#8892A4', fontSize: 13 },
@@ -101,35 +159,71 @@ const InterfaceAnalysis: React.FC = () => {
     ],
   };
 
+  const getViewBadge = () => {
+    if (adminView === 'mine') return 'My Calls';
+    if (adminView === 'all') return 'Platform Total';
+    return `User: ${selectedUserName || '...'}`;
+  };
+
   return (
     <PageContainer>
       <div className="analysis-page">
         {/* View Toggle — only shown to admin */}
         {isAdmin && (
           <Card className="analysis-toggle-card" bodyStyle={{ padding: '16px 20px' }}>
-            <div className="analysis-toggle-header">
-              <AppstoreOutlined className="analysis-toggle-icon" />
-              <span className="analysis-toggle-label">View Mode</span>
+            <div className="analysis-toggle-row">
+              <div className="analysis-toggle-left">
+                <div className="analysis-toggle-header">
+                  <AppstoreOutlined className="analysis-toggle-icon" />
+                  <span className="analysis-toggle-label">View Mode</span>
+                </div>
+                <Radio.Group
+                  value={adminView}
+                  onChange={(e) => setAdminView(e.target.value)}
+                  buttonStyle="solid"
+                  className="analysis-radio-group"
+                >
+                  <Radio.Button value="mine">
+                    <Space size={6}>
+                      <UserOutlined />
+                      <span>My Calls</span>
+                    </Space>
+                  </Radio.Button>
+                  <Radio.Button value="all">
+                    <Space size={6}>
+                      <TeamOutlined />
+                      <span>Platform Total</span>
+                    </Space>
+                  </Radio.Button>
+                  <Radio.Button value="user">
+                    <Space size={6}>
+                      <UnorderedListOutlined />
+                      <span>User Breakdown</span>
+                    </Space>
+                  </Radio.Button>
+                </Radio.Group>
+              </div>
+
+              {/* User Selector — shown only when User Breakdown is selected */}
+              {adminView === 'user' && (
+                <div className="analysis-user-selector">
+                  <span className="analysis-user-selector-label">Select User</span>
+                  <Select
+                    className="analysis-user-select"
+                    value={selectedUserId}
+                    onChange={(val) => setSelectedUserId(val)}
+                    placeholder="Choose a user"
+                    optionFilterProp="label"
+                    options={users.map((u) => ({
+                      value: u.id,
+                      label: u.userName || `User ${u.id}`,
+                    }))}
+                    style={{ minWidth: 160 }}
+                    popupMatchSelectWidth={false}
+                  />
+                </div>
+              )}
             </div>
-            <Radio.Group
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value)}
-              buttonStyle="solid"
-              className="analysis-radio-group"
-            >
-              <Radio.Button value="mine">
-                <Space size={6}>
-                  <UserOutlined />
-                  <span>My Calls</span>
-                </Space>
-              </Radio.Button>
-              <Radio.Button value="all">
-                <Space size={6}>
-                  <TeamOutlined />
-                  <span>Platform Total</span>
-                </Space>
-              </Radio.Button>
-            </Radio.Group>
           </Card>
         )}
 
@@ -141,9 +235,7 @@ const InterfaceAnalysis: React.FC = () => {
             </svg>
             <h3>Call Volume Distribution</h3>
             {isAdmin && (
-              <span className="analysis-view-badge">
-                {viewMode === 'mine' ? 'My Calls' : 'Platform Total'}
-              </span>
+              <span className="analysis-view-badge">{getViewBadge()}</span>
             )}
           </div>
           {chartData.length === 0 && !loading ? (

@@ -62,6 +62,20 @@
   margin: 0 auto 16px auto;
 }
 
+.analysis-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.analysis-toggle-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .analysis-toggle-header {
   display: flex;
   align-items: center;
@@ -124,4 +138,42 @@
   color: @primary;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* ---- User Selector ---- */
+.analysis-user-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.analysis-user-selector-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: @text-secondary;
+  white-space: nowrap;
+}
+
+.analysis-user-select {
+  .ant-select-selector {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-color: @border-mid !important;
+    border-radius: @radius-sm !important;
+    height: 36px !important;
+
+    .ant-select-selection-item {
+      color: @text-primary !important;
+      line-height: 34px !important;
+    }
+  }
+
+  &.ant-select-focused .ant-select-selector {
+    border-color: @primary !important;
+    box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.1) !important;
+  }
+
+  .ant-select-arrow {
+    color: @text-secondary !important;
+  }
 }

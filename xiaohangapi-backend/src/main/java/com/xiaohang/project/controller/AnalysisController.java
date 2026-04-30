@@ -13,12 +13,14 @@ import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 import com.xiaohang.xiaohangapicommon.common.ResultUtils;
 import com.xiaohang.xiaohangapicommon.constant.UserConstant;
 import com.xiaohang.xiaohangapicommon.model.entity.InterfaceInfo;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo;
 import com.xiaohang.xiaohangapicommon.model.vo.InterfaceInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -121,5 +123,39 @@ public class AnalysisController {
             return interfaceInfoVO;
         }).collect(Collectors.toList());
         return ResultUtils.success(result);
+    }
+
+    @GetMapping("/admin/user/{userId}/interface/invoke")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<List<InterfaceInfoVO>> listUserInvokeInterfaceInfo(@PathVariable long userId) {
+        List<UserInterfaceInfo> userInterfaceInfoList = userInterfaceInfoService.listTopInvokeInterfaceInfo(userId, 20);
+        if (userInterfaceInfoList.isEmpty()) {
+            return ResultUtils.success(List.of());
+        }
+        Map<Long, List<UserInterfaceInfo>> interfaceInfoIdObjMap = userInterfaceInfoList.stream()
+                .collect(Collectors.groupingBy(UserInterfaceInfo::getInterfaceInfoId));
+        List<InterfaceInfo> list = interfaceInfoService.lambdaQuery()
+                .in(InterfaceInfo::getId, interfaceInfoIdObjMap.keySet())
+                .eq(InterfaceInfo::getIsDelete, 0)
+                .list();
+        if (list.isEmpty()) {
+            return ResultUtils.success(List.of());
+        }
+        List<InterfaceInfoVO> result = list.stream().map(interfaceInfo -> {
+            InterfaceInfoVO interfaceInfoVO = InterfaceInfoVO.objToVo(interfaceInfo);
+            interfaceInfoVO.setTotalNum(interfaceInfoIdObjMap.get(interfaceInfo.getId()).get(0).getTotalNum());
+            return interfaceInfoVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(result);
+    }
+
+    @GetMapping("/admin/user/list")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<List<User>> listAllUsers() {
+        List<User> users = userService.lambdaQuery()
+                .eq(User::getIsDelete, 0)
+                .orderByDesc(User::getCreateTime)
+                .list();
+        return ResultUtils.success(users);
     }
 }
