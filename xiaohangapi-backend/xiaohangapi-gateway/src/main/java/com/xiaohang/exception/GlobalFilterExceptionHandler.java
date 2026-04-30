@@ -1,11 +1,11 @@
 package com.xiaohang.exception;
 
-import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaohang.xiaohangapicommon.common.BaseResponse;
 import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 import com.xiaohang.xiaohangapicommon.common.ResultUtils;
+import com.xiaohang.xiaohangapigateway.utils.Resilience4jCircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -54,11 +54,11 @@ public class GlobalFilterExceptionHandler implements ErrorWebExceptionHandler {
                     || code == ErrorCode.OPERATION_ERROR.getCode()) {
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
             }
-        } else if (ex instanceof BlockException) {
+        } else if (ex instanceof Resilience4jCircuitBreaker.CircuitBreakerOpenException) {
             status = HttpStatus.SERVICE_UNAVAILABLE;
             message = "Service temporarily unavailable, please try again later";
             response.getHeaders().add(HttpHeaders.RETRY_AFTER, "30");
-            log.warn("Sentinel BlockException caught: {}", ex.getClass().getSimpleName());
+            log.warn("Resilience4j CircuitBreakerOpenException caught: {}", ex.getMessage());
         } else if (ex instanceof ResponseStatusException) {
             status = ((ResponseStatusException) ex).getStatus();
         }

@@ -2,7 +2,6 @@ package com.xiaohang.xiaohangapigateway;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.URLUtil;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.xiaohang.exception.BusinessException;
 import com.xiaohang.xiaohangapiclientsdk.utils.SignUtils;
 import cn.hutool.core.util.StrUtil;
@@ -15,7 +14,7 @@ import com.xiaohang.xiaohangapicommon.service.InnerUserService;
 import com.xiaohang.xiaohangapigateway.config.CircuitBreakerConfig;
 import com.xiaohang.xiaohangapigateway.config.RateLimitConfig;
 import com.xiaohang.xiaohangapigateway.utils.RateLimiter;
-import com.xiaohang.xiaohangapigateway.utils.SentinelCircuitBreaker;
+import com.xiaohang.xiaohangapigateway.utils.Resilience4jCircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
@@ -36,7 +35,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -54,14 +52,14 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private final RateLimiter rateLimiter;
     private final RateLimitConfig rateLimitConfig;
-    private final SentinelCircuitBreaker sentinelCircuitBreaker;
+    private final Resilience4jCircuitBreaker resilience4jCircuitBreaker;
     private final CircuitBreakerConfig circuitBreakerConfig;
 
     public CustomGlobalFilter(RateLimiter rateLimiter, RateLimitConfig rateLimitConfig,
-                              SentinelCircuitBreaker sentinelCircuitBreaker, CircuitBreakerConfig circuitBreakerConfig) {
+                              Resilience4jCircuitBreaker resilience4jCircuitBreaker, CircuitBreakerConfig circuitBreakerConfig) {
         this.rateLimiter = rateLimiter;
         this.rateLimitConfig = rateLimitConfig;
-        this.sentinelCircuitBreaker = sentinelCircuitBreaker;
+        this.resilience4jCircuitBreaker = resilience4jCircuitBreaker;
         this.circuitBreakerConfig = circuitBreakerConfig;
     }
 
@@ -128,9 +126,8 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         InterfaceInfo interfaceInfo;
         try {
             interfaceInfo = queryInterfaceInfoWithCircuitBreaker(path, method);
-        } catch (BlockException e) {
-            log.error("Circuit breaker triggered while querying interface info for path: {}", path, e);
-            throw new BusinessException(ErrorCode.CIRCUIT_BREAKER_ERROR, "Service temporarily unavailable, please try again later");
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to query interface info", e);
             interfaceInfo = null;
@@ -187,11 +184,9 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
      */
     private boolean doCircuitBreakerCheck(String path) {
         try {
-            sentinelCircuitBreaker.execute(() -> {
-                return true;
-            });
+            resilience4jCircuitBreaker.execute(() -> true);
             return true;
-        } catch (BlockException e) {
+        } catch (Resilience4jCircuitBreaker.CircuitBreakerOpenException e) {
             log.warn("Circuit breaker pre-check triggered for path: {}", path);
             return false;
         }
@@ -200,10 +195,17 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     /**
      * Query interface info with circuit breaker protection around the Dubbo RPC call.
      */
-    private InterfaceInfo queryInterfaceInfoWithCircuitBreaker(String path, String method) throws BlockException {
-        return sentinelCircuitBreaker.execute(() -> {
-            return innerInterfaceInfoService.getInterfaceInfo(path, method);
-        });
+    private InterfaceInfo queryInterfaceInfoWithCircuitBreaker(String path, String method) {
+        try {
+            return resilience4jCircuitBreaker.execute(
+                    () -> innerInterfaceInfoService.getInterfaceInfo(path, method)
+            );
+        } catch (Resilience4jCircuitBreaker.CircuitBreakerOpenException e) {
+            log.error("Circuit breaker open while querying interface info for path: {}", path);
+            throw new BusinessException(ErrorCode.CIRCUIT_BREAKER_ERROR, "Service temporarily unavailable, please try again later");
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Failed to query interface: " + e.getMessage());
+        }
     }
 
     @Override
