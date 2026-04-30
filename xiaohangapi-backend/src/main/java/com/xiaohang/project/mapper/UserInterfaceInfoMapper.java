@@ -14,6 +14,8 @@ import java.util.List;
 */
 public interface UserInterfaceInfoMapper extends BaseMapper<UserInterfaceInfo> {
     List<UserInterfaceInfo> listTopInvokeInterfaceInfo(long currentUserid, int limit);
+
+    List<UserInterfaceInfo> listAllInvokeInterfaceInfo(int limit);
 }
 
 

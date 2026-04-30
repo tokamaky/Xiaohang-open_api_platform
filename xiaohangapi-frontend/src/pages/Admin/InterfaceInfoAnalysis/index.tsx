@@ -1,33 +1,57 @@
 import { PageContainer } from '@ant-design/pro-components';
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
-import { listTopInvokeInterfaceInfoUsingGet } from '@/services/xiaohang-backend/analysisController';
+import { Radio, Card, Space } from 'antd';
+import {
+  UserOutlined,
+  AppstoreOutlined,
+  TeamOutlined,
+} from '@ant-design/icons';
+import { listAllInvokeInterfaceInfoUsingGet, listCurrentUserInvokeInterfaceInfoUsingGet } from '@/services/xiaohang-backend/analysisController';
+import { useModel } from '@umijs/max';
 import './index.less';
 
+type ViewMode = 'mine' | 'all';
+
 const InterfaceAnalysis: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
+  const isAdmin = initialState?.loginUser?.userRole === 'admin';
+
+  const [viewMode, setViewMode] = useState<ViewMode>('mine');
   const [data, setData] = useState<API.InterfaceInfoVO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    listTopInvokeInterfaceInfoUsingGet().then((res) => {
+    setLoading(true);
+    const request = viewMode === 'mine'
+      ? listCurrentUserInvokeInterfaceInfoUsingGet()
+      : listAllInvokeInterfaceInfoUsingGet();
+    request.then((res) => {
       if (res.data) setData(res.data);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, []);
+  }, [viewMode]);
 
   const chartData = data
     .filter((item) => item.totalNum !== undefined)
     .sort((a, b) => (b.totalNum ?? 0) - (a.totalNum ?? 0))
-    .slice(0, 8)
+    .slice(0, 20)
     .map((item) => ({ name: item.name, value: item.totalNum ?? 0 }));
 
   const totalInvoke = chartData.reduce((sum, d) => sum + d.value, 0);
 
+  const chartTitle = viewMode === 'mine'
+    ? 'My API Calls'
+    : 'Platform Total Calls';
+  const chartSubtext = viewMode === 'mine'
+    ? `Top 20 interfaces I invoked · ${totalInvoke.toLocaleString()} total`
+    : `Top 20 interfaces platform-wide · ${totalInvoke.toLocaleString()} total`;
+
   const option = {
     backgroundColor: 'transparent',
     title: {
-      text: 'API Invocation Analysis',
-      subtext: `Top 8 by total calls · ${totalInvoke.toLocaleString()} total`,
+      text: chartTitle,
+      subtext: chartSubtext,
       left: 'center',
       textStyle: { color: '#E2EAF4', fontSize: 18, fontWeight: 800 },
       subtextStyle: { color: '#8892A4', fontSize: 13 },
@@ -72,7 +96,7 @@ const InterfaceAnalysis: React.FC = () => {
           scaleSize: 8,
         },
         data: chartData,
-        color: ['#00D4AA', '#00A3FF', '#00BFA0', '#5CB85C', '#F0AD4E', '#5BC0DE', '#00D4AA88', '#00A3FF88'],
+        color: ['#00D4AA', '#00A3FF', '#00BFA0', '#5CB85C', '#F0AD4E', '#5BC0DE', '#DDA0DD', '#FF6B6B', '#45B7D1', '#96CEB4', '#F0B429', '#A8E6CF'],
       },
     ],
   };
@@ -80,12 +104,47 @@ const InterfaceAnalysis: React.FC = () => {
   return (
     <PageContainer>
       <div className="analysis-page">
-        <div className="analysis-card">
+        {/* View Toggle — only shown to admin */}
+        {isAdmin && (
+          <Card className="analysis-toggle-card" bodyStyle={{ padding: '16px 20px' }}>
+            <div className="analysis-toggle-header">
+              <AppstoreOutlined className="analysis-toggle-icon" />
+              <span className="analysis-toggle-label">View Mode</span>
+            </div>
+            <Radio.Group
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value)}
+              buttonStyle="solid"
+              className="analysis-radio-group"
+            >
+              <Radio.Button value="mine">
+                <Space size={6}>
+                  <UserOutlined />
+                  <span>My Calls</span>
+                </Space>
+              </Radio.Button>
+              <Radio.Button value="all">
+                <Space size={6}>
+                  <TeamOutlined />
+                  <span>Platform Total</span>
+                </Space>
+              </Radio.Button>
+            </Radio.Group>
+          </Card>
+        )}
+
+        {/* Chart Card */}
+        <Card className="analysis-card" bodyStyle={{ padding: '20px' }}>
           <div className="analysis-header">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
             <h3>Call Volume Distribution</h3>
+            {isAdmin && (
+              <span className="analysis-view-badge">
+                {viewMode === 'mine' ? 'My Calls' : 'Platform Total'}
+              </span>
+            )}
           </div>
           {chartData.length === 0 && !loading ? (
             <div className="analysis-empty">
@@ -97,7 +156,7 @@ const InterfaceAnalysis: React.FC = () => {
           ) : (
             <ReactECharts showLoading={loading} option={option} className="analysis-chart" />
           )}
-        </div>
+        </Card>
       </div>
     </PageContainer>
   );

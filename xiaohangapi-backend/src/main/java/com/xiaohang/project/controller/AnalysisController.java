@@ -74,4 +74,52 @@ public class AnalysisController {
         }).collect(Collectors.toList());
         return ResultUtils.success(result);
     }
+
+    @GetMapping("/top/interface/invoke/all")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<List<InterfaceInfoVO>> listAllInvokeInterfaceInfo() {
+        List<UserInterfaceInfo> userInterfaceInfoList = userInterfaceInfoService.listAllInvokeInterfaceInfo(20);
+        if (userInterfaceInfoList.isEmpty()) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "No interface invocation data found");
+        }
+        Map<Long, List<UserInterfaceInfo>> interfaceInfoIdObjMap = userInterfaceInfoList.stream()
+                .collect(Collectors.groupingBy(UserInterfaceInfo::getInterfaceInfoId));
+        List<InterfaceInfo> list = interfaceInfoService.lambdaQuery()
+                .in(InterfaceInfo::getId, interfaceInfoIdObjMap.keySet())
+                .eq(InterfaceInfo::getIsDelete, 0)
+                .list();
+        if (list.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Interface information does not exist");
+        }
+        List<InterfaceInfoVO> result = list.stream().map(interfaceInfo -> {
+            InterfaceInfoVO interfaceInfoVO = InterfaceInfoVO.objToVo(interfaceInfo);
+            interfaceInfoVO.setTotalNum(interfaceInfoIdObjMap.get(interfaceInfo.getId()).get(0).getTotalNum());
+            return interfaceInfoVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(result);
+    }
+
+    @GetMapping("/user/interface/invoke")
+    public BaseResponse<List<InterfaceInfoVO>> listCurrentUserInvokeInterfaceInfo(HttpServletRequest request) {
+        long currentUserId = userService.getLoginUser(request).getId();
+        List<UserInterfaceInfo> userInterfaceInfoList = userInterfaceInfoService.listTopInvokeInterfaceInfo(currentUserId, 20);
+        if (userInterfaceInfoList.isEmpty()) {
+            return ResultUtils.success(List.of());
+        }
+        Map<Long, List<UserInterfaceInfo>> interfaceInfoIdObjMap = userInterfaceInfoList.stream()
+                .collect(Collectors.groupingBy(UserInterfaceInfo::getInterfaceInfoId));
+        List<InterfaceInfo> list = interfaceInfoService.lambdaQuery()
+                .in(InterfaceInfo::getId, interfaceInfoIdObjMap.keySet())
+                .eq(InterfaceInfo::getIsDelete, 0)
+                .list();
+        if (list.isEmpty()) {
+            return ResultUtils.success(List.of());
+        }
+        List<InterfaceInfoVO> result = list.stream().map(interfaceInfo -> {
+            InterfaceInfoVO interfaceInfoVO = InterfaceInfoVO.objToVo(interfaceInfo);
+            interfaceInfoVO.setTotalNum(interfaceInfoIdObjMap.get(interfaceInfo.getId()).get(0).getTotalNum());
+            return interfaceInfoVO;
+        }).collect(Collectors.toList());
+        return ResultUtils.success(result);
+    }
 }

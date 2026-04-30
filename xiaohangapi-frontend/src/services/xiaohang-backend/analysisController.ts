@@ -9,3 +9,19 @@ export async function listTopInvokeInterfaceInfoUsingGet(options?: { [key: strin
     ...(options || {}),
   });
 }
+
+/** listAllInvokeInterfaceInfo GET /api/analysis/top/interface/invoke/all */
+export async function listAllInvokeInterfaceInfoUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseListInterfaceInfoVO_>('/api/analysis/top/interface/invoke/all', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** listCurrentUserInvokeInterfaceInfo GET /api/analysis/user/interface/invoke */
+export async function listCurrentUserInvokeInterfaceInfoUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseListInterfaceInfoVO_>('/api/analysis/user/interface/invoke', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}

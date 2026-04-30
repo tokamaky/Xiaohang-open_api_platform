@@ -30,4 +30,13 @@
         ORDER BY totalNum DESC
             LIMIT #{limit}
     </select>
+    <select id="listAllInvokeInterfaceInfo" resultType="com.xiaohang.xiaohangapicommon.model.entity.UserInterfaceInfo">
+        SELECT u.interfaceInfoId, SUM(u.totalNum) AS totalNum
+        FROM user_interface_info u
+                 INNER JOIN interface_info i ON u.interfaceInfoId = i.id
+        WHERE i.isDelete = 0 AND u.isDelete = 0
+        GROUP BY u.interfaceInfoId
+        ORDER BY totalNum DESC
+            LIMIT #{limit}
+    </select>
 </mapper>

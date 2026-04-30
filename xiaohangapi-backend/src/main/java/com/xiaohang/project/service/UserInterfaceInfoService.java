@@ -50,4 +50,6 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
      */
     List<UserInterfaceInfo> listTopInvokeInterfaceInfo(long currentUserid, int limit);
 
+    List<UserInterfaceInfo> listAllInvokeInterfaceInfo(int limit);
+
 }
