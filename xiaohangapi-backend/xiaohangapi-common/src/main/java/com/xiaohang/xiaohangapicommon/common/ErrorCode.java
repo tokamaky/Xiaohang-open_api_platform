@@ -16,7 +16,8 @@ public enum ErrorCode {
     FORBIDDEN_ERROR(40300, "Access Denied"),
     SYSTEM_ERROR(50000, "System internal abnormality"),
     OPERATION_ERROR(50001, "Operation failed"),
-    RATE_LIMIT_ERROR(42900, "Rate limit exceeded, please try again later");
+    RATE_LIMIT_ERROR(42900, "Rate limit exceeded, please try again later"),
+    CIRCUIT_BREAKER_ERROR(50300, "Service temporarily unavailable, please try again later");
 
     private final int code;
 

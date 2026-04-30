@@ -2,6 +2,7 @@ package com.xiaohang.xiaohangapigateway;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.URLUtil;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.xiaohang.exception.BusinessException;
 import com.xiaohang.xiaohangapiclientsdk.utils.SignUtils;
 import cn.hutool.core.util.StrUtil;
@@ -11,11 +12,15 @@ import com.xiaohang.xiaohangapicommon.model.entity.User;
 import com.xiaohang.xiaohangapicommon.service.InnerInterfaceInfoService;
 import com.xiaohang.xiaohangapicommon.service.InnerUserInterfaceInfoService;
 import com.xiaohang.xiaohangapicommon.service.InnerUserService;
+import com.xiaohang.xiaohangapigateway.config.CircuitBreakerConfig;
 import com.xiaohang.xiaohangapigateway.config.RateLimitConfig;
 import com.xiaohang.xiaohangapigateway.utils.RateLimiter;
+import com.xiaohang.xiaohangapigateway.utils.SentinelCircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -29,12 +34,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,10 +54,15 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private final RateLimiter rateLimiter;
     private final RateLimitConfig rateLimitConfig;
+    private final SentinelCircuitBreaker sentinelCircuitBreaker;
+    private final CircuitBreakerConfig circuitBreakerConfig;
 
-    public CustomGlobalFilter(RateLimiter rateLimiter, RateLimitConfig rateLimitConfig) {
+    public CustomGlobalFilter(RateLimiter rateLimiter, RateLimitConfig rateLimitConfig,
+                              SentinelCircuitBreaker sentinelCircuitBreaker, CircuitBreakerConfig circuitBreakerConfig) {
         this.rateLimiter = rateLimiter;
         this.rateLimitConfig = rateLimitConfig;
+        this.sentinelCircuitBreaker = sentinelCircuitBreaker;
+        this.circuitBreakerConfig = circuitBreakerConfig;
     }
 
     private static final String DYE_DATA_HEADER = "X-Dye-Data";
@@ -115,9 +121,16 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
             throw new BusinessException(ErrorCode.RATE_LIMIT_ERROR, "Rate limit exceeded, please try again later");
         }
 
+        if (!doCircuitBreakerCheck(path)) {
+            throw new BusinessException(ErrorCode.CIRCUIT_BREAKER_ERROR, "Service temporarily unavailable, please try again later");
+        }
+
         InterfaceInfo interfaceInfo;
         try {
-            interfaceInfo = innerInterfaceInfoService.getInterfaceInfo(path, method);
+            interfaceInfo = queryInterfaceInfoWithCircuitBreaker(path, method);
+        } catch (BlockException e) {
+            log.error("Circuit breaker triggered while querying interface info for path: {}", path, e);
+            throw new BusinessException(ErrorCode.CIRCUIT_BREAKER_ERROR, "Service temporarily unavailable, please try again later");
         } catch (Exception e) {
             log.error("Failed to query interface info", e);
             interfaceInfo = null;
@@ -166,6 +179,31 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         }
 
         return true;
+    }
+
+    /**
+     * Pre-check circuit breaker before invoking backend.
+     * Throws CircuitBreakerOpenException if the circuit is open.
+     */
+    private boolean doCircuitBreakerCheck(String path) {
+        try {
+            sentinelCircuitBreaker.execute(() -> {
+                return true;
+            });
+            return true;
+        } catch (BlockException e) {
+            log.warn("Circuit breaker pre-check triggered for path: {}", path);
+            return false;
+        }
+    }
+
+    /**
+     * Query interface info with circuit breaker protection around the Dubbo RPC call.
+     */
+    private InterfaceInfo queryInterfaceInfoWithCircuitBreaker(String path, String method) throws BlockException {
+        return sentinelCircuitBreaker.execute(() -> {
+            return innerInterfaceInfoService.getInterfaceInfo(path, method);
+        });
     }
 
     @Override

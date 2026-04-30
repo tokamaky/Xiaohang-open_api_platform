@@ -1,5 +1,6 @@
 package com.xiaohang.exception;
 
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaohang.xiaohangapicommon.common.BaseResponse;
@@ -43,6 +44,9 @@ public class GlobalFilterExceptionHandler implements ErrorWebExceptionHandler {
             if (code == ErrorCode.RATE_LIMIT_ERROR.getCode()) {
                 status = HttpStatus.TOO_MANY_REQUESTS;
                 response.getHeaders().add(HttpHeaders.RETRY_AFTER, "60");
+            } else if (code == ErrorCode.CIRCUIT_BREAKER_ERROR.getCode()) {
+                status = HttpStatus.SERVICE_UNAVAILABLE;
+                response.getHeaders().add(HttpHeaders.RETRY_AFTER, "30");
             } else if (code == ErrorCode.NOT_LOGIN_ERROR.getCode()
                     || code == ErrorCode.NOT_FOUND_ERROR.getCode()) {
                 status = HttpStatus.NOT_FOUND;
@@ -50,6 +54,11 @@ public class GlobalFilterExceptionHandler implements ErrorWebExceptionHandler {
                     || code == ErrorCode.OPERATION_ERROR.getCode()) {
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
             }
+        } else if (ex instanceof BlockException) {
+            status = HttpStatus.SERVICE_UNAVAILABLE;
+            message = "Service temporarily unavailable, please try again later";
+            response.getHeaders().add(HttpHeaders.RETRY_AFTER, "30");
+            log.warn("Sentinel BlockException caught: {}", ex.getClass().getSimpleName());
         } else if (ex instanceof ResponseStatusException) {
             status = ((ResponseStatusException) ex).getStatus();
         }

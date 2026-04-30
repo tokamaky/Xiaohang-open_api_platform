@@ -30,6 +30,19 @@ rate-limit:
   global:
     max-requests: 1000
     window-seconds: 60
+
+# 熔断降级配置
+circuit-breaker:
+  # 慢调用阈值（毫秒），超过此值的调用被视为慢调用
+  slow-call-duration-ms: 2000
+  # 慢调用比例阈值（0.0-1.0），超过此比例时熔断器打开
+  slow-call-ratio-threshold: 0.5
+  # 错误比例阈值（0.0-1.0），超过此比例时熔断器打开
+  error-ratio-threshold: 0.5
+  # 熔断器打开的最小请求数
+  min-request-amount: 5
+  # 熔断器打开后的等待时间（秒）
+  wait-duration-in-open-state-seconds: 30
 #          uri: http://localhost:8123
 #          predicates:
 #            - Path=/api/**
