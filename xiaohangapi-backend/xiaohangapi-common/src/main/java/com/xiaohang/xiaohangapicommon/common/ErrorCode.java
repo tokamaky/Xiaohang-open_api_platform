@@ -15,7 +15,8 @@ public enum ErrorCode {
     NOT_FOUND_ERROR(40400, "The requested data does not exist"),
     FORBIDDEN_ERROR(40300, "Access Denied"),
     SYSTEM_ERROR(50000, "System internal abnormality"),
-    OPERATION_ERROR(50001, "Operation failed");
+    OPERATION_ERROR(50001, "Operation failed"),
+    RATE_LIMIT_ERROR(42900, "Rate limit exceeded, please try again later");
 
     private final int code;
 

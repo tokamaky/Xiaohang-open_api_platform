@@ -7,13 +7,29 @@ spring:
     gateway:
       routes:
         - id: api_route
-          uri:  ${GATEWAY_INTERFACE_URL:https://interface-production-b00a.up.railway.app}
-
+          uri: ${GATEWAY_INTERFACE_URL:https://interface-production-b00a.up.railway.app}
           predicates:
             - Path=/**
-    autoconfigure:
-      exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-#        - id: add_request_header_route
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    password: ${SPRING_REDIS_PASSWORD:}
+    database: 0
+
+# 限流配置
+rate-limit:
+  # 每用户每分钟最大请求数（基于 accessKey）
+  user:
+    max-requests: 100
+    window-seconds: 60
+  # 每接口每分钟最大请求数
+  interface:
+    max-requests: 50
+    window-seconds: 60
+  # 全局限流（所有请求共享）
+  global:
+    max-requests: 1000
+    window-seconds: 60
 #          uri: http://localhost:8123
 #          predicates:
 #            - Path=/api/**
