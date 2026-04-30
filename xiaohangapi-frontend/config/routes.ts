@@ -36,5 +36,6 @@
   },
   { name: 'User Center', icon: 'UserOutlined', path: '/profile', component: './User/Profile' },
   { name: 'Author To Do', icon: 'RobotOutlined', path: '/Todo', component: './Infomation/Todo' },
+  { name: 'Devlog', icon: 'HistoryOutlined', path: '/Devlog', component: './Devlog' },
   { path: '*', layout: false, component: './404' },
 ];
