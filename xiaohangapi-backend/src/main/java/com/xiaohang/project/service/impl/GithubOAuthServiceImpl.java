@@ -1,6 +1,7 @@
 package com.xiaohang.project.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xiaohang.project.exception.BusinessException;
 import com.xiaohang.project.service.GithubOAuthService;
@@ -237,8 +238,8 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
 
     private User createGithubUser(String githubId, String githubLogin, String githubAvatar) {
         String userAccount = "github_" + githubLogin;
-        String accessKey = cn.hutool.core.util.DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(5));
-        String secretKey = cn.hutool.core.util.DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
+        String accessKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(5));
+        String secretKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
 
         User user = new User();
         user.setUserAccount(userAccount);

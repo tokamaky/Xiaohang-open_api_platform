@@ -52,5 +52,10 @@ public class LoginUserVO implements Serializable {
      */
     private String githubId;
 
+    /**
+     * JWT token (for OAuth login)
+     */
+    private String token;
+
     private static final long serialVersionUID = 1L;
 }
