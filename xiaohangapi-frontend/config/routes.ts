@@ -35,7 +35,14 @@
     ],
   },
   { name: 'User Center', icon: 'UserOutlined', path: '/profile', component: './User/Profile' },
-  { name: 'Devlog', icon: 'HistoryOutlined', path: '/Devlog', component: './Devlog', access: 'canAdmin' },
-  { name: 'Author To Do', icon: 'RobotOutlined', path: '/Todo', component: './Infomation/Todo', access: 'canAdmin' },
+  { name: 'Devlog', icon: 'HistoryOutlined', path: '/Devlog', component: './Devlog' },
+  {
+    name: 'Author To Do',
+    icon: 'RobotOutlined',
+    path: '/Todo',
+    component: './Infomation/Todo',
+    access: 'canSeeTodo',
+    hideInMenu: true,
+  },
   { path: '*', layout: false, component: './404' },
 ];

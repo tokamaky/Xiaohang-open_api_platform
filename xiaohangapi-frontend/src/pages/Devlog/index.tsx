@@ -159,6 +159,66 @@ const phases: Phase[] = [
       'Circuit breaking and rate limiting are complementary: rate limiting protects against traffic spikes and resource exhaustion, while circuit breaking protects against downstream failures. Together they form the two pillars of gateway resilience.',
     ],
   },
+  {
+    key: 'phase-3',
+    phase: 'Phase 3',
+    date: '2026/04/30',
+    title: 'GitHub OAuth Integration',
+    subtitle: 'Seamless social login with account linking support',
+    icon: <RobotOutlined />,
+    color: '#00A3FF',
+    features: [
+      {
+        title: 'Stateless OAuth 2.0 Flow with CSRF Protection',
+        description:
+          'Implemented a server-side GitHub OAuth 2.0 flow without relying on Spring Security\'s built-in session-based OAuth login. Each authorization request generates a cryptographically random 32-digit CSRF token (state parameter) and encodes the frontend return URL into the state, preventing cross-site request forgery attacks. The state parameter is passed through GitHub\'s redirect and decoded on callback to restore the original navigation context.',
+        tag: 'OAuth 2.0 + CSRF',
+        tagColor: '#FF6B6B',
+      },
+      {
+        title: 'Token Exchange & User Info Retrieval',
+        description:
+          'After GitHub redirects back with an authorization code, the backend exchanges it for an access token via a POST to GitHub\'s token endpoint (client_id + client_secret + code). The access token is then used to fetch the authenticated user\'s public profile from GitHub\'s /user endpoint — retrieving the GitHub ID, login name, and avatar URL — entirely server-side without exposing credentials to the browser.',
+        tag: 'Token Exchange',
+        tagColor: '#4ECDC4',
+      },
+      {
+        title: 'Account Linking for Existing Users',
+        description:
+          'When a logged-in user clicks "Link GitHub", the OAuth flow binds their existing account to a GitHub ID without creating a new account. The backend detects the existing session (via JWT cookie), updates the user record with the GitHub ID, and returns the updated user profile. If the GitHub account is already linked to a different user, an error is thrown to prevent account hijacking.',
+        tag: 'Account Binding',
+        tagColor: '#F0B429',
+      },
+      {
+        title: 'Auto-Registration for New Users',
+        description:
+          'If no existing session and no existing account matches the GitHub ID, the system auto-registers a new account: generating a username from the GitHub login name, setting a random avatar from GitHub, and issuing a JWT token. The new user lands on the frontend already authenticated — no password required, no friction. The GitHub ID is stored as a unique column in the User entity, ensuring one GitHub account maps to one platform account.',
+        tag: 'Auto-Register',
+        tagColor: '#45B7D1',
+      },
+      {
+        title: 'Session-Based OAuth Result Relay',
+        description:
+          'Since OAuth callbacks are server-side redirects (not fetch/XHR), the OAuth result cannot be returned directly to the frontend via a response body. Instead, the backend stores the LoginUserVO in the HTTP session after processing the callback, then redirects to the frontend URL with a ?__oauth_done=1 marker. The frontend polls /api/oauth/github/result to retrieve the session-stored result, completing the round-trip transparently.',
+        tag: 'Session Relay',
+        tagColor: '#9B59B6',
+      },
+      {
+        title: 'Flexible Callback URL with Environment Variable',
+        description:
+          'The GitHub OAuth callback URL is constructed dynamically using a BACKEND_HOST environment variable, supporting multiple deployment environments (local, Railway production) without code changes. The host string is normalized — stripping any leading protocol prefix or trailing slash — before being reconstructed as https://host/api/oauth/github/callback to match the registered GitHub App redirect URI exactly.',
+        tag: 'Env-Driven Config',
+        tagColor: '#96CEB4',
+      },
+    ],
+    learnings: [
+      'The OAuth state parameter is not just a CSRF token — it can carry payload. Encoding the frontend redirect URL into state avoids the need for a separate session lookup to restore navigation context after the callback.',
+      'Social login UX has three distinct cases: (1) existing user linking a new identity, (2) returning user logging in with social account, (3) new user registering via social account. All three must be handled correctly or users get frustrated or accounts get duplicated.',
+      'GitHub\'s redirect_uri matching is strict — it requires an exact match including protocol and path. A trailing slash or www vs non-www difference will cause a redirect_uri mismatch error. Always normalize the callback URL before registration and use environment variables to manage per-environment URIs.',
+      'OAuth callbacks are HTTP redirects, not API calls. This means the backend cannot return JSON to the frontend directly — you need a relay mechanism. Session storage + frontend polling is the simplest approach; WebSocket or postMessage could be alternatives for SPA-specific flows.',
+      'Storing githubId as a nullable unique column on the User table works cleanly for both password-based and OAuth-only accounts. Just ensure the uniqueness constraint handles NULL values correctly (MySQL treats multiple NULLs as non-conflicting in unique indexes).',
+    ],
+  },
 ];
 
 const Changelog: React.FC = () => {
@@ -185,17 +245,17 @@ const Changelog: React.FC = () => {
             <Divider className="cl-header-divider" />
             <div className="cl-header-stats">
               <div className="cl-stat">
-                <span className="cl-stat-number">2</span>
+                <span className="cl-stat-number">3</span>
                 <span className="cl-stat-label">Phase Completed</span>
               </div>
               <div className="cl-stat-sep" />
               <div className="cl-stat">
-                <span className="cl-stat-number">12</span>
+                <span className="cl-stat-number">18</span>
                 <span className="cl-stat-label">Features Added</span>
               </div>
               <div className="cl-stat-sep" />
               <div className="cl-stat">
-                <span className="cl-stat-number">10</span>
+                <span className="cl-stat-number">15</span>
                 <span className="cl-stat-label">Key Learnings</span>
               </div>
             </div>
@@ -298,19 +358,14 @@ const Changelog: React.FC = () => {
               </Title>
             </div>
             <Paragraph className="cl-future-desc">
-              Phases 2, 3, 4, and 5 are planned. Each will follow the same structure: a
+              Phases 4 and 5 are planned. Each will follow the same structure: a
               problem statement, implementation details, and real technical insights gained
               from building.
             </Paragraph>
             <div className="cl-future-list">
               <div className="cl-future-item">
-                <span className="cl-future-item-num">03</span>
-                <span className="cl-future-item-name">SkyWalking Distributed Tracing</span>
-                <Tag color="default">Planned</Tag>
-              </div>
-              <div className="cl-future-item">
                 <span className="cl-future-item-num">04</span>
-                <span className="cl-future-item-name">GitHub Actions CI/CD Pipeline</span>
+                <span className="cl-future-item-name">SkyWalking Distributed Tracing</span>
                 <Tag color="default">Planned</Tag>
               </div>
               <div className="cl-future-item">

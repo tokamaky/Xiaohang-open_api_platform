@@ -486,8 +486,8 @@ const Login: React.FC = () => {
             )}
 
             <Alert
-              message="Database wake-up notice"
-              description="If you see a database error on first login, give it a moment to initialize — then try again."
+              message="First-time login tip"
+              description="The backend runs on a serverless platform. After 10 minutes of inactivity, the service enters a sleep state and will automatically wake up on the next request — the first request after waking may take a few seconds. Just try to login again after a few seconds."
               type="info"
               showIcon
               icon={<DatabaseOutlined />}
