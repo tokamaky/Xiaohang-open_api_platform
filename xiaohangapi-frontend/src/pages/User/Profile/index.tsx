@@ -62,8 +62,8 @@ const Profile: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('__oauth_done') === '1') {
       getUserInfo();
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState({}, '', cleanUrl);
+      const cleanPath = window.location.pathname.replace(/^(.+?)(_\d+)?$/, '$1');
+      window.history.replaceState({}, '', cleanPath);
     }
   }, []);
 
