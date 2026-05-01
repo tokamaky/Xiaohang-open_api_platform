@@ -44,6 +44,8 @@ xiaohang:
   jwt:
     secret: ${JWT_SECRET:xiaohang-api-platform-secret-key-change-in-production}
     expiration-ms: 604800000
+  gateway:
+    host: ${GATEWAY_HOST:https://gateway-production-b0f7.up.railway.app}
 server:
   port: 7529
   servlet:
@@ -62,10 +64,6 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
-
-xiaohang:
-  gateway:
-    host: ${GATEWAY_HOST:https://gateway-production-b0f7.up.railway.app}
 
 #xiaohangapi:
 #  client:
