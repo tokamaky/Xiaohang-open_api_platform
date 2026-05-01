@@ -3,6 +3,9 @@ import {
     updateSecretKeyUsingPost,
     updateUserUsingPost,
     userLoginUsingPost,
+    getGithubAuthUrlUsingGet,
+    bindGithubUsingPost,
+    unbindGithubUsingPost,
 } from '@/services/xiaohang-backend/userController';
 import {useModel} from '@@/exports';
 import {
@@ -15,9 +18,12 @@ import {
     UnlockOutlined,
     UserOutlined,
     VerifiedOutlined,
+    GithubOutlined,
+    LinkOutlined,
+    DisconnectOutlined,
 } from '@ant-design/icons';
 import {PageContainer, ProForm, ProFormInstance, ProFormText} from '@ant-design/pro-components';
-import {Button, Card, Col, Divider, message, Modal, Row, Typography, Upload, UploadFile, UploadProps} from 'antd';
+import {Button, Card, Divider, message, Modal, Typography, Upload, UploadFile, UploadProps, Tag} from 'antd';
 import {RcFile, UploadChangeParam} from 'antd/es/upload';
 import React, {useEffect, useRef, useState} from 'react';
 import './index.less';
@@ -53,12 +59,25 @@ const Profile: React.FC = () => {
   };
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('__oauth_done') === '1') {
+      // OAuth flow completed — reload user data
+      const userId = initialState?.loginUser?.id;
+      if (userId) {
+        getUserInfo(userId);
+      }
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
+  }, []);
+
+  useEffect(() => {
     try {
       getUserInfo(initialState?.loginUser?.id);
     } catch (e: any) {
       console.log(e);
     }
-  }, []);
+  }, [initialState?.loginUser?.id]);
 
   const showSecretKey = async () => {
     let userPassword = formRef?.current?.getFieldValue('userPassword');
@@ -162,6 +181,68 @@ const Profile: React.FC = () => {
               <span className="info-icon"><FieldTimeOutlined /></span>
               <span className="info-label">Registered</span>
               <span className="info-value">{data?.createTime ? new Date(data.createTime).toLocaleDateString() : '—'}</span>
+            </div>
+
+            {/* GitHub Binding */}
+            <div className="info-row">
+              <span className="info-icon"><GithubOutlined /></span>
+              <span className="info-label">GitHub</span>
+              <span className="info-value">
+                {data?.githubId ? (
+                  <Tag color="green" icon={<GithubOutlined />}>Linked</Tag>
+                ) : (
+                  <Tag color="default" icon={<GithubOutlined />}>Not linked</Tag>
+                )}
+              </span>
+            </div>
+
+            {/* GitHub Link / Unlink Button */}
+            <div className="info-row" style={{ marginTop: 8 }}>
+              <span className="info-icon" />
+              <span className="info-value" style={{ paddingLeft: 0 }}>
+                {data?.githubId ? (
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DisconnectOutlined />}
+                    onClick={async () => {
+                      try {
+                        const res = await unbindGithubUsingPost();
+                        if (res.code === 0) {
+                          message.success('GitHub account unlinked');
+                          getUserInfo(data?.id);
+                        }
+                      } catch (e: any) {
+                        message.error(e?.message || 'Failed to unlink GitHub');
+                      }
+                    }}
+                  >
+                    Unlink GitHub
+                  </Button>
+                ) : (
+                  <Button
+                    size="small"
+                    icon={<LinkOutlined />}
+                    onClick={async () => {
+                      try {
+                        const currentUrl = encodeURIComponent(window.location.href.split('?')[0]);
+                        const res = await (window as any).fetch(
+                          `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${currentUrl}`
+                        ).then(r => r.json());
+                        if (res.data) {
+                          window.location.href = res.data;
+                        } else {
+                          message.error(res.message || 'Failed to get GitHub auth URL');
+                        }
+                      } catch (e) {
+                        message.error('Failed to connect to GitHub');
+                      }
+                    }}
+                  >
+                    Link GitHub
+                  </Button>
+                )}
+              </span>
             </div>
           </div>
         </Card>

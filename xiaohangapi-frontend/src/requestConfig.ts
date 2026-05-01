@@ -31,21 +31,23 @@ export const requestConfig: RequestConfig = {
 
   // 请求拦截器
   requestInterceptors: [
-    // (config: RequestOptions) => {
-    //   // 拦截请求配置，进行个性化处理。
-    //   const url = config?.url?.concat('?token = 123');
-    //   return { ...config, url };
-    // },
+    (config: RequestOptions) => {
+      // Inject JWT token from localStorage if present (used by GitHub OAuth login)
+      const token = localStorage.getItem('oauth_token');
+      if (token && config.headers) {
+        config.headers['Authorization'] = 'Bearer ' + token;
+      }
+      return { ...config };
+    },
   ],
 
   // 响应拦截器
   responseInterceptors: [
     (response) => {
-      // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
 
       if (data.code !== 0 && data.code !== 40102) {
-        message.error(data.message).then(r => {})
+        message.error(data.message).then(r => {});
       }
       return response;
     },

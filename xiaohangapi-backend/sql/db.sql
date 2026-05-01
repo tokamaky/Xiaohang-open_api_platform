@@ -62,6 +62,7 @@ CREATE TABLE `user` (
                         `userRole` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'user' COMMENT 'User role: user/admin/ban',
                         `accessKey` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Access key',
                         `secretKey` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Secret key',
+                        `githubId` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'GitHub OpenID',
                         `createTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
                         `updateTime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update time',
                         `isDelete` tinyint NOT NULL DEFAULT 0 COMMENT 'Is deleted (0 - not deleted, 1 - deleted)',
@@ -107,6 +108,9 @@ INSERT INTO `user_interface_info` VALUES (16, 1667508636207661058, 33, 2, 999999
 INSERT INTO `user_interface_info` VALUES (17, 1667508636207661058, 34, 3, 99999996, 0, '2023-07-10 23:57:23', '2023-07-11 00:06:14', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- Migration: add githubId column if not exists (run this on existing databases)
+ALTER TABLE `user` ADD COLUMN `githubId` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'GitHub OpenID' AFTER `secretKey`;
 
 
 

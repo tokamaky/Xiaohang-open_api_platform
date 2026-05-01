@@ -29,6 +29,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseString_ = {
+    code?: number;
+    data?: string;
+    message?: string;
+  };
+
   type BaseResponseObject_ = {
     code?: number;
     data?: Record<string, any>;
@@ -187,7 +193,9 @@ declare namespace API {
 
   type LoginUserVO = {
     createTime?: string;
+    githubId?: string;
     id?: number;
+    token?: string;
     updateTime?: string;
     userAvatar?: string;
     userName?: string;
@@ -368,6 +376,7 @@ declare namespace API {
   type UserVO = {
     accessKey?: string;
     createTime?: string;
+    githubId?: string;
     id?: number;
     secretKey?: string;
     userAccount?: string;

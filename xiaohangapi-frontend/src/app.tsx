@@ -5,12 +5,15 @@ import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import React from 'react';
 import defaultSettings from '../config/defaultSettings';
-import {getLoginUserUsingGet} from "@/services/xiaohang-backend/userController";
-import {requestConfig} from "@/requestConfig";
+import { getLoginUserUsingGet, getOAuthResultUsingGet } from '@/services/xiaohang-backend/userController';
+import { requestConfig } from '@/requestConfig';
 import { LinkedinOutlined, GlobalOutlined, MailOutlined } from '@ant-design/icons';
+import { message } from 'antd';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
+
+const OAUTH_TOKEN_KEY = 'oauth_token';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -25,16 +28,52 @@ export async function getInitialState(): Promise<InitialState> {
     }
     return undefined;
   };
-  // 如果不是登录页面，执行
+
   const { location } = history;
-  if (location.pathname !== loginPath) {
-    const loginUser = await getLoginUserUsingGet();
-    return {
-      fetchUserInfo,
-      loginUser: loginUser.data,
-      settings: defaultSettings as Partial<LayoutSettings>,
-    };
+  const urlParams = new URLSearchParams(location.search);
+
+  // --- Handle GitHub OAuth callback ---
+  if (urlParams.get('__oauth_done') === '1') {
+    try {
+      const result = await getOAuthResultUsingGet();
+      if (result.data?.token) {
+        localStorage.setItem(OAUTH_TOKEN_KEY, result.data.token);
+      }
+      if (result.data) {
+        const cleanUrl = location.pathname;
+        history.push(cleanUrl);
+        return {
+          fetchUserInfo,
+          loginUser: result.data,
+          settings: defaultSettings as Partial<LayoutSettings>,
+        };
+      }
+    } catch (e) {
+      message.error('GitHub login failed. Please try again.');
+    }
+    history.push(loginPath);
   }
+
+  if (urlParams.get('__oauth_error') === '1') {
+    const errorMsg = urlParams.get('error') || 'GitHub OAuth failed';
+    message.error(decodeURIComponent(errorMsg));
+    history.push(loginPath);
+  }
+
+  // --- Normal flow ---
+  if (location.pathname !== loginPath) {
+    try {
+      const loginUser = await getLoginUserUsingGet();
+      return {
+        fetchUserInfo,
+        loginUser: loginUser.data,
+        settings: defaultSettings as Partial<LayoutSettings>,
+      };
+    } catch {
+      history.push(loginPath);
+    }
+  }
+
   return {
     fetchUserInfo,
     settings: defaultSettings as Partial<LayoutSettings>,

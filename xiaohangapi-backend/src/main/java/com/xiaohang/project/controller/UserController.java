@@ -10,6 +10,7 @@ import com.xiaohang.xiaohangapicommon.common.*;
 import com.xiaohang.xiaohangapicommon.constant.UserConstant;
 import com.xiaohang.xiaohangapicommon.model.dto.user.*;
 import com.xiaohang.xiaohangapicommon.model.entity.User;
+import com.xiaohang.project.service.GithubOAuthService;
 import com.xiaohang.project.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,9 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private GithubOAuthService githubOAuthService;
 
     // region Login-related
 
@@ -281,5 +285,33 @@ public class UserController {
         boolean result = userService.updateSecretKey(idRequest.getId());
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * Bind GitHub account to current user
+     *
+     * @param githubId GitHub user ID
+     * @param request  HTTP request
+     * @return Response with the result
+     */
+    @PostMapping("/bind/github")
+    public BaseResponse<Boolean> bindGithub(@RequestBody IdRequest githubId, HttpServletRequest request) {
+        if (githubId == null || githubId.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = githubOAuthService.bindGithubAccount(request, String.valueOf(githubId.getId()));
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * Unbind GitHub account from current user
+     *
+     * @param request HTTP request
+     * @return Response with the result
+     */
+    @PostMapping("/unbind/github")
+    public BaseResponse<Boolean> unbindGithub(HttpServletRequest request) {
+        boolean result = githubOAuthService.unbindGithubAccount(request);
+        return ResultUtils.success(result);
     }
 }

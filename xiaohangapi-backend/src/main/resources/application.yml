@@ -24,6 +24,26 @@ spring:
     port: ${SPRING_REDIS_PORT:6379}
     password: ${SPRING_REDIS_PASSWORD:}
     database: 0
+  # GitHub OAuth2 配置
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GITHUB_CLIENT_ID:}
+            client-secret: ${GITHUB_CLIENT_SECRET:}
+            scope: read:user,user:email
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
+
+xiaohang:
+  jwt:
+    secret: ${JWT_SECRET:xiaohang-api-platform-secret-key-change-in-production}
+    expiration-ms: 604800000
 server:
   port: 7529
   servlet:

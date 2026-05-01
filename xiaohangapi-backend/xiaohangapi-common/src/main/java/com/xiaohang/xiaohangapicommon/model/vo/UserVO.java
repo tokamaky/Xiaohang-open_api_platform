@@ -54,6 +54,11 @@ public class UserVO implements Serializable {
     private String secretKey;
 
     /**
+     * GitHub ID (if linked)
+     */
+    private String githubId;
+
+    /**
      * Creation time
      */
     private Date createTime;

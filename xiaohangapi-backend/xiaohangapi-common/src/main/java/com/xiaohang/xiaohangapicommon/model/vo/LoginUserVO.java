@@ -47,5 +47,10 @@ public class LoginUserVO implements Serializable {
      */
     private Date updateTime;
 
+    /**
+     * GitHub ID (if linked)
+     */
+    private String githubId;
+
     private static final long serialVersionUID = 1L;
 }

@@ -66,6 +66,11 @@ public class User implements Serializable {
     private String secretKey;
 
     /**
+     * GitHub OpenID
+     */
+    private String githubId;
+
+    /**
      * Creation time
      */
     private Date createTime;

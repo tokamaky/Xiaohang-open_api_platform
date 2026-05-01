@@ -179,3 +179,46 @@ export async function updateSecretKeyUsingPost(
     ...(options || {}),
   });
 }
+
+/** getGithubAuthUrl GET /api/oauth/github/url */
+export async function getGithubAuthUrlUsingGet(
+  params: { redirectUrl: string },
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseString_>('/api/oauth/github/url', {
+    method: 'GET',
+    params,
+    ...(options || {}),
+  });
+}
+
+/** getOAuthResult GET /api/oauth/github/result */
+export async function getOAuthResultUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLoginUserVO_>('/api/oauth/github/result', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** bindGithub POST /api/user/bind/github */
+export async function bindGithubUsingPost(
+  body: API.IdRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/bind/github', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** unbindGithub POST /api/user/unbind/github */
+export async function unbindGithubUsingPost(options?: { [key: string]: any }) {
+  return request<API.BaseResponseBoolean_>('/api/user/unbind/github', {
+    method: 'POST',
+    ...(options || {}),
+  });
+}
