@@ -49,6 +49,7 @@ const Profile: React.FC = () => {
   const formRef = useRef<ProFormInstance<{ userPassword: string }>>();
 
   const getUserInfo = async (id: any) => {
+    if (!id) return;
     return getUserVoByIdUsingGet({ id }).then((res) => {
       if (res.data) {
         setInitialState((s: any) => ({ ...s, loginUser: res.data }));
@@ -210,7 +211,7 @@ const Profile: React.FC = () => {
                         const res = await unbindGithubUsingPost();
                         if (res.code === 0) {
                           message.success('GitHub account unlinked');
-                          getUserInfo(data?.id);
+                          getUserInfo(initialState?.loginUser?.id);
                         }
                       } catch (e: any) {
                         message.error(e?.message || 'Failed to unlink GitHub');
