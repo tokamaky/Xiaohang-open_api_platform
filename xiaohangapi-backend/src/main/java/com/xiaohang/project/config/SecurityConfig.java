@@ -17,8 +17,8 @@ public class SecurityConfig {
             .cors().and()
             .authorizeRequests()
                 .antMatchers("/api/user/**").permitAll()
+                .antMatchers("/oauth/**").permitAll()
                 .antMatchers("/api/oauth/**").permitAll()
-                .antMatchers("/login/oauth/**").permitAll()
                 .anyRequest().permitAll();
 
         return http.build();

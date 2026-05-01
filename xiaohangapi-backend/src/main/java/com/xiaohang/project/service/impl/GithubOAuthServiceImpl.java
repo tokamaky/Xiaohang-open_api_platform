@@ -200,7 +200,7 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
         if (host.endsWith("/")) {
             host = host.substring(0, host.length() - 1);
         }
-        return "https://" + host + "/api/oauth/github/callback";
+        return "https://" + host + "/oauth/github/callback";
     }
 
     private String getBackendHost() {
