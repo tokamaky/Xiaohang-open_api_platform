@@ -3,6 +3,8 @@ package com.xiaohang.project.service.impl;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaohang.project.exception.BusinessException;
 import com.xiaohang.project.service.GithubOAuthService;
 import com.xiaohang.project.service.UserService;
@@ -20,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
@@ -202,18 +205,36 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
         body.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
-        String response = restTemplate.postForObject(GITHUB_TOKEN_URL, entity, String.class);
-
-        // Parse access_token from response (GitHub returns: access_token=xxx&...)
-        if (response == null || !response.contains("access_token=")) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Failed to exchange GitHub code for token");
+        String response;
+        try {
+            response = restTemplate.postForObject(GITHUB_TOKEN_URL, entity, String.class);
+        } catch (HttpClientErrorException e) {
+            log.error("GitHub token exchange failed: {}", e.getResponseBodyAsString());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Failed to exchange GitHub code for token: " + e.getResponseBodyAsString());
         }
 
-        String token = response.substring(response.indexOf("access_token=") + 13);
-        if (token.contains("&")) {
-            token = token.substring(0, token.indexOf("&"));
+        if (response == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "GitHub token exchange returned empty response");
         }
-        return token.trim();
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, String> tokenResponse = mapper.readValue(response,
+                    new TypeReference<Map<String, String>>() {});
+            String token = tokenResponse.get("access_token");
+            if (StringUtils.isBlank(token)) {
+                String error = tokenResponse.get("error_description");
+                log.error("GitHub token error: {}", error);
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,
+                        "Failed to exchange GitHub code for token: " + (error != null ? error : "unknown error"));
+            }
+            return token;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to parse GitHub token response: {}", response, e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Failed to parse GitHub token response");
+        }
     }
 
     private Map<String, Object> getGithubUserInfo(String accessToken) {
