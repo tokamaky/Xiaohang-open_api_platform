@@ -128,6 +128,7 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
             String token = jwtUtils.generateToken(existingUser.getId(), existingUser.getUserAccount());
             resultVO = userService.getLoginUserVO(existingUser);
             resultVO.setToken(token);
+            request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, existingUser);
         } else if (loginUser != null) {
             // Logged in user — bind GitHub account
             loginUser.setGithubId(githubId);
@@ -135,6 +136,7 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
                 loginUser.setUserAvatar(githubAvatar);
             }
             userService.updateById(loginUser);
+            request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, loginUser);
             resultVO = userService.getLoginUserVO(loginUser);
         } else {
             // New user — auto-register
@@ -164,19 +166,19 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
         boolean updated = userService.updateById(loginUser);
         if (updated) {
             request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, loginUser);
+            User refreshed = userService.getById(loginUser.getId());
+            return refreshed != null;
         }
-        return updated;
+        return false;
     }
 
     @Override
-    public boolean unbindGithubAccount(HttpServletRequest request) {
+    public LoginUserVO unbindGithubAccount(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         loginUser.setGithubId(null);
-        boolean updated = userService.updateById(loginUser);
-        if (updated) {
-            request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, loginUser);
-        }
-        return updated;
+        userService.updateById(loginUser);
+        User updated = userService.getById(loginUser.getId());
+        return userService.getLoginUserVO(updated);
     }
 
     public LoginUserVO getOAuthResult(HttpServletRequest request) {

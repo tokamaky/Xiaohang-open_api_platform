@@ -310,8 +310,8 @@ public class UserController {
      * @return Response with the result
      */
     @PostMapping("/unbind/github")
-    public BaseResponse<Boolean> unbindGithub(HttpServletRequest request) {
-        boolean result = githubOAuthService.unbindGithubAccount(request);
+    public BaseResponse<LoginUserVO> unbindGithub(HttpServletRequest request) {
+        LoginUserVO result = githubOAuthService.unbindGithubAccount(request);
         return ResultUtils.success(result);
     }
 }

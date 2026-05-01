@@ -13,5 +13,5 @@ public interface GithubOAuthService {
 
     boolean bindGithubAccount(HttpServletRequest request, String githubId);
 
-    boolean unbindGithubAccount(HttpServletRequest request);
+    LoginUserVO unbindGithubAccount(HttpServletRequest request);
 }
