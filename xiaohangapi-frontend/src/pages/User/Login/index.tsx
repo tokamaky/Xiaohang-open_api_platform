@@ -462,10 +462,9 @@ const Login: React.FC = () => {
                 onClick={async () => {
                   setLoading(true);
                   try {
-                    const currentUrl = encodeURIComponent(window.location.href.split('?')[0]);
                     const res = await (window as any).fetch(
-                      `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${currentUrl}`
-                    ).then(r => r.json());
+                      `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${encodeURIComponent('https://xiaohang-openapiplatform-production.up.railway.app/user/login')}`
+                    ).then((r: Response) => r.json());
                     if (res.data) {
                       window.location.href = res.data;
                     } else {

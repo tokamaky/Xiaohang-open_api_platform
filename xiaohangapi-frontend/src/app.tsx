@@ -40,8 +40,13 @@ export async function getInitialState(): Promise<InitialState> {
         localStorage.setItem(OAUTH_TOKEN_KEY, result.data.token);
       }
       if (result.data) {
-        const cleanUrl = location.pathname;
-        history.push(cleanUrl);
+        // Strip the GitHub ID suffix from the pathname before redirecting.
+        // This handles both /profile_<githubId> and any other <path>_<suffix> patterns.
+        let cleanPath = location.pathname.replace(/^(.+?)_\d+$/, '$1');
+        if (cleanPath === location.pathname) {
+          cleanPath = '/profile';
+        }
+        history.push(cleanPath);
         return {
           fetchUserInfo,
           loginUser: result.data,

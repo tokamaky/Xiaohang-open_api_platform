@@ -59,14 +59,6 @@ const Profile: React.FC = () => {
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('__oauth_done') === '1') {
-      getUserInfo();
-      window.history.replaceState({}, '', '/profile');
-    }
-  }, []);
-
-  useEffect(() => {
     try {
       getUserInfo();
     } catch (e: any) {
@@ -224,10 +216,9 @@ const Profile: React.FC = () => {
                     icon={<LinkOutlined />}
                     onClick={async () => {
                       try {
-                        const currentUrl = encodeURIComponent(window.location.href.split('?')[0]);
                         const res = await (window as any).fetch(
-                          `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${currentUrl}`
-                        ).then(r => r.json());
+                          `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${encodeURIComponent('https://xiaohang-openapiplatform-production.up.railway.app/profile')}`
+                        ).then((r: Response) => r.json());
                         if (res.data) {
                           window.location.href = res.data;
                         } else {
