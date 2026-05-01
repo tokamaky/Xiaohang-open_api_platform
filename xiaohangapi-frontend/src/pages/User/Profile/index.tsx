@@ -1,11 +1,11 @@
 import {
-    getUserVoByIdUsingGet,
     updateSecretKeyUsingPost,
     updateUserUsingPost,
     userLoginUsingPost,
     getGithubAuthUrlUsingGet,
     bindGithubUsingPost,
     unbindGithubUsingPost,
+    getLoginUserUsingGet,
 } from '@/services/xiaohang-backend/userController';
 import {useModel} from '@@/exports';
 import {
@@ -48,12 +48,11 @@ const Profile: React.FC = () => {
   const { initialState, setInitialState } = useModel('@@initialState');
   const formRef = useRef<ProFormInstance<{ userPassword: string }>>();
 
-  const getUserInfo = async (id: any) => {
-    if (!id) return;
-    return getUserVoByIdUsingGet({ id }).then((res) => {
+  const getUserInfo = async () => {
+    return getLoginUserUsingGet().then((res) => {
       if (res.data) {
         setInitialState((s: any) => ({ ...s, loginUser: res.data }));
-        setData(res.data);
+        setData(res.data as API.UserVO);
         setImageUrl(res.data.userAvatar);
       }
     });
@@ -62,11 +61,7 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('__oauth_done') === '1') {
-      // OAuth flow completed — reload user data
-      const userId = initialState?.loginUser?.id;
-      if (userId) {
-        getUserInfo(userId);
-      }
+      getUserInfo();
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, '', cleanUrl);
     }
@@ -74,11 +69,11 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     try {
-      getUserInfo(initialState?.loginUser?.id);
+      getUserInfo();
     } catch (e: any) {
       console.log(e);
     }
-  }, [initialState?.loginUser?.id]);
+  }, []);
 
   const showSecretKey = async () => {
     let userPassword = formRef?.current?.getFieldValue('userPassword');
@@ -93,12 +88,14 @@ const Profile: React.FC = () => {
     }
   };
 
-  const updateUserAvatar = async (id: number, userAvatar: string) => {
+  const updateUserAvatar = async (userAvatar: string) => {
+    const id = initialState?.loginUser?.id;
+    if (!id) return;
     const res = await updateUserUsingPost({ id, userAvatar });
     if (res.code !== 0) {
       message.error(`Failed to update avatar`);
     } else {
-      getUserInfo(id);
+      getUserInfo();
     }
   };
 
@@ -110,7 +107,7 @@ const Profile: React.FC = () => {
       const userAvatar = info.file.response.data.url;
       setLoading(false);
       setImageUrl(userAvatar);
-      updateUserAvatar(id, userAvatar);
+      updateUserAvatar(userAvatar);
     }
   };
 
@@ -124,7 +121,7 @@ const Profile: React.FC = () => {
       if (res.code === 0) {
         const res2 = await updateSecretKeyUsingPost({ id: data?.id });
         if (res2.data) {
-          getUserInfo(data?.id);
+          getUserInfo();
           message.success('Secret key reset successfully!');
           setOpen(false);
         }
@@ -211,7 +208,7 @@ const Profile: React.FC = () => {
                         const res = await unbindGithubUsingPost();
                         if (res.code === 0) {
                           message.success('GitHub account unlinked');
-                          getUserInfo(initialState?.loginUser?.id);
+                          getUserInfo();
                         }
                       } catch (e: any) {
                         message.error(e?.message || 'Failed to unlink GitHub');
