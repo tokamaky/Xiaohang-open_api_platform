@@ -161,14 +161,22 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
         }
 
         loginUser.setGithubId(githubId);
-        return userService.updateById(loginUser);
+        boolean updated = userService.updateById(loginUser);
+        if (updated) {
+            request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, loginUser);
+        }
+        return updated;
     }
 
     @Override
     public boolean unbindGithubAccount(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         loginUser.setGithubId(null);
-        return userService.updateById(loginUser);
+        boolean updated = userService.updateById(loginUser);
+        if (updated) {
+            request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, loginUser);
+        }
+        return updated;
     }
 
     public LoginUserVO getOAuthResult(HttpServletRequest request) {
