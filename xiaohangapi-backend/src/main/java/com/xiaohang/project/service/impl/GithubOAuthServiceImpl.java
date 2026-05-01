@@ -193,7 +193,14 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
     }
 
     private String buildCallbackUrl() {
-        return "https://" + getBackendHost() + "/api/oauth/github/callback";
+        String host = getBackendHost();
+        if (host.startsWith("http://") || host.startsWith("https://")) {
+            host = host.replaceFirst("https?://", "");
+        }
+        if (host.endsWith("/")) {
+            host = host.substring(0, host.length() - 1);
+        }
+        return "https://" + host + "/api/oauth/github/callback";
     }
 
     private String getBackendHost() {
