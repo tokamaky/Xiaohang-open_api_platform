@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -37,20 +38,19 @@ public class GithubOAuthController {
     /**
      * Get GitHub OAuth authorization URL.
      * The 'redirectUrl' param tells backend where to redirect after OAuth completes.
-     * We pass HttpServletRequest so the service can associate the CSRF token with the session.
      */
     @GetMapping("/github/url")
-    public BaseResponse<String> getGithubAuthUrl(
-            @RequestParam String redirectUrl,
-            HttpServletRequest request) {
-        String url = githubOAuthService.getGithubAuthUrl(request, redirectUrl);
+    public BaseResponse<String> getGithubAuthUrl(@RequestParam String redirectUrl) {
+        String state = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
+        String url = githubOAuthService.getGithubAuthUrl(state);
         return ResultUtils.success(url);
     }
 
     /**
      * GitHub OAuth callback — GitHub redirects here after user authorizes.
-     * Validates the CSRF state, then encodes the login result (token + user info) into the
-     * redirect URL fragment so it survives Railway serverless container switches.
+     * Encodes the login result (token + user info) into the redirect URL fragment
+     * so it survives serverless container switches. The frontend extracts it from
+     * window.location.search after the redirect.
      */
     @GetMapping("/github/callback")
     public void githubCallback(
@@ -59,19 +59,16 @@ public class GithubOAuthController {
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         try {
-            // Validate CSRF state before processing — extracts and verifies the redirect URL
-            String redirectUrl = githubOAuthServiceImpl.validateAndExtractRedirectUrl(state);
+            LoginUserVO vo = githubOAuthService.handleGithubCallback(code, request, response);
+            String redirectUrl = URLDecoder.decode(state, StandardCharsets.UTF_8);
             if (redirectUrl == null || redirectUrl.isEmpty()) {
                 redirectUrl = "/";
             }
-
-            LoginUserVO vo = githubOAuthService.handleGithubCallback(code, request, response);
-            log.info("[OAuth] Building callback payload — userAccount: {}, userName: {}, githubId: {}, token generated: true",
-                    vo.getUserAccount(), vo.getUserName(), vo.getGithubId());
-
-            // Always regenerate token here so it works regardless of which serverless
-            // container handled the callback (containers share no state).
+            // Always regenerate token here in the controller so it works regardless of
+            // which serverless container handled the callback (containers share no state).
             String token = jwtUtils.generateToken(vo.getId(), vo.getUserAccount());
+            log.info("[OAuth] Building callback payload — userAccount: {}, userName: {}, githubId: {}, token generated: {}",
+                    vo.getUserAccount(), vo.getUserName(), vo.getGithubId(), token != null);
             Map<String, Object> payload = new HashMap<>();
             payload.put("token", token);
             payload.put("userAccount", vo.getUserAccount());
@@ -86,15 +83,10 @@ public class GithubOAuthController {
             String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
             response.sendRedirect(redirectUrl + "?__oauth_done=1&__oauth_data=" + encoded);
         } catch (Exception e) {
-            log.error("GitHub OAuth callback error: {}", e.getMessage(), e);
-            String redirectUrl;
-            try {
-                redirectUrl = githubOAuthServiceImpl.extractRedirectUrlFromState(state);
-            } catch (Exception ex) {
-                redirectUrl = "/";
-            }
+            log.error("GitHub OAuth callback error: {}", e.getMessage());
+            String redirectUrl = URLDecoder.decode(state, StandardCharsets.UTF_8);
             String errorMsg = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-            String finalRedirect = redirectUrl + "?__oauth_error=1&error=" + errorMsg;
+            String finalRedirect = (redirectUrl != null ? redirectUrl : "/") + "?__oauth_error=1&error=" + errorMsg;
             response.sendRedirect(finalRedirect);
         }
     }

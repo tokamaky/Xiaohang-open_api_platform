@@ -1,7 +1,8 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
+import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
-import { history } from '@umijs/max';
+import { history, Link } from '@umijs/max';
 import React from 'react';
 import defaultSettings from '../config/defaultSettings';
 import { getLoginUserUsingGet } from '@/services/xiaohang-backend/userController';
@@ -19,49 +20,37 @@ const OAUTH_TOKEN_KEY = 'oauth_token';
  * */
 export async function getInitialState(): Promise<InitialState> {
   const { location } = history;
+  console.log('[OAuth] getInitialState running, location.search:', location.search);
+  console.log('[OAuth] window.location.href:', window.location.href);
 
   const fetchUserInfo = async () => {
     try {
       const res = await getLoginUserUsingGet();
       return res.data;
-    } catch {
-      return undefined;
+    } catch (error) {
+      history.push(loginPath);
     }
+    return undefined;
   };
 
-  // --- Step 1: Try OAuth token from localStorage first (GitHub OAuth users) ---
-  // This must come FIRST because the requestConfig interceptor injects the token
-  // into all API calls, including getLoginUserUsingGet().
-  const storedToken = localStorage.getItem(OAUTH_TOKEN_KEY);
-  if (storedToken) {
-    console.log('[Auth] Found OAuth token in localStorage, validating with API...');
-    try {
-      const res = await getLoginUserUsingGet();
-      if (res.data) {
-        console.log('[Auth] OAuth token valid, user:', res.data.userName);
-        return {
-          fetchUserInfo,
-          loginUser: res.data,
-          settings: defaultSettings as Partial<LayoutSettings>,
-        };
-      }
-    } catch (e) {
-      console.log('[Auth] OAuth token invalid or expired, clearing:', e);
-      localStorage.removeItem(OAUTH_TOKEN_KEY);
-    }
-  }
-
-  // --- Step 2: Check for GitHub OAuth callback in URL ---
-  // Backend redirects here with ?__oauth_done=1&__oauth_data=<base64>
   const urlParams = new URLSearchParams(window.location.search);
+  console.log('[OAuth] urlParams __oauth_done:', urlParams.get('__oauth_done'));
+
+  // --- Handle GitHub OAuth callback ---
+  // Login data is encoded in __oauth_data URL param (set by backend callback).
+  // This avoids relying on session which doesn't work across Railway serverless containers.
   if (urlParams.get('__oauth_done') === '1') {
     const encodedData = urlParams.get('__oauth_data');
+    console.log('[OAuth] Callback detected, encodedData:', encodedData);
     if (encodedData) {
       try {
         const json = atob(encodedData);
+        console.log('[OAuth] Decoded JSON:', json);
         const data = JSON.parse(json);
+        console.log('[OAuth] Parsed data:', data);
         if (data.token) {
           localStorage.setItem(OAUTH_TOKEN_KEY, data.token);
+          console.log('[OAuth] Token stored in localStorage');
         }
         const loginUser = {
           id: data.id,
@@ -72,48 +61,56 @@ export async function getInitialState(): Promise<InitialState> {
           userRole: data.userRole,
           githubId: data.githubId,
         };
-        // Clean OAuth params from URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete('__oauth_done');
-        url.searchParams.delete('__oauth_data');
-        window.history.replaceState(null, '', url.pathname + url.search);
-        // Re-run getInitialState so the token in localStorage is picked up
-        window.location.reload();
-        return { fetchUserInfo, loginUser, settings: defaultSettings as Partial<LayoutSettings> };
+        console.log('[OAuth] loginUser built:', loginUser);
+        // Clean the URL of OAuth params while preserving the user state.
+        // IMPORTANT: use window.location.href for redirect, NOT history.push.
+        // history.push would cause Umi to re-render SSR-side where the URL
+        // no longer has __oauth_done params, so the callback logic would never run.
+        const cleanPath = window.location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
+        const urlWithParams = new URL(window.location.href);
+        urlWithParams.searchParams.delete('__oauth_done');
+        urlWithParams.searchParams.delete('__oauth_data');
+        window.history.replaceState(null, '', urlWithParams.pathname + urlWithParams.search);
+        console.log('[OAuth] URL cleaned, redirecting to:', cleanPath);
+        if (cleanPath === window.location.pathname) {
+          // Already on target page, just reload to re-run getInitialState without OAuth params
+          window.location.reload();
+        } else {
+          window.location.href = cleanPath;
+        }
+        return {
+          fetchUserInfo,
+          loginUser,
+          settings: defaultSettings as Partial<LayoutSettings>,
+        };
       } catch (e) {
-        console.error('[Auth] Failed to decode OAuth callback data:', e);
+        console.error('[OAuth] Failed to decode callback data:', e);
       }
     }
     message.error('GitHub login failed. Please try again.');
+    history.push(loginPath);
   }
 
   if (urlParams.get('__oauth_error') === '1') {
     const errorMsg = urlParams.get('error') || 'GitHub OAuth failed';
     message.error(decodeURIComponent(errorMsg));
-    const url = new URL(window.location.href);
-    url.searchParams.delete('__oauth_error');
-    url.searchParams.delete('error');
-    window.history.replaceState(null, '', url.pathname + url.search);
+    history.push(loginPath);
   }
 
-  // --- Step 3: Try session-based login (regular users) ---
-  // Skip this for the login page itself
+  // --- Normal flow ---
   if (window.location.pathname !== loginPath) {
     try {
       const loginUser = await getLoginUserUsingGet();
-      if (loginUser.data) {
-        return {
-          fetchUserInfo,
-          loginUser: loginUser.data,
-          settings: defaultSettings as Partial<LayoutSettings>,
-        };
-      }
+      return {
+        fetchUserInfo,
+        loginUser: loginUser.data,
+        settings: defaultSettings as Partial<LayoutSettings>,
+      };
     } catch {
-      // Not logged in
+      history.push(loginPath);
     }
   }
 
-  // --- Step 4: Not logged in ---
   return {
     fetchUserInfo,
     settings: defaultSettings as Partial<LayoutSettings>,
