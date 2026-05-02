@@ -340,9 +340,28 @@ const Profile: React.FC = () => {
                     onClick={async () => {
                       try {
                         const res = await unbindGithubUsingPost();
-                        if (res.code === 0) {
+                        if (res.code === 0 && res.data) {
                           message.success('GitHub account unlinked');
-                          await getUserInfo();
+                          const unlinkedUser = res.data;
+                          // Update all state sources so UI reflects githubId=null immediately
+                          setData(unlinkedUser as API.UserVO);
+                          setImageUrl(unlinkedUser.userAvatar);
+                          setUsernameValue(unlinkedUser.userName || '');
+                          setInitialState((s: any) => ({
+                            ...s,
+                            loginUser: { ...s.loginUser, githubId: null, userAvatar: unlinkedUser.userAvatar, userName: unlinkedUser.userName },
+                          }));
+                          // Persist to sessionStorage so refresh doesn't restore old state
+                          const stored = sessionStorage.getItem(SESSION_USER_KEY);
+                          if (stored) {
+                            const parsed = JSON.parse(stored);
+                            parsed.githubId = null;
+                            parsed.userAvatar = unlinkedUser.userAvatar;
+                            parsed.userName = unlinkedUser.userName;
+                            sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(parsed));
+                          }
+                        } else {
+                          message.error(res.message || 'Failed to unlink GitHub');
                         }
                       } catch (e: any) {
                         message.error(e?.message || 'Failed to unlink GitHub');

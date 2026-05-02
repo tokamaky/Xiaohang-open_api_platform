@@ -217,7 +217,7 @@ export async function bindGithubUsingPost(
 
 /** unbindGithub POST /api/user/unbind/github */
 export async function unbindGithubUsingPost(options?: { [key: string]: any }) {
-  return request<API.BaseResponseBoolean_>('/api/user/unbind/github', {
+  return request<API.BaseResponseLoginUserVO_>('/api/user/unbind/github', {
     method: 'POST',
     ...(options || {}),
   });
