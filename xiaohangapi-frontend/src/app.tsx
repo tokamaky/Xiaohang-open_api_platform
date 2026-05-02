@@ -5,7 +5,7 @@ import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
 import React from 'react';
 import defaultSettings from '../config/defaultSettings';
-import { getLoginUserUsingGet, getOAuthResultUsingGet } from '@/services/xiaohang-backend/userController';
+import { getLoginUserUsingGet } from '@/services/xiaohang-backend/userController';
 import { requestConfig } from '@/requestConfig';
 import { LinkedinOutlined, GlobalOutlined, MailOutlined } from '@ant-design/icons';
 import { message } from 'antd';
@@ -33,29 +33,41 @@ export async function getInitialState(): Promise<InitialState> {
   const urlParams = new URLSearchParams(location.search);
 
   // --- Handle GitHub OAuth callback ---
+  // Login data is encoded in __oauth_data URL param (set by backend callback).
+  // This avoids relying on session which doesn't work across Railway serverless containers.
   if (urlParams.get('__oauth_done') === '1') {
-    try {
-      const result = await getOAuthResultUsingGet();
-      if (result.data?.token) {
-        localStorage.setItem(OAUTH_TOKEN_KEY, result.data.token);
-      }
-      if (result.data) {
-        // Strip the GitHub ID suffix from the pathname before redirecting.
-        // This handles both /profile_<githubId> and any other <path>_<suffix> patterns.
+    const encodedData = urlParams.get('__oauth_data');
+    if (encodedData) {
+      try {
+        const json = atob(encodedData);
+        const data = JSON.parse(json);
+        if (data.token) {
+          localStorage.setItem(OAUTH_TOKEN_KEY, data.token);
+        }
+        const loginUser = {
+          id: data.id,
+          token: data.token,
+          userAccount: data.userAccount,
+          userName: data.userName,
+          userAvatar: data.userAvatar,
+          userRole: data.userRole,
+          githubId: data.githubId,
+        };
         let cleanPath = location.pathname.replace(/^(.+?)_\d+$/, '$1');
         if (cleanPath === location.pathname) {
-          cleanPath = '/profile';
+          cleanPath = '/';
         }
         history.push(cleanPath);
         return {
           fetchUserInfo,
-          loginUser: result.data,
+          loginUser,
           settings: defaultSettings as Partial<LayoutSettings>,
         };
+      } catch (e) {
+        console.error('[OAuth] Failed to decode callback data:', e);
       }
-    } catch (e) {
-      message.error('GitHub login failed. Please try again.');
     }
+    message.error('GitHub login failed. Please try again.');
     history.push(loginPath);
   }
 
