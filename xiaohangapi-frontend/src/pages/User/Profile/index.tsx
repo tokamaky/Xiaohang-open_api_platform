@@ -143,7 +143,11 @@ const Profile: React.FC = () => {
           setData(oauthData as API.UserVO);
           setImageUrl(oauthData.userAvatar);
           setUsernameValue(oauthData.userName || '');
-          message.success('GitHub account linked successfully!');
+
+          // Only show "linked successfully" for link action
+          if (oauthData.oauthAction === 'link') {
+            message.success('GitHub account linked successfully!');
+          }
         } catch (e) {
           console.error('[OAuth] Failed to decode profile callback data:', e);
           await getUserInfo();
@@ -151,7 +155,6 @@ const Profile: React.FC = () => {
         }
       } else {
         await getUserInfo();
-        message.success('GitHub account linked successfully!');
       }
     };
 
@@ -515,8 +518,14 @@ const Profile: React.FC = () => {
                     icon={<LinkOutlined />}
                     onClick={async () => {
                       try {
+                        // Add action=link to distinguish from login
+                        // Pass current token in Authorization header for serverless session verification
+                        const token = localStorage.getItem('oauth_token');
+                        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                        const redirectUrl = encodeURIComponent('https://xiaohang-openapiplatform-production.up.railway.app/user/profile?oauth_action=link');
                         const res = await (window as any).fetch(
-                          `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${encodeURIComponent('https://xiaohang-openapiplatform-production.up.railway.app/user/profile')}`
+                          `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${redirectUrl}`,
+                          { headers }
                         ).then((r: Response) => r.json());
                         if (res.data) {
                           window.location.href = res.data;

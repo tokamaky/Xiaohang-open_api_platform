@@ -83,7 +83,7 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
     }
 
     @Override
-    public LoginUserVO handleGithubCallback(String code, HttpServletRequest request, HttpServletResponse response) {
+    public LoginUserVO handleGithubCallback(String code, HttpServletRequest request, HttpServletResponse response, String action) {
         if (StringUtils.isBlank(code)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "Missing authorization code");
         }
@@ -102,15 +102,60 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
         queryWrapper.eq("githubId", githubId);
         User existingUser = userService.getOne(queryWrapper);
 
-        // Check if user is already logged in via session
+        // Check if user is already logged in via session or JWT
         User loginUser = null;
         try {
             loginUser = userService.getLoginUserPermitNull(request);
         } catch (Exception ignored) {
         }
 
+        // For "link" action, check if we have a stored user ID from the initial request
+        Long storedUserId = null;
+        if ("link".equals(action)) {
+            Object storedId = request.getSession().getAttribute("oauth_link_user_id");
+            if (storedId instanceof Long) {
+                storedUserId = (Long) storedId;
+                log.info("[OAuth] Found stored link user ID in session: {}", storedUserId);
+            }
+            // Clear the stored ID after use
+            request.getSession().removeAttribute("oauth_link_user_id");
+        }
+
         LoginUserVO resultVO;
 
+        // If this is a "link" action
+        if ("link".equals(action)) {
+            // First priority: use stored user ID from session (most reliable for serverless)
+            if (storedUserId != null) {
+                loginUser = userService.getById(storedUserId);
+                log.info("[OAuth] Using stored user for link: {} (githubId: {})", loginUser != null ? loginUser.getUserAccount() : "null", githubId);
+            }
+
+            if (loginUser == null) {
+                // Cannot link GitHub without being logged in
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                        "Your session has expired. Please refresh the page and log in again, then try to link your GitHub account.");
+            }
+
+            if (existingUser != null && !existingUser.getId().equals(loginUser.getId())) {
+                // GitHub already linked to a different user
+                throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                        "This GitHub account is already linked to another user. Please unlink it from the current account first.");
+            }
+
+            // All good - bind the GitHub to this user
+            loginUser.setGithubId(githubId);
+            if (StringUtils.isBlank(loginUser.getUserAvatar())) {
+                loginUser.setUserAvatar(githubAvatar);
+            }
+            userService.updateById(loginUser);
+            request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, loginUser);
+            resultVO = userService.getLoginUserVO(loginUser);
+            storeOAuthResult(request, resultVO);
+            return resultVO;
+        }
+
+        // Normal login flow (action = "login")
         if (existingUser != null && loginUser != null && existingUser.getId().equals(loginUser.getId())) {
             // Already linked and logged in — just return
             resultVO = userService.getLoginUserVO(existingUser);

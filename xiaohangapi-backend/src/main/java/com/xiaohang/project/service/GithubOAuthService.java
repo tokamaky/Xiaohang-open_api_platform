@@ -9,7 +9,15 @@ public interface GithubOAuthService {
 
     String getGithubAuthUrl(String state);
 
-    LoginUserVO handleGithubCallback(String code, HttpServletRequest request, HttpServletResponse response);
+    /**
+     * Handle GitHub OAuth callback
+     * @param code Authorization code from GitHub
+     * @param request HTTP request
+     * @param response HTTP response
+     * @param action The action type: "login" or "link"
+     * @return LoginUserVO with user info
+     */
+    LoginUserVO handleGithubCallback(String code, HttpServletRequest request, HttpServletResponse response, String action);
 
     boolean bindGithubAccount(HttpServletRequest request, String githubId);
 

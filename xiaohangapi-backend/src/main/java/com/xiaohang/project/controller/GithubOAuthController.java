@@ -38,10 +38,27 @@ public class GithubOAuthController {
     /**
      * Get GitHub OAuth authorization URL.
      * The 'redirectUrl' param tells backend where to redirect after OAuth completes.
+     * The 'action' param can be "link" to indicate this is a link operation (not login).
+     * For "link" action, we store the current user's ID in session for verification during callback.
      */
     @GetMapping("/github/url")
-    public BaseResponse<String> getGithubAuthUrl(@RequestParam String redirectUrl) {
-        String state = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8);
+    public BaseResponse<String> getGithubAuthUrl(
+            @RequestParam String redirectUrl,
+            @RequestParam(required = false, defaultValue = "login") String action,
+            HttpServletRequest request) {
+        // If this is a link action, store the current user ID in session for verification during callback
+        if ("link".equals(action)) {
+            try {
+                User loginUser = userService.getLoginUser(request);
+                request.getSession().setAttribute("oauth_link_user_id", loginUser.getId());
+                log.info("[OAuth] Storing link user ID in session: {}", loginUser.getId());
+            } catch (Exception e) {
+                log.warn("[OAuth] Failed to get current user for link action: {}", e.getMessage());
+                // Continue anyway - the user might not be logged in and we'll catch that in callback
+            }
+        }
+
+        String state = URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8) + "_" + action;
         String url = githubOAuthService.getGithubAuthUrl(state);
         return ResultUtils.success(url);
     }
@@ -59,7 +76,19 @@ public class GithubOAuthController {
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         try {
-            LoginUserVO vo = githubOAuthService.handleGithubCallback(code, request, response);
+            // Extract action from state (format: "encodedRedirectUrl_action")
+            String action = "login";
+            int lastUnderscore = state.lastIndexOf('_');
+            if (lastUnderscore > 0) {
+                String possibleAction = state.substring(lastUnderscore + 1);
+                // Only use it if it's a known action
+                if ("link".equals(possibleAction)) {
+                    action = possibleAction;
+                    state = state.substring(0, lastUnderscore);
+                }
+            }
+
+            LoginUserVO vo = githubOAuthService.handleGithubCallback(code, request, response, action);
             String redirectUrl = URLDecoder.decode(state, StandardCharsets.UTF_8);
             if (redirectUrl == null || redirectUrl.isEmpty()) {
                 redirectUrl = "/";
@@ -67,8 +96,8 @@ public class GithubOAuthController {
             // Always regenerate token here in the controller so it works regardless of
             // which serverless container handled the callback (containers share no state).
             String token = jwtUtils.generateToken(vo.getId(), vo.getUserAccount());
-            log.info("[OAuth] Building callback payload — userAccount: {}, userName: {}, githubId: {}, token generated: {}",
-                    vo.getUserAccount(), vo.getUserName(), vo.getGithubId(), token != null);
+            log.info("[OAuth] Building callback payload — action: {}, userAccount: {}, userName: {}, githubId: {}, token generated: {}",
+                    action, vo.getUserAccount(), vo.getUserName(), vo.getGithubId(), token != null);
             Map<String, Object> payload = new HashMap<>();
             payload.put("token", token);
             payload.put("userAccount", vo.getUserAccount());
@@ -78,6 +107,7 @@ public class GithubOAuthController {
             payload.put("githubId", vo.getGithubId());
             payload.put("id", vo.getId());
             payload.put("isNew", vo.getUserAccount() != null && vo.getUserAccount().startsWith("github_"));
+            payload.put("oauthAction", action);
 
             String json = new ObjectMapper().writeValueAsString(payload);
             String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
