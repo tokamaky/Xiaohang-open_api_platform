@@ -13,6 +13,7 @@
         <result property="userRole" column="userRole" jdbcType="VARCHAR"/>
         <result property="accessKey" column="accessKey" jdbcType="VARCHAR"/>
         <result property="secretKey" column="secretKey" jdbcType="VARCHAR"/>
+        <result property="githubId" column="githubId" jdbcType="VARCHAR"/>
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
         <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
@@ -22,7 +23,7 @@
         id,userAccount,userPassword,
         userName,
         userAvatar,userProfile,userRole,
-        accessKey,secretKey,createTime,
+        accessKey,secretKey,githubId,createTime,
         updateTime,isDelete
     </sql>
 </mapper>

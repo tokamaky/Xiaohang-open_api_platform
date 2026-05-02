@@ -199,9 +199,7 @@ const Profile: React.FC = () => {
                         const res = await unbindGithubUsingPost();
                         if (res.code === 0) {
                           message.success('GitHub account unlinked');
-                          const newData = { ...data, githubId: undefined as any };
-                          setData(newData);
-                          setInitialState((s: any) => ({ ...s, loginUser: newData }));
+                          await getUserInfo();
                         }
                       } catch (e: any) {
                         message.error(e?.message || 'Failed to unlink GitHub');
