@@ -3,10 +3,10 @@ package com.xiaohang.project.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaohang.project.service.GithubOAuthService;
 import com.xiaohang.project.service.impl.GithubOAuthServiceImpl;
+import com.xiaohang.project.utils.JwtUtils;
 import com.xiaohang.xiaohangapicommon.common.BaseResponse;
 import com.xiaohang.xiaohangapicommon.common.ResultUtils;
 import com.xiaohang.xiaohangapicommon.model.vo.LoginUserVO;
-import com.xiaohang.xiaohangapicommon.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
