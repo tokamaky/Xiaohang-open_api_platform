@@ -33,7 +33,6 @@ export async function getInitialState(): Promise<InitialState> {
     return undefined;
   };
 
-  const { location } = history;
   const urlParams = new URLSearchParams(window.location.search);
   console.log('[OAuth] urlParams __oauth_done:', urlParams.get('__oauth_done'));
 
@@ -67,7 +66,7 @@ export async function getInitialState(): Promise<InitialState> {
         // IMPORTANT: use window.location.href for redirect, NOT history.push.
         // history.push would cause Umi to re-render SSR-side where the URL
         // no longer has __oauth_done params, so the callback logic would never run.
-        const cleanPath = location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
+        const cleanPath = window.location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
         const urlWithParams = new URL(window.location.href);
         urlWithParams.searchParams.delete('__oauth_done');
         urlWithParams.searchParams.delete('__oauth_data');
@@ -99,7 +98,7 @@ export async function getInitialState(): Promise<InitialState> {
   }
 
   // --- Normal flow ---
-  if (location.pathname !== loginPath) {
+  if (window.location.pathname !== loginPath) {
     try {
       const loginUser = await getLoginUserUsingGet();
       return {
