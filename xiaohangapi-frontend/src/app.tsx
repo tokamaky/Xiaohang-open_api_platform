@@ -21,6 +21,7 @@ const OAUTH_TOKEN_KEY = 'oauth_token';
 export async function getInitialState(): Promise<InitialState> {
   const { location } = history;
   console.log('[OAuth] getInitialState running, location.search:', location.search);
+  console.log('[OAuth] window.location.href:', window.location.href);
 
   const fetchUserInfo = async () => {
     try {
@@ -33,7 +34,7 @@ export async function getInitialState(): Promise<InitialState> {
   };
 
   const { location } = history;
-  const urlParams = new URLSearchParams(location.search);
+  const urlParams = new URLSearchParams(window.location.search);
   console.log('[OAuth] urlParams __oauth_done:', urlParams.get('__oauth_done'));
 
   // --- Handle GitHub OAuth callback ---
@@ -63,13 +64,21 @@ export async function getInitialState(): Promise<InitialState> {
         };
         console.log('[OAuth] loginUser built:', loginUser);
         // Clean the URL of OAuth params while preserving the user state.
-        const cleanUrl = location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
+        // IMPORTANT: use window.location.href for redirect, NOT history.push.
+        // history.push would cause Umi to re-render SSR-side where the URL
+        // no longer has __oauth_done params, so the callback logic would never run.
+        const cleanPath = location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
         const urlWithParams = new URL(window.location.href);
         urlWithParams.searchParams.delete('__oauth_done');
         urlWithParams.searchParams.delete('__oauth_data');
         window.history.replaceState(null, '', urlWithParams.pathname + urlWithParams.search);
-        console.log('[OAuth] URL cleaned, redirecting to:', cleanUrl);
-        history.push(cleanUrl);
+        console.log('[OAuth] URL cleaned, redirecting to:', cleanPath);
+        if (cleanPath === window.location.pathname) {
+          // Already on target page, just reload to re-run getInitialState without OAuth params
+          window.location.reload();
+        } else {
+          window.location.href = cleanPath;
+        }
         return {
           fetchUserInfo,
           loginUser,
