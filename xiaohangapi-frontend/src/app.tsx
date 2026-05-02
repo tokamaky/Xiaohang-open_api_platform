@@ -37,13 +37,13 @@ export async function getInitialState(): Promise<InitialState> {
   // This avoids relying on session which doesn't work across Railway serverless containers.
   if (urlParams.get('__oauth_done') === '1') {
     const encodedData = urlParams.get('__oauth_data');
+    console.log('[OAuth] Callback detected, encodedData:', encodedData);
     if (encodedData) {
       try {
         const json = atob(encodedData);
+        console.log('[OAuth] Decoded JSON:', json);
         const data = JSON.parse(json);
-        if (data.token) {
-          localStorage.setItem(OAUTH_TOKEN_KEY, data.token);
-        }
+        console.log('[OAuth] Parsed data:', data);
         const loginUser = {
           id: data.id,
           token: data.token,

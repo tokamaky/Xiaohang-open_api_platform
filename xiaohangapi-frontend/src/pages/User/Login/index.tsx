@@ -118,6 +118,7 @@ const Login: React.FC = () => {
       window.history.replaceState(null, '', cleanUrl);
 
       const encodedData = params.get('__oauth_data');
+      console.log('[OAuth] Login page processing, encodedData:', encodedData);
       if (!encodedData) {
         message.error('Failed to retrieve login result. Please log in manually.');
         return;
@@ -126,7 +127,9 @@ const Login: React.FC = () => {
       let user: API.LoginUserVO;
       try {
         const json = atob(encodedData);
+        console.log('[OAuth] Decoded JSON:', json);
         const data = JSON.parse(json);
+        console.log('[OAuth] Parsed data:', data);
         user = {
           id: data.id,
           token: data.token,
