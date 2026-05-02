@@ -178,11 +178,11 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
     @Override
     public LoginUserVO unbindGithubAccount(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
-        // Use LambdaUpdateWrapper to force-set githubId to null.
-        // updateById skips null fields by default, so we need a wrapper.
-        userService.update(new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<>(new User())
-                .set(User::getGithubId, null)
-                .eq(User::getId, loginUser.getId()));
+        com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<User> wrapper =
+                new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<>();
+        wrapper.eq("id", loginUser.getId());
+        wrapper.set("githubId", null);
+        userService.update(null, wrapper);
         User updated = userService.getById(loginUser.getId());
         return userService.getLoginUserVO(updated);
     }

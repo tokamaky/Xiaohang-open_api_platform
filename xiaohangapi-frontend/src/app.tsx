@@ -66,18 +66,16 @@ export async function getInitialState(): Promise<InitialState> {
     }
   }
 
-  // --- Normal flow ---
-  if (location.pathname !== loginPath) {
-    try {
-      const loginUser = await getLoginUserUsingGet();
-      return {
-        fetchUserInfo,
-        loginUser: loginUser.data,
-        settings: defaultSettings as Partial<LayoutSettings>,
-      };
-    } catch {
-      history.push(loginPath);
-    }
+  // --- Always verify session so initialState.loginUser is populated ---
+  try {
+    const loginUser = await getLoginUserUsingGet();
+    return {
+      fetchUserInfo,
+      loginUser: loginUser.data,
+      settings: defaultSettings as Partial<LayoutSettings>,
+    };
+  } catch {
+    // Not logged in — fall through to guest state
   }
 
   return {

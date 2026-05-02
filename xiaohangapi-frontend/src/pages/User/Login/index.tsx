@@ -10,8 +10,6 @@ import {
   CodeOutlined,
   DatabaseOutlined,
   ArrowRightOutlined,
-  GithubOutlined,
-  SmileOutlined,
 } from '@ant-design/icons';
 import { Alert, message, Modal } from 'antd';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -120,46 +118,13 @@ const Login: React.FC = () => {
       const isNewGithubUser = data.isNew === true;
 
       if (isNewGithubUser) {
-        Modal.confirm({
-          title: (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <SmileOutlined style={{ color: '#00D4AA' }} />
-              Welcome to Xiaohang API Platform!
-            </span>
-          ),
-          icon: null,
-          content: (
-            <div style={{ marginTop: 12, color: '#E2EAF4' }}>
-              <p>
-                Your GitHub account <strong>@{user.userName}</strong> has been linked to a new account.
-              </p>
-              <p style={{ marginTop: 8 }}>
-                Your auto-generated account is{' '}
-                <code style={{ background: 'rgba(0,212,170,0.12)', color: '#00D4AA', padding: '1px 6px', borderRadius: 4, fontFamily: 'monospace' }}>{user.userAccount}</code>.
-              </p>
-              <p style={{ marginTop: 8, color: '#8892A4' }}>
-                Head over to <strong>Profile</strong> to customize your username and optionally set a
-                password so you can log in without GitHub next time.
-              </p>
-            </div>
-          ),
-          okText: 'Go to Profile',
-          cancelText: 'Stay Here',
-          okButtonProps: { icon: <GithubOutlined /> },
-          onOk: () => {
-            localStorage.removeItem('oauth_pending');
-            localStorage.removeItem('oauth_user');
-            setInitialState({ loginUser: user });
-            window.location.href = '/profile';
-          },
-          onCancel: () => {
-            localStorage.removeItem('oauth_pending');
-            localStorage.removeItem('oauth_user');
-            setInitialState({ loginUser: user });
-            message.info('You are logged in. You can navigate to other pages.');
-          },
-        });
+        // New GitHub user — set state and redirect to profile to complete setup
+        localStorage.removeItem('oauth_pending');
+        localStorage.removeItem('oauth_user');
+        setInitialState({ loginUser: user });
+        window.location.href = '/profile';
       } else {
+        // Existing GitHub user — welcome back
         localStorage.removeItem('oauth_pending');
         localStorage.removeItem('oauth_user');
         setInitialState({ loginUser: user });
