@@ -62,13 +62,14 @@ export async function getInitialState(): Promise<InitialState> {
           githubId: data.githubId,
         };
         console.log('[OAuth] loginUser built:', loginUser);
-        let cleanPath = location.pathname.replace(/^(.+?)_\d+$/, '$1');
-        console.log('[OAuth] cleanPath:', cleanPath, 'original:', location.pathname);
-        if (cleanPath === location.pathname) {
-          cleanPath = '/';
-        }
-        console.log('[OAuth] Redirecting to:', cleanPath);
-        history.push(cleanPath);
+        // Clean the URL of OAuth params while preserving the user state.
+        const cleanUrl = location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
+        const urlWithParams = new URL(window.location.href);
+        urlWithParams.searchParams.delete('__oauth_done');
+        urlWithParams.searchParams.delete('__oauth_data');
+        window.history.replaceState(null, '', urlWithParams.pathname + urlWithParams.search);
+        console.log('[OAuth] URL cleaned, redirecting to:', cleanUrl);
+        history.push(cleanUrl);
         return {
           fetchUserInfo,
           loginUser,
