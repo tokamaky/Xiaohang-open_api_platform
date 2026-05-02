@@ -6,6 +6,7 @@ import com.xiaohang.project.service.impl.GithubOAuthServiceImpl;
 import com.xiaohang.xiaohangapicommon.common.BaseResponse;
 import com.xiaohang.xiaohangapicommon.common.ResultUtils;
 import com.xiaohang.xiaohangapicommon.model.vo.LoginUserVO;
+import com.xiaohang.xiaohangapicommon.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,9 @@ public class GithubOAuthController {
 
     @Resource
     private GithubOAuthServiceImpl githubOAuthServiceImpl;
+
+    @Resource
+    private JwtUtils jwtUtils;
 
     /**
      * Get GitHub OAuth authorization URL.
@@ -60,12 +64,13 @@ public class GithubOAuthController {
             if (redirectUrl == null || redirectUrl.isEmpty()) {
                 redirectUrl = "/";
             }
-            // Encode token + user data as base64 JSON so any container can decode it.
-            // We include only the essential fields to avoid long URLs.
-            log.info("[OAuth] Building callback payload — userAccount: {}, userName: {}, githubId: {}",
-                    vo.getUserAccount(), vo.getUserName(), vo.getGithubId());
+            // Always regenerate token here in the controller so it works regardless of
+            // which serverless container handled the callback (containers share no state).
+            String token = jwtUtils.generateToken(vo.getId(), vo.getUserAccount());
+            log.info("[OAuth] Building callback payload — userAccount: {}, userName: {}, githubId: {}, token generated: {}",
+                    vo.getUserAccount(), vo.getUserName(), vo.getGithubId(), token != null);
             Map<String, Object> payload = new HashMap<>();
-            payload.put("token", vo.getToken());
+            payload.put("token", token);
             payload.put("userAccount", vo.getUserAccount());
             payload.put("userName", vo.getUserName());
             payload.put("userAvatar", vo.getUserAvatar());
