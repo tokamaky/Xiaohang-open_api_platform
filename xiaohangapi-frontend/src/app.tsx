@@ -19,6 +19,9 @@ const OAUTH_TOKEN_KEY = 'oauth_token';
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
 export async function getInitialState(): Promise<InitialState> {
+  const { location } = history;
+  console.log('[OAuth] getInitialState running, location.search:', location.search);
+
   const fetchUserInfo = async () => {
     try {
       const res = await getLoginUserUsingGet();
@@ -31,6 +34,7 @@ export async function getInitialState(): Promise<InitialState> {
 
   const { location } = history;
   const urlParams = new URLSearchParams(location.search);
+  console.log('[OAuth] urlParams __oauth_done:', urlParams.get('__oauth_done'));
 
   // --- Handle GitHub OAuth callback ---
   // Login data is encoded in __oauth_data URL param (set by backend callback).
@@ -44,6 +48,10 @@ export async function getInitialState(): Promise<InitialState> {
         console.log('[OAuth] Decoded JSON:', json);
         const data = JSON.parse(json);
         console.log('[OAuth] Parsed data:', data);
+        if (data.token) {
+          localStorage.setItem(OAUTH_TOKEN_KEY, data.token);
+          console.log('[OAuth] Token stored in localStorage');
+        }
         const loginUser = {
           id: data.id,
           token: data.token,
@@ -53,10 +61,13 @@ export async function getInitialState(): Promise<InitialState> {
           userRole: data.userRole,
           githubId: data.githubId,
         };
+        console.log('[OAuth] loginUser built:', loginUser);
         let cleanPath = location.pathname.replace(/^(.+?)_\d+$/, '$1');
+        console.log('[OAuth] cleanPath:', cleanPath, 'original:', location.pathname);
         if (cleanPath === location.pathname) {
           cleanPath = '/';
         }
+        console.log('[OAuth] Redirecting to:', cleanPath);
         history.push(cleanPath);
         return {
           fetchUserInfo,
