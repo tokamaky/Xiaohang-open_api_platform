@@ -3,7 +3,7 @@ import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
-import React from 'react';
+import React, { useEffect } from 'react';
 import defaultSettings from '../config/defaultSettings';
 import { getLoginUserUsingGet } from '@/services/xiaohang-backend/userController';
 import { requestConfig } from '@/requestConfig';
@@ -21,7 +21,6 @@ const OAUTH_TOKEN_KEY = 'oauth_token';
 export async function getInitialState(): Promise<InitialState> {
   const { location } = history;
   console.log('[OAuth] getInitialState running, location.search:', location.search);
-  console.log('[OAuth] window.location.href:', window.location.href);
 
   const fetchUserInfo = async () => {
     try {
@@ -33,72 +32,8 @@ export async function getInitialState(): Promise<InitialState> {
     return undefined;
   };
 
-  const urlParams = new URLSearchParams(window.location.search);
-  console.log('[OAuth] urlParams __oauth_done:', urlParams.get('__oauth_done'));
-
-  // --- Handle GitHub OAuth callback ---
-  // Login data is encoded in __oauth_data URL param (set by backend callback).
-  // This avoids relying on session which doesn't work across Railway serverless containers.
-  if (urlParams.get('__oauth_done') === '1') {
-    const encodedData = urlParams.get('__oauth_data');
-    console.log('[OAuth] Callback detected, encodedData:', encodedData);
-    if (encodedData) {
-      try {
-        const json = atob(encodedData);
-        console.log('[OAuth] Decoded JSON:', json);
-        const data = JSON.parse(json);
-        console.log('[OAuth] Parsed data:', data);
-        if (data.token) {
-          localStorage.setItem(OAUTH_TOKEN_KEY, data.token);
-          console.log('[OAuth] Token stored in localStorage');
-        }
-        const loginUser = {
-          id: data.id,
-          token: data.token,
-          userAccount: data.userAccount,
-          userName: data.userName,
-          userAvatar: data.userAvatar,
-          userRole: data.userRole,
-          githubId: data.githubId,
-        };
-        console.log('[OAuth] loginUser built:', loginUser);
-        // Clean the URL of OAuth params while preserving the user state.
-        // IMPORTANT: use window.location.href for redirect, NOT history.push.
-        // history.push would cause Umi to re-render SSR-side where the URL
-        // no longer has __oauth_done params, so the callback logic would never run.
-        const cleanPath = window.location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
-        const urlWithParams = new URL(window.location.href);
-        urlWithParams.searchParams.delete('__oauth_done');
-        urlWithParams.searchParams.delete('__oauth_data');
-        window.history.replaceState(null, '', urlWithParams.pathname + urlWithParams.search);
-        console.log('[OAuth] URL cleaned, redirecting to:', cleanPath);
-        if (cleanPath === window.location.pathname) {
-          // Already on target page, just reload to re-run getInitialState without OAuth params
-          window.location.reload();
-        } else {
-          window.location.href = cleanPath;
-        }
-        return {
-          fetchUserInfo,
-          loginUser,
-          settings: defaultSettings as Partial<LayoutSettings>,
-        };
-      } catch (e) {
-        console.error('[OAuth] Failed to decode callback data:', e);
-      }
-    }
-    message.error('GitHub login failed. Please try again.');
-    history.push(loginPath);
-  }
-
-  if (urlParams.get('__oauth_error') === '1') {
-    const errorMsg = urlParams.get('error') || 'GitHub OAuth failed';
-    message.error(decodeURIComponent(errorMsg));
-    history.push(loginPath);
-  }
-
-  // --- Normal flow ---
-  if (window.location.pathname !== loginPath) {
+  // --- Normal flow (SSR-safe) ---
+  if (location.pathname !== loginPath) {
     try {
       const loginUser = await getLoginUserUsingGet();
       return {
@@ -116,6 +51,54 @@ export async function getInitialState(): Promise<InitialState> {
     settings: defaultSettings as Partial<LayoutSettings>,
   };
 }
+
+// ── Client-side OAuth callback handler ────────────────────────────────────────
+// This component runs ONLY in the browser (never during SSR), so window.location
+// always has the real URL with __oauth_data params. It bridges the gap between the
+// SSR render (where getInitialState can't see URL params) and the client render.
+let oauthHydrated = false;
+const OAuthBridge: React.FC<{ children: React.ReactNode; setInitialState: (state: InitialState | ((prev: InitialState) => InitialState)) => void }> = ({ children, setInitialState }) => {
+  useEffect(() => {
+    if (oauthHydrated) return;
+    oauthHydrated = true;
+
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get('__oauth_error');
+    if (oauthError) {
+      const cleanUrl = window.location.href.replace(/([?&])__oauth_error=1/, '$1').replace(/([?&])error=[^&]*/, '$1').replace(/[?&]$/, '');
+      window.history.replaceState(null, '', cleanUrl);
+      message.error(oauthError || 'GitHub login failed.');
+      return;
+    }
+
+    if (params.get('__oauth_done') !== '1') return;
+
+    const encodedData = params.get('__oauth_data');
+    if (!encodedData) return;
+
+    try {
+      const json = atob(encodedData);
+      const data = JSON.parse(json);
+
+      if (data.token) {
+        localStorage.setItem(OAUTH_TOKEN_KEY, data.token);
+      }
+
+      localStorage.setItem('oauth_pending', '1');
+      localStorage.setItem('oauth_user', JSON.stringify(data));
+
+      const cleanUrl = window.location.href
+        .replace(/([?&])__oauth_done=1/, '$1')
+        .replace(/([?&])__oauth_data=[^&]*/, '$1')
+        .replace(/[?&]$/, '');
+      window.history.replaceState(null, '', cleanUrl);
+    } catch (e) {
+      console.error('[OAuth] Failed to decode callback data:', e);
+    }
+  }, [setInitialState]);
+
+  return <>{children}</>;
+};
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
@@ -168,23 +151,11 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     // 增加一个 loading 的状态
-    childrenRender: (children) => {
-      // if (initialState?.loading) return <PageLoading />;
+    childrenRender: (children, { setInitialState }) => {
       return (
-        <>
+        <OAuthBridge setInitialState={setInitialState}>
           {children}
-          {/*<SettingDrawer*/}
-          {/*    disableUrlParams*/}
-          {/*    enableDarkTheme*/}
-          {/*    settings={initialState?.settings}*/}
-          {/*    onSettingChange={(settings) => {*/}
-          {/*        setInitialState((preInitialState) => ({*/}
-          {/*            ...preInitialState,*/}
-          {/*            settings,*/}
-          {/*        }));*/}
-          {/*    }}*/}
-          {/*/>*/}
-        </>
+        </OAuthBridge>
       );
     },
     ...initialState?.settings,
