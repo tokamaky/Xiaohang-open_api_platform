@@ -129,15 +129,15 @@ const Login: React.FC = () => {
           ),
           icon: null,
           content: (
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 12, color: '#E2EAF4' }}>
               <p>
                 Your GitHub account <strong>@{user.userName}</strong> has been linked to a new account.
               </p>
               <p style={{ marginTop: 8 }}>
                 Your auto-generated account is{' '}
-                <code style={{ background: '#f0f0f0', padding: '1px 4px', borderRadius: 3 }}>{user.userAccount}</code>.
+                <code style={{ background: 'rgba(0,212,170,0.12)', color: '#00D4AA', padding: '1px 6px', borderRadius: 4, fontFamily: 'monospace' }}>{user.userAccount}</code>.
               </p>
-              <p style={{ marginTop: 8, color: '#888' }}>
+              <p style={{ marginTop: 8, color: '#8892A4' }}>
                 Head over to <strong>Profile</strong> to customize your username and optionally set a
                 password so you can log in without GitHub next time.
               </p>

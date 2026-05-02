@@ -1,9 +1,20 @@
 import {history} from '@umijs/max';
 import {Button} from 'antd';
-import React from 'react';
+import React, {useEffect} from 'react';
 import './404.less';
 
-const NoFoundPage: React.FC = () => (
+const NoFoundPage: React.FC = () => {
+  // Auto-redirect GitHub OAuth callbacks from the 404 page.
+  // Railway serves the 404 page for /user/login_xxx before client JS runs,
+  // so we intercept here before anything else renders.
+  useEffect(() => {
+    const loc = window.location;
+    if (/^\/user\/login_\d+$/.test(loc.pathname) && loc.search.includes('__oauth_done')) {
+      window.location.href = '/user/login' + loc.search;
+    }
+  }, []);
+
+  return (
   <div className="not-found-page">
     <div className="not-found-content">
       {/* Animated SVG */}
@@ -53,6 +64,6 @@ const NoFoundPage: React.FC = () => (
       </div>
     </div>
   </div>
-);
+};
 
 export default NoFoundPage;
