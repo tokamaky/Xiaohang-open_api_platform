@@ -41,6 +41,8 @@ const beforeUpload = (file: RcFile) => {
   return isJpgOrPng && isLt2M;
 };
 
+const SESSION_USER_KEY = 'oauth_session_user';
+
 const Profile: React.FC = () => {
   const [data, setData] = useState<API.UserVO>({});
   const [visible, setVisible] = useState<boolean>(false);
@@ -54,6 +56,24 @@ const Profile: React.FC = () => {
   const { initialState, setInitialState } = useModel('@@initialState');
   const formRef = useRef<ProFormInstance<{ userPassword: string }>>();
 
+  // ── Restore user from sessionStorage on mount ──────────────────────────────
+  // This is a fallback for when the profile page is reached directly (e.g. via
+  // a bookmark or after a full browser restart) and the API call fails.
+  useEffect(() => {
+    if (!data?.id) {
+      const stored = sessionStorage.getItem(SESSION_USER_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setInitialState((s: any) => ({ ...s, loginUser: parsed }));
+          setData(parsed as API.UserVO);
+          setImageUrl(parsed.userAvatar);
+          setUsernameValue(parsed.userName || '');
+        } catch {}
+      }
+    }
+  }, [data?.id]);
+
   // ── GitHub OAuth callback ──────────────────────────────────────────────
   // Detect #__oauth_done=1 after GitHub redirects back (e.g. from Profile page "Link GitHub").
   // Uses hash (#) instead of query params (?) so Railway always serves index.html.
@@ -62,7 +82,7 @@ const Profile: React.FC = () => {
     if (!hash || !hash.includes('__oauth_done=1')) return;
 
     const doProcess = async () => {
-      // Strip the hash to clean the URL (no need to keep it)
+      // Strip the hash to clean the URL
       window.history.replaceState(null, '', window.location.pathname);
 
       const hashParams = new URLSearchParams(hash.substring(1)); // strip leading #
@@ -74,16 +94,13 @@ const Profile: React.FC = () => {
           if (data.token) {
             localStorage.setItem('oauth_token', data.token);
           }
-          const updatedUser = {
-            id: data.id,
-            token: data.token,
-            userAccount: data.userAccount,
-            userName: data.userName,
-            userAvatar: data.userAvatar,
-            userRole: data.userRole,
-            githubId: data.githubId,
-          };
-          setInitialState((s: any) => ({ ...s, loginUser: updatedUser }));
+          // Persist to sessionStorage so getUserInfo can use it as fallback
+          sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(data));
+
+          setInitialState((s: any) => ({ ...s, loginUser: data }));
+          setData(data as API.UserVO);
+          setImageUrl(data.userAvatar);
+          setUsernameValue(data.userName || '');
           message.success('GitHub account linked successfully!');
         } catch (e) {
           console.error('[OAuth] Failed to decode profile callback data:', e);
@@ -102,10 +119,24 @@ const Profile: React.FC = () => {
   const getUserInfo = async () => {
     return getLoginUserUsingGet().then((res) => {
       if (res.data) {
+        // Also persist to sessionStorage as backup
+        sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(res.data));
         setInitialState((s: any) => ({ ...s, loginUser: res.data }));
         setData(res.data as API.UserVO);
         setImageUrl(res.data.userAvatar);
         setUsernameValue(res.data.userName || '');
+      }
+    }).catch(() => {
+      // API failed (e.g. Railway serverless cold-start) — fall back to sessionStorage
+      const stored = sessionStorage.getItem(SESSION_USER_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setInitialState((s: any) => ({ ...s, loginUser: parsed }));
+          setData(parsed as API.UserVO);
+          setImageUrl(parsed.userAvatar);
+          setUsernameValue(parsed.userName || '');
+        } catch {}
       }
     });
   };
