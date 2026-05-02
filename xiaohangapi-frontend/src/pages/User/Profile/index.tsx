@@ -55,23 +55,22 @@ const Profile: React.FC = () => {
   const formRef = useRef<ProFormInstance<{ userPassword: string }>>();
 
   // ── GitHub OAuth callback ──────────────────────────────────────────────
-  // Detect ?__oauth_done=1 after GitHub redirects back (e.g. from Profile page "Link GitHub"),
-  // extract user data from URL params, refresh local state, and show a success message.
+  // Detect #__oauth_done=1 after GitHub redirects back (e.g. from Profile page "Link GitHub").
+  // Uses hash (#) instead of query params (?) so Railway always serves index.html.
   useEffect(() => {
-    const params = new URL(window.location.href).searchParams;
-    if (params.get('__oauth_done') !== '1') return;
-    if (params.get('oauth_processed')) return;
+    const hash = window.location.hash;
+    if (!hash || !hash.includes('__oauth_done=1')) return;
 
     const doProcess = async () => {
-      const cleanUrl = window.location.href.replace(/([?&])__oauth_done=1/, '$1').replace(/([?&])__oauth_data=[^&]*/, '$1').replace(/[?&]$/, '');
-      window.history.replaceState(null, '', cleanUrl);
+      // Strip the hash to clean the URL (no need to keep it)
+      window.history.replaceState(null, '', window.location.pathname);
 
-      const encodedData = params.get('__oauth_data');
+      const hashParams = new URLSearchParams(hash.substring(1)); // strip leading #
+      const encodedData = hashParams.get('__oauth_data');
       if (encodedData) {
         try {
           const json = atob(encodedData);
           const data = JSON.parse(json);
-          // Update initialState with the fresh data from the callback
           if (data.token) {
             localStorage.setItem('oauth_token', data.token);
           }
@@ -88,12 +87,10 @@ const Profile: React.FC = () => {
           message.success('GitHub account linked successfully!');
         } catch (e) {
           console.error('[OAuth] Failed to decode profile callback data:', e);
-          // Fallback: just refresh user info
           await getUserInfo();
           message.success('GitHub account linked successfully!');
         }
       } else {
-        // No embedded data — session-based refresh (for already-logged-in users)
         await getUserInfo();
         message.success('GitHub account linked successfully!');
       }

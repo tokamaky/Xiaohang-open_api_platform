@@ -81,12 +81,17 @@ public class GithubOAuthController {
 
             String json = new ObjectMapper().writeValueAsString(payload);
             String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
-            response.sendRedirect(redirectUrl + "?__oauth_done=1&__oauth_data=" + encoded);
+            // Use hash fragment (#) instead of query params (?).
+            // Query params are sent to the server — Railway returns 404 for /user/login_xxx
+            // and the 404.html JS may not run if the response is cached or cold-started.
+            // Hash fragments are never sent to the server; the browser always loads index.html
+            // and the frontend reads the OAuth data from window.location.hash.
+            response.sendRedirect(redirectUrl + "#__oauth_done=1&__oauth_data=" + encoded);
         } catch (Exception e) {
             log.error("GitHub OAuth callback error: {}", e.getMessage());
             String redirectUrl = URLDecoder.decode(state, StandardCharsets.UTF_8);
             String errorMsg = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
-            String finalRedirect = (redirectUrl != null ? redirectUrl : "/") + "?__oauth_error=1&error=" + errorMsg;
+            String finalRedirect = (redirectUrl != null ? redirectUrl : "/") + "#__oauth_error=1&error=" + errorMsg;
             response.sendRedirect(finalRedirect);
         }
     }

@@ -1,25 +1,19 @@
-import {history} from '@umijs/max';
-import {Button} from 'antd';
-import React, {useEffect} from 'react';
+import { history } from '@umijs/max';
+import { Button } from 'antd';
+import React, { useEffect } from 'react';
 import './404.less';
 
 const NoFoundPage: React.FC = () => {
   useEffect(() => {
-    const loc = window.location;
-    const pathname = loc.pathname;
-    const search = loc.search;
-
-    // GitHub OAuth success callback
-    // Matches: /user/login_xxx, /user/profile_xxx, etc. with __oauth_done=1
-    if (/^\/user\/(?:login|profile)_\d+$/.test(pathname) && search.includes('__oauth_done')) {
-      const base = pathname.replace(/^(.+?)_\d+$/, '$1');
-      window.location.href = base + search;
-      return;
-    }
-
-    // GitHub OAuth error callback — redirect to /user/login so the error message is shown
-    if (/^\/user\/(?:login|profile)_\d+$/.test(pathname) && search.includes('__oauth_error')) {
-      window.location.href = '/user/login' + search;
+    const hash = window.location.hash;
+    // Handle OAuth callbacks landing on a 404 page.
+    // Hash fragments are never sent to the server, so Railway serves index.html
+    // and this component mounts. Redirect to the base path to continue OAuth.
+    if (hash && hash.includes('__oauth_done=1')) {
+      const base = window.location.pathname.replace(/^(.+?)_\d+$/, '$1');
+      window.location.href = base + hash;
+    } else if (hash && hash.includes('__oauth_error=1')) {
+      window.location.href = '/user/login' + hash;
     }
   }, []);
 

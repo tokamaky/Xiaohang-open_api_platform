@@ -1,4 +1,4 @@
-import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
+import { AvatarDropdown, AvatarName, Footer, Question } from '@/components';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
@@ -6,16 +6,12 @@ import React, { useEffect } from 'react';
 import defaultSettings from '../config/defaultSettings';
 import { getLoginUserUsingGet } from '@/services/xiaohang-backend/userController';
 import { requestConfig } from '@/requestConfig';
-import { LinkedinOutlined, GlobalOutlined, MailOutlined } from '@ant-design/icons';
+import { LinkedinOutlined, GlobalOutlined } from '@ant-design/icons';
 import { message } from 'antd';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
-/**
- * OAuth payload decoded from the __oauth_data URL parameter in getInitialState.
- * Cleared from localStorage immediately after getInitialState processes it.
- */
 interface OAuthPayload {
   token: string;
   userAccount: string;
@@ -28,22 +24,20 @@ interface OAuthPayload {
 }
 
 /**
- * @see https://umijs.org/zh-CN/plugins/plugin-initial-state
- *
  * OAuth flow:
- * 1. User clicks "Sign in with GitHub" on Login page
+ * 1. User clicks "Sign in with GitHub"
  * 2. GitHub redirects to backend /api/oauth/github/callback
  * 3. Backend creates/finds user, generates JWT, redirects to
- *    /user/login?__oauth_done=1&__oauth_data=<base64-json>
- * 4. This getInitialState detects __oauth_done, decodes the payload,
- *    sets initialState.loginUser, and IMMEDIATELY redirects to the
- *    final destination (/profile for new users, / for returning users).
- *    window.location.href prevents the Login component from ever rendering.
+ *    /user/login#__oauth_done=1&__oauth_data=<base64-json>
+ *    NOTE: uses hash (#) not query (?) so Railway always serves index.html
+ * 4. This getInitialState detects __oauth_done in window.location.hash,
+ *    decodes the payload, sets initialState.loginUser, and IMMEDIATELY
+ *    redirects to the final destination (/profile for new users, / for returning).
  *
- * Session verification (getLoginUserUsingGet) is a SEPARATE concern — it
- * runs after OAuth processing to populate initialState for the ProLayout
- * avatar/name. If it fails (user not in session), loginUser stays as
- * set by the OAuth data above.
+ * Using hash fragments (#) instead of query params (?) solves the issue where
+ * Railway returns 404 for /user/login_xxx, causing the 404.html JS to miss the
+ * OAuth parameters. Hash fragments are never sent to the server, so Railway
+ * always serves index.html and the frontend reads the OAuth data client-side.
  */
 export async function getInitialState(): Promise<InitialState> {
   const fetchUserInfo = async () => {
@@ -56,30 +50,36 @@ export async function getInitialState(): Promise<InitialState> {
     return undefined;
   };
 
-  // ── OAuth callback: decode payload and redirect BEFORE any component renders ─────
+  // ── OAuth callback: read from hash, decode, redirect ─────────────────────────────
+  // window.location.hash is never sent to the server, so Railway always serves
+  // index.html for any callback URL — no 404 issues.
   if (typeof window !== 'undefined') {
-    const params = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
 
-    if (params.get('__oauth_done') === '1' && params.get('__oauth_data')) {
+    if (hash && hash.includes('__oauth_done=1')) {
       try {
-        const json = atob(params.get('__oauth_data')!);
-        const data: OAuthPayload = JSON.parse(json);
-        console.log('[OAuth] Decoded payload, isNew:', data.isNew, 'userName:', data.userName);
+        const hashParams = new URLSearchParams(hash.substring(1)); // strip leading #
+        const encodedData = hashParams.get('__oauth_data');
+        if (!encodedData) throw new Error('Missing __oauth_data in hash');
 
-        // Write token to localStorage so request interceptor sends it with every API call
+        const json = atob(encodedData);
+        const data: OAuthPayload = JSON.parse(json);
+        console.log('[OAuth] Decoded from hash, isNew:', data.isNew, 'userName:', data.userName);
+
+        // Write token so request interceptor sends it with every API call
         if (data.token) {
           localStorage.setItem('oauth_token', data.token);
         }
 
-        // Build the final destination BEFORE setting initialState.
-        // We MUST redirect with window.location.href so the browser navigates
-        // away BEFORE the Login/ProLayout component renders (no flash).
         const target = data.isNew ? '/profile' : '/';
         console.log('[OAuth] Redirecting to:', target);
+
+        // Immediately redirect. Use window.location.href so the browser navigates
+        // away before any component renders — prevents the Login page flash.
         window.location.href = target;
-        // Return a placeholder — the browser is navigating away so this return
-        // value is never used. We intentionally set loginUser so that if the
-        // navigation is somehow blocked, the user ends up on the right page.
+
+        // Return the user so initialState.loginUser is set even if navigation
+        // is somehow blocked. This makes the auth guard happy on the next page.
         return {
           fetchUserInfo,
           loginUser: {
@@ -93,7 +93,7 @@ export async function getInitialState(): Promise<InitialState> {
           settings: defaultSettings as Partial<LayoutSettings>,
         };
       } catch (e) {
-        console.error('[OAuth] Failed to decode callback data:', e);
+        console.error('[OAuth] Failed to decode hash callback data:', e);
         message.error('GitHub login failed. Please try again.');
       }
     }
@@ -120,15 +120,13 @@ export async function getInitialState(): Promise<InitialState> {
 // ── OAuth error handler: shows error toast on any page ──────────────────────────
 const OAuthBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const oauthError = params.get('__oauth_error');
-    if (oauthError) {
-      const cleanUrl = window.location.href
-        .replace(/([?&])__oauth_error=1/, '$1')
-        .replace(/([?&])error=[^&]*/, '$1')
-        .replace(/[?&]$/, '');
+    const hash = window.location.hash;
+    if (hash && hash.includes('__oauth_error=1')) {
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const errorMsg = hashParams.get('error') || 'GitHub login failed.';
+      const cleanUrl = window.location.pathname; // strip hash
       window.history.replaceState(null, '', cleanUrl);
-      message.error(oauthError || 'GitHub login failed.');
+      message.error(decodeURIComponent(errorMsg));
     }
   }, []);
 
@@ -136,7 +134,7 @@ const OAuthBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 // ProLayout 配置
-export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
     actionsRender: () => [<Question key="doc" />],
     avatarProps: {
@@ -152,18 +150,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       const { pathname } = history.location;
       if (!pathname || typeof window === 'undefined') return;
 
-      // Handle OAuth callback URLs with numeric state suffix (e.g. /user/login_123456789...)
-      // Redirect to /user/login so UmiJS can match the route.
-      const oauthStateMatch = pathname.match(/^\/user\/(?:login|profile)_\d+$/);
-      if (oauthStateMatch) {
-        const params = new URLSearchParams(window.location.search);
-        const target = pathname.replace(/^(.+?)_\d+$/, '$1');
-        window.location.href = target + (params.toString() ? '?' + params.toString() : '');
-        return;
-      }
-
       // Auth guard: redirect unauthenticated users away from protected pages.
-      // Note: OAuth users have initialState.loginUser set by getInitialState above,
+      // OAuth users have initialState.loginUser set by getInitialState above,
       // so they are NOT redirected here.
       if (!initialState?.loginUser && pathname !== loginPath) {
         history.push(loginPath);
@@ -190,9 +178,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         ]
       : [],
     menuHeaderRender: undefined,
-    childrenRender: (children) => (
-      <OAuthBridge>{children}</OAuthBridge>
-    ),
+    childrenRender: (children) => <OAuthBridge>{children}</OAuthBridge>,
     ...initialState?.settings,
   };
 };
