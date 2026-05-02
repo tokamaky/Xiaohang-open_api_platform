@@ -6,8 +6,20 @@ import './404.less';
 const NoFoundPage: React.FC = () => {
   useEffect(() => {
     const loc = window.location;
-    if (/^\/user\/login_\d+$/.test(loc.pathname) && loc.search.includes('__oauth_done')) {
-      window.location.href = '/user/login' + loc.search;
+    const pathname = loc.pathname;
+    const search = loc.search;
+
+    // GitHub OAuth success callback
+    // Matches: /user/login_xxx, /user/profile_xxx, etc. with __oauth_done=1
+    if (/^\/user\/(?:login|profile)_\d+$/.test(pathname) && search.includes('__oauth_done')) {
+      const base = pathname.replace(/^(.+?)_\d+$/, '$1');
+      window.location.href = base + search;
+      return;
+    }
+
+    // GitHub OAuth error callback — redirect to /user/login so the error message is shown
+    if (/^\/user\/(?:login|profile)_\d+$/.test(pathname) && search.includes('__oauth_error')) {
+      window.location.href = '/user/login' + search;
     }
   }, []);
 

@@ -10,15 +10,27 @@
       var pathname = loc.pathname;
       var search = loc.search;
 
-      // GitHub OAuth callback: /user/login_xxx?__oauth_done=1&__oauth_data=...
-      if (/^\/user\/login_\d+$/.test(pathname) && search.indexOf('__oauth_done') !== -1) {
+      // GitHub OAuth callback with __oauth_done=1 (success)
+      // Matches: /user/login_xxx, /user/profile_xxx, etc.
+      var isOAuthSuccess = /^\/user\/(?:login|profile)_\d+$/.test(pathname) && search.indexOf('__oauth_done') !== -1;
+      // GitHub OAuth callback with __oauth_error=1 (error)
+      var isOAuthError = /^\/user\/(?:login|profile)_\d+$/.test(pathname) && search.indexOf('__oauth_error') !== -1;
+
+      if (isOAuthSuccess) {
+        // Extract base path: /user/login_123 -> /user/login
+        var base = pathname.replace(/^(.+?)_\d+$/, '$1');
+        window.location.replace(base + search);
+        return;
+      }
+
+      if (isOAuthError) {
+        // OAuth error: redirect to /user/login so the error message can be shown
         window.location.replace('/user/login' + search);
         return;
       }
 
-      // If already on a valid route, let the SPA handle it
-      // Otherwise redirect to home
-      if (pathname !== '/' && !pathname.startsWith('/user/login')) {
+      // Not an OAuth URL — redirect unknown paths to home
+      if (pathname !== '/' && !pathname.startsWith('/user/')) {
         window.location.replace('/');
       }
     })();

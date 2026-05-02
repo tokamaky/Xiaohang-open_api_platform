@@ -156,10 +156,12 @@ const Login: React.FC = () => {
             localStorage.removeItem('oauth_pending');
             localStorage.removeItem('oauth_user');
             setInitialState({ loginUser: user });
-            window.location.href = '/';
+            message.info('You are logged in. You can navigate to other pages.');
           },
         });
       } else {
+        localStorage.removeItem('oauth_pending');
+        localStorage.removeItem('oauth_user');
         setInitialState({ loginUser: user });
         message.success(`Welcome back, ${user.userName}!`);
         window.location.href = '/';
