@@ -1,6 +1,5 @@
 import Footer from '@/components/Footer';
 import { userLoginUsingPost, userRegisterUsingPost } from '@/services/xiaohang-backend/userController';
-import { getOAuthResultUsingGet } from '@/services/xiaohang-backend/userController';
 import {
   LockOutlined,
   UserOutlined,
@@ -95,69 +94,88 @@ const Login: React.FC = () => {
   }, [handleMouseMove]);
 
   // ── GitHub OAuth callback ──────────────────────────────────────────────
-  // Detect ?__oauth_done=1 after GitHub redirects back, fetch session result, and complete login.
+  // Detect ?__oauth_done=1 after GitHub redirects back. The login result (token + user info)
+  // is encoded as base64 JSON in the __oauth_data URL param, so it works across Railway's
+  // serverless containers (no session sharing needed).
   useEffect(() => {
     const params = new URL(window.location.href).searchParams;
-    if (params.get('__oauth_done') !== '1') return;
-    if (params.get('oauth_processed')) return;
+    const isOauthDone = params.get('__oauth_done') === '1';
+    const isProcessed = params.get('oauth_processed');
+    if (!isOauthDone || isProcessed) return;
 
-    const doProcess = async () => {
-      // Mark as processed to avoid double-triggering on re-render
-      const markedUrl = window.location.href.replace(/([?&])__oauth_done=1/, '$1__oauth_processed=true');
-      window.history.replaceState(null, '', markedUrl);
+    const doProcess = () => {
+      const cleanUrl = window.location.href.replace(/([?&])__oauth_done=1/, '$1').replace(/([?&])__oauth_data=[^&]*/, '$1').replace(/[?&]$/, '');
+      window.history.replaceState(null, '', cleanUrl);
 
+      const encodedData = params.get('__oauth_data');
+      if (!encodedData) {
+        message.error('Failed to retrieve login result. Please log in manually.');
+        return;
+      }
+
+      let user: API.LoginUserVO;
       try {
-        const res = await getOAuthResultUsingGet();
-        if (res.data) {
-          const user = res.data;
-          // If this is a newly registered GitHub user (auto-created account),
-          // show a welcome modal guiding them to set a custom username / add a password.
-          const isNewGithubUser = !!user.userAccount?.startsWith('github_');
-          if (isNewGithubUser) {
-            Modal.confirm({
-              title: (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <SmileOutlined style={{ color: '#00D4AA' }} />
-                  Welcome to Xiaohang API Platform!
-                </span>
-              ),
-              icon: null,
-              content: (
-                <div style={{ marginTop: 12 }}>
-                  <p>
-                    Your GitHub account <strong>@{user.userName}</strong> has been linked to a new account.
-                  </p>
-                  <p style={{ marginTop: 8 }}>
-                    Your auto-generated account is <code style={{ background: '#f0f0f0', padding: '1px 4px', borderRadius: 3 }}>{user.userAccount}</code>.
-                  </p>
-                  <p style={{ marginTop: 8, color: '#888' }}>
-                    Head over to{' '}
-                    <strong>Profile</strong> to customize your username and optionally set a password
-                    so you can log in without GitHub next time.
-                  </p>
-                </div>
-              ),
-              okText: 'Go to Profile',
-              cancelText: 'Stay Here',
-              okButtonProps: { icon: <GithubOutlined /> },
-              onOk: () => {
-                setInitialState({ loginUser: user });
-                window.location.href = '/user/profile';
-              },
-              onCancel: () => {
-                setInitialState({ loginUser: user });
-                window.location.href = '/';
-              },
-            });
-          } else {
-            setInitialState({ loginUser: user });
-            message.success(`Welcome back, ${user.userName}!`);
-            window.location.href = '/';
-          }
-        } else if (res.message) {
-          message.error(res.message);
+        const json = atob(encodedData);
+        const data = JSON.parse(json);
+        user = {
+          id: data.id,
+          token: data.token,
+          userAccount: data.userAccount,
+          userName: data.userName,
+          userAvatar: data.userAvatar,
+          userRole: data.userRole,
+          githubId: data.githubId,
+        };
+        const isNewGithubUser = data.isNew === true;
+
+        // Store token for future authenticated API calls
+        if (user.token) {
+          localStorage.setItem('oauth_token', user.token);
         }
-      } catch {
+
+        if (isNewGithubUser) {
+          Modal.confirm({
+            title: (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <SmileOutlined style={{ color: '#00D4AA' }} />
+                Welcome to Xiaohang API Platform!
+              </span>
+            ),
+            icon: null,
+            content: (
+              <div style={{ marginTop: 12 }}>
+                <p>
+                  Your GitHub account <strong>@{user.userName}</strong> has been linked to a new account.
+                </p>
+                <p style={{ marginTop: 8 }}>
+                  Your auto-generated account is{' '}
+                  <code style={{ background: '#f0f0f0', padding: '1px 4px', borderRadius: 3 }}>{user.userAccount}</code>.
+                </p>
+                <p style={{ marginTop: 8, color: '#888' }}>
+                  Head over to <strong>Profile</strong> to customize your username and optionally set a
+                  password so you can log in without GitHub next time.
+                </p>
+              </div>
+            ),
+            okText: 'Go to Profile',
+            cancelText: 'Stay Here',
+            okButtonProps: { icon: <GithubOutlined /> },
+            onOk: () => {
+              setInitialState({ loginUser: user });
+              window.location.href = '/user/profile';
+            },
+            onCancel: () => {
+              setInitialState({ loginUser: user });
+              window.location.href = '/';
+            },
+          });
+        } else {
+          setInitialState({ loginUser: user });
+          message.success(`Welcome back, ${user.userName}!`);
+          window.location.href = '/';
+        }
+      } catch (e) {
+        console.error('[OAuth] Failed to decode response:', e);
         message.error('Failed to complete GitHub login. Please try again.');
       }
     };

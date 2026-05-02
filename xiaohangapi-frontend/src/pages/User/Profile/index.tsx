@@ -56,23 +56,46 @@ const Profile: React.FC = () => {
 
   // ── GitHub OAuth callback ──────────────────────────────────────────────
   // Detect ?__oauth_done=1 after GitHub redirects back (e.g. from Profile page "Link GitHub"),
-  // fetch session result, refresh user info, and show a success message.
+  // extract user data from URL params, refresh local state, and show a success message.
   useEffect(() => {
     const params = new URL(window.location.href).searchParams;
     if (params.get('__oauth_done') !== '1') return;
     if (params.get('oauth_processed')) return;
 
     const doProcess = async () => {
-      const markedUrl = window.location.href.replace(/([?&])__oauth_done=1/, '$1__oauth_processed=true');
-      window.history.replaceState(null, '', markedUrl);
+      const cleanUrl = window.location.href.replace(/([?&])__oauth_done=1/, '$1').replace(/([?&])__oauth_data=[^&]*/, '$1').replace(/[?&]$/, '');
+      window.history.replaceState(null, '', cleanUrl);
 
-      try {
-        // No need to store loginUser here — session cookie already handles it.
-        // Just refresh user info so the UI reflects the new GitHub link state.
+      const encodedData = params.get('__oauth_data');
+      if (encodedData) {
+        try {
+          const json = atob(encodedData);
+          const data = JSON.parse(json);
+          // Update initialState with the fresh data from the callback
+          if (data.token) {
+            localStorage.setItem('oauth_token', data.token);
+          }
+          const updatedUser = {
+            id: data.id,
+            token: data.token,
+            userAccount: data.userAccount,
+            userName: data.userName,
+            userAvatar: data.userAvatar,
+            userRole: data.userRole,
+            githubId: data.githubId,
+          };
+          setInitialState((s: any) => ({ ...s, loginUser: updatedUser }));
+          message.success('GitHub account linked successfully!');
+        } catch (e) {
+          console.error('[OAuth] Failed to decode profile callback data:', e);
+          // Fallback: just refresh user info
+          await getUserInfo();
+          message.success('GitHub account linked successfully!');
+        }
+      } else {
+        // No embedded data — session-based refresh (for already-logged-in users)
         await getUserInfo();
         message.success('GitHub account linked successfully!');
-      } catch {
-        message.error('GitHub link completed, but failed to refresh user info.');
       }
     };
 

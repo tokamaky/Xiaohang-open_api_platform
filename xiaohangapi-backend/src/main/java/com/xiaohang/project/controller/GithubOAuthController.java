@@ -1,5 +1,6 @@
 package com.xiaohang.project.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xiaohang.project.service.GithubOAuthService;
 import com.xiaohang.project.service.impl.GithubOAuthServiceImpl;
 import com.xiaohang.xiaohangapicommon.common.BaseResponse;
@@ -15,6 +16,9 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/oauth")
@@ -40,8 +44,9 @@ public class GithubOAuthController {
 
     /**
      * GitHub OAuth callback — GitHub redirects here after user authorizes.
-     * Stores the result in session and redirects back to frontend with a marker.
-     * Frontend polls /oauth/github/result to get the actual login data.
+     * Encodes the login result (token + user info) into the redirect URL fragment
+     * so it survives serverless container switches. The frontend extracts it from
+     * window.location.search after the redirect.
      */
     @GetMapping("/github/callback")
     public void githubCallback(
@@ -50,12 +55,26 @@ public class GithubOAuthController {
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
         try {
-            githubOAuthService.handleGithubCallback(code, request, response);
+            LoginUserVO vo = githubOAuthService.handleGithubCallback(code, request, response);
             String redirectUrl = URLDecoder.decode(state, StandardCharsets.UTF_8);
             if (redirectUrl == null || redirectUrl.isEmpty()) {
                 redirectUrl = "/";
             }
-            response.sendRedirect(redirectUrl + "?__oauth_done=1");
+            // Encode token + user data as base64 JSON so any container can decode it.
+            // We include only the essential fields to avoid long URLs.
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("token", vo.getToken());
+            payload.put("userAccount", vo.getUserAccount());
+            payload.put("userName", vo.getUserName());
+            payload.put("userAvatar", vo.getUserAvatar());
+            payload.put("userRole", vo.getUserRole());
+            payload.put("githubId", vo.getGithubId());
+            payload.put("id", vo.getId());
+            payload.put("isNew", vo.getUserAccount() != null && vo.getUserAccount().startsWith("github_"));
+
+            String json = new ObjectMapper().writeValueAsString(payload);
+            String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+            response.sendRedirect(redirectUrl + "?__oauth_done=1&__oauth_data=" + encoded);
         } catch (Exception e) {
             log.error("GitHub OAuth callback error: {}", e.getMessage());
             String redirectUrl = URLDecoder.decode(state, StandardCharsets.UTF_8);
