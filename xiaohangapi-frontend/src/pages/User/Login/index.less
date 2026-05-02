@@ -830,6 +830,21 @@
   }
 }
 
+/* GitHub loading spinner */
+.github-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: githubSpinnerRotate 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes githubSpinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
 /* Footer override */
 .login-page-wrapper .ant-pro-global-footer {
   position: fixed !important;

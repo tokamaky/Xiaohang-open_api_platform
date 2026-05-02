@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xiaohang.project.exception.BusinessException;
 import com.xiaohang.project.mapper.UserMapper;
 import com.xiaohang.project.service.UserService;
+import com.xiaohang.project.utils.JwtUtils;
 import com.xiaohang.project.utils.SqlUtils;
 import com.xiaohang.xiaohangapicommon.common.ErrorCode;
 import com.xiaohang.xiaohangapicommon.constant.CommonConstant;
@@ -44,6 +45,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * Salt value, obfuscates password
      */
     private static final String SALT = "xiaohang";
+    private static final String BEARER_PREFIX = "Bearer ";
+
+    @Resource
+    private JwtUtils jwtUtils;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -122,45 +127,56 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     /**
-     * Get the current logged-in user
+     * Get the current logged-in user.
+     * Supports both JWT Bearer token (GitHub OAuth) and session-based authentication.
      *
      * @param request
      * @return
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        // First check if the user is logged in
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            throw new BusinessException(ErrorCode.FIRST_TIME_LOGIN);
-        }
-        // Query from the database (for performance, you can comment this and use cache directly)
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
-        if (currentUser == null) {
+        User user = getLoginUserPermitNull(request);
+        if (user == null || user.getId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
-        return currentUser;
+        return user;
     }
 
     /**
-     * Get the current logged-in user (allow null if not logged in)
+     * Get the current logged-in user (allow null if not logged in).
+     * Priority: 1) JWT Bearer token (GitHub OAuth, works across serverless containers)
+     *           2) Session (regular login)
      *
      * @param request
      * @return
      */
     @Override
     public User getLoginUserPermitNull(HttpServletRequest request) {
-        // First check if the user is logged in
+        // 1. Try JWT Bearer token first (used by GitHub OAuth login)
+        String authHeader = request.getHeader("Authorization");
+        if (StringUtils.isNotBlank(authHeader) && authHeader.startsWith(BEARER_PREFIX)) {
+            String token = authHeader.substring(BEARER_PREFIX.length()).trim();
+            try {
+                if (jwtUtils.validateToken(token)) {
+                    Long userId = jwtUtils.getUserIdFromToken(token);
+                    User user = this.getById(userId);
+                    if (user != null && user.getIsDelete() == 0) {
+                        log.debug("[JWT Auth] Authenticated user {} via Bearer token", userId);
+                        return user;
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("[JWT Auth] Token validation failed: {}", e.getMessage());
+            }
+        }
+
+        // 2. Fall back to session (regular login)
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null || currentUser.getId() == null) {
             return null;
         }
-        // Query from the database (for performance, you can comment this and use cache directly)
-        long userId = currentUser.getId();
-        return this.getById(userId);
+        return this.getById(currentUser.getId());
     }
 
     /**

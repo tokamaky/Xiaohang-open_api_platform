@@ -39,20 +39,17 @@ public interface UserService extends IService<User> {
 
 
     /**
-     * Get current logged-in user
-     *
-     * @param request
-     * @return
-     */
-    User getLoginUser(HttpServletRequest request);
-
-    /**
-     * Get current logged-in user (allow null)
-     *
-     * @param request
-     * @return
+     * Get current logged-in user (allow null).
+     * Checks JWT Bearer token first (supports GitHub OAuth users across serverless containers),
+     * then falls back to session (for regular login).
      */
     User getLoginUserPermitNull(HttpServletRequest request);
+
+    /**
+     * Get current logged-in user. Throws if not logged in.
+     * Supports both JWT Bearer token and session-based auth.
+     */
+    User getLoginUser(HttpServletRequest request);
 
     /**
      * Check if the user is an administrator

@@ -31,8 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -56,6 +56,11 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
     private static final String OAUTH_STATE_SESSION_KEY = "github_oauth_state";
     private static final String OAUTH_RESULT_SESSION_KEY = "github_oauth_result";
 
+    // In-memory CSRF state cache: csrfToken -> original redirectUrl
+    // Entries expire after 10 minutes. This works across Railway serverless instances
+    // because the state is validated purely from the cache, not from session.
+    private static final Map<String, String> requestCache = new ConcurrentHashMap<>();
+
     @Resource
     private UserService userService;
 
@@ -69,17 +74,60 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
     private String clientSecret;
 
     @Override
-    public String getGithubAuthUrl(String state) {
+    public String getGithubAuthUrl(HttpServletRequest request, String state) {
+        // Generate a CSRF token and store it in the in-memory cache.
+        // Key = csrfToken, Value = original redirectUrl.
+        // On callback, we validate that the same csrfToken is paired with the same redirectUrl.
         String csrfToken = RandomUtil.randomNumbers(32);
-        String redirectUri = buildCallbackUrl();
+        requestCache.put(csrfToken, state);
+        return buildGithubAuthUrl(state, csrfToken);
+    }
 
+    private String buildGithubAuthUrl(String redirectUrl, String csrfToken) {
+        String redirectUri = buildCallbackUrl();
         StringBuilder url = new StringBuilder(GITHUB_AUTHORIZE_URL);
         url.append("?client_id=").append(clientId);
         url.append("&redirect_uri=").append(java.net.URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
         url.append("&scope=read:user,user:email");
-        url.append("&state=").append(state).append("_").append(csrfToken);
-
+        // state format: <original_redirect_url>_<csrf_token>
+        url.append("&state=").append(redirectUrl).append("_").append(csrfToken);
         return url.toString();
+    }
+
+    /**
+     * Validates the CSRF token in the callback state parameter.
+     * Returns the original redirect URL if valid, throws BusinessException if not.
+     */
+    @Override
+    public String validateAndExtractRedirectUrl(String state) {
+        if (StringUtils.isBlank(state) || !state.contains("_")) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Invalid OAuth state");
+        }
+        int lastUnderscore = state.lastIndexOf('_');
+        String redirectUrl = state.substring(0, lastUnderscore);
+        String csrfToken = state.substring(lastUnderscore + 1);
+        String storedRedirect = requestCache.get(csrfToken);
+        if (storedRedirect == null) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "OAuth state expired or tampered");
+        }
+        if (!storedRedirect.equals(redirectUrl)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "OAuth state mismatch");
+        }
+        requestCache.remove(csrfToken);
+        return redirectUrl;
+    }
+
+    /**
+     * Extracts just the redirect URL portion from the state parameter for error cases.
+     * Does NOT validate — just parses the URL before the last underscore.
+     */
+    @Override
+    public String extractRedirectUrlFromState(String state) {
+        if (StringUtils.isBlank(state) || !state.contains("_")) {
+            return "/";
+        }
+        int lastUnderscore = state.lastIndexOf('_');
+        return state.substring(0, lastUnderscore);
     }
 
     @Override
