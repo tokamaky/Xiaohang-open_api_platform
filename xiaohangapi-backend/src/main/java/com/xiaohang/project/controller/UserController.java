@@ -314,4 +314,44 @@ public class UserController {
         LoginUserVO result = githubOAuthService.unbindGithubAccount(request);
         return ResultUtils.success(result);
     }
+
+    /**
+     * Delete current user's account
+     * Requires password verification for security
+     *
+     * @param userPasswordRequest Password for verification
+     * @param request            HTTP request
+     * @return Response with the result
+     */
+    @PostMapping("/delete/account")
+    public BaseResponse<Boolean> deleteMyAccount(@RequestBody UserPasswordRequest userPasswordRequest,
+                                                  HttpServletRequest request) {
+        if (userPasswordRequest == null || StringUtils.isBlank(userPasswordRequest.getUserPassword())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Password is required");
+        }
+        boolean result = userService.deleteMyAccount(userPasswordRequest.getUserPassword(), request);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * Change current user's password
+     *
+     * @param passwordRequest Password change request
+     * @param request         HTTP request
+     * @return Response with the result
+     */
+    @PostMapping("/change/password")
+    public BaseResponse<Boolean> changePassword(@RequestBody UserPasswordRequest passwordRequest,
+                                                HttpServletRequest request) {
+        if (passwordRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String oldPassword = passwordRequest.getUserPassword();
+        String newPassword = passwordRequest.getNewPassword();
+        if (StringUtils.isAnyBlank(oldPassword, newPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Old password and new password are required");
+        }
+        boolean result = userService.changePassword(oldPassword, newPassword, request);
+        return ResultUtils.success(result);
+    }
 }

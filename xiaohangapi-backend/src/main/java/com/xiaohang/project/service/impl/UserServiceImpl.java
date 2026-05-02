@@ -45,6 +45,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     private static final String SALT = "xiaohang";
 
+    @Resource
+    private com.xiaohang.project.utils.JwtUtils jwtUtils;
+
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. Validation
@@ -123,19 +126,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * Get the current logged-in user
+     * Supports both Session-based and JWT token-based authentication
      *
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return Current logged-in user
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        // First check if the user is logged in
+        // First, try to get user from Session (for regular login)
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
+
+        // If not in session, try JWT token (for GitHub OAuth login)
         if (currentUser == null || currentUser.getId() == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    if (jwtUtils.validateToken(token)) {
+                        Long userId = jwtUtils.getUserIdFromToken(token);
+                        if (userId != null) {
+                            currentUser = this.getById(userId);
+                            if (currentUser != null) {
+                                return currentUser;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to validate JWT token: {}", e.getMessage());
+                }
+            }
             throw new BusinessException(ErrorCode.FIRST_TIME_LOGIN);
         }
-        // Query from the database (for performance, you can comment this and use cache directly)
+
+        // Query from the database to get fresh data
         long userId = currentUser.getId();
         currentUser = this.getById(userId);
         if (currentUser == null) {
@@ -146,34 +170,74 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * Get the current logged-in user (allow null if not logged in)
+     * Supports both Session-based and JWT token-based authentication
      *
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return Current logged-in user or null if not logged in
      */
     @Override
     public User getLoginUserPermitNull(HttpServletRequest request) {
-        // First check if the user is logged in
+        // First, try to get user from Session (for regular login)
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
+
+        // If not in session, try JWT token (for GitHub OAuth login)
         if (currentUser == null || currentUser.getId() == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    if (jwtUtils.validateToken(token)) {
+                        Long userId = jwtUtils.getUserIdFromToken(token);
+                        if (userId != null) {
+                            currentUser = this.getById(userId);
+                            if (currentUser != null) {
+                                return currentUser;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to validate JWT token: {}", e.getMessage());
+                }
+            }
             return null;
         }
-        // Query from the database (for performance, you can comment this and use cache directly)
+
+        // Query from the database to get fresh data
         long userId = currentUser.getId();
         return this.getById(userId);
     }
 
     /**
      * Check if the user is an admin
+     * Supports both Session-based and JWT token-based authentication
      *
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return boolean
      */
     @Override
     public boolean isAdmin(HttpServletRequest request) {
-        // Only admins can query
+        // First, try to get user from Session
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User) userObj;
+
+        // If not in session, try JWT token (for GitHub OAuth login)
+        if (user == null || user.getId() == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    if (jwtUtils.validateToken(token)) {
+                        Long userId = jwtUtils.getUserIdFromToken(token);
+                        if (userId != null) {
+                            user = this.getById(userId);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to validate JWT token in isAdmin: {}", e.getMessage());
+                }
+            }
+        }
         return isAdmin(user);
     }
 
@@ -184,12 +248,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * User logout
+     * Supports both Session-based and JWT token-based authentication
      *
-     * @param request
+     * @param request HTTP request
      */
     @Override
     public boolean userLogout(HttpServletRequest request) {
-        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+        // Check session first
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObj == null) {
+            // If not in session, check JWT token (for GitHub OAuth users)
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    if (jwtUtils.validateToken(token)) {
+                        // Valid JWT token, consider as logged in
+                        // For JWT-based auth, we don't have session to clear
+                        return true;
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to validate JWT token on logout: {}", e.getMessage());
+                }
+            }
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "Not logged in");
         }
         // Remove login status
@@ -254,6 +335,90 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String secretKey = DigestUtil.md5Hex(SALT + user.getUserAccount() + RandomUtil.randomNumbers(8));
         user.setSecretKey(secretKey);
         user.setAccessKey(accessKey);
+        return this.updateById(user);
+    }
+
+    @Override
+    public boolean deleteMyAccount(String userPassword, HttpServletRequest request) {
+        User loginUser = getLoginUser(request);
+
+        // Check if user is a GitHub OAuth user (has password placeholder)
+        // GitHub OAuth users have password = md5(salt + githubId + "github_oauth")
+        boolean isGithubUser = loginUser.getUserPassword() != null &&
+                loginUser.getUserPassword().endsWith("github_oauth") &&
+                loginUser.getGithubId() != null;
+
+        if (isGithubUser) {
+            // For GitHub OAuth users, verify using their GitHub account via JWT token
+            // They must be authenticated with a valid JWT token to delete
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                if (jwtUtils.validateToken(token)) {
+                    // Valid JWT token from GitHub OAuth, allow deletion without password
+                    // Clear session
+                    request.getSession().removeAttribute(USER_LOGIN_STATE);
+                    return this.removeById(loginUser.getId());
+                }
+            }
+            // If no valid JWT token, reject
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                    "Cannot delete GitHub OAuth account without valid authentication. Please log in via GitHub first.");
+        }
+
+        // For regular users, verify password
+        if (StringUtils.isBlank(userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Password is required");
+        }
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", loginUser.getId());
+        queryWrapper.eq("userPassword", encryptPassword);
+        User user = this.getOne(queryWrapper);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Incorrect password");
+        }
+        // Delete the user
+        boolean result = this.removeById(loginUser.getId());
+        if (result) {
+            // Clear session
+            request.getSession().removeAttribute(USER_LOGIN_STATE);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean changePassword(String oldPassword, String newPassword, HttpServletRequest request) {
+        if (StringUtils.isAnyBlank(oldPassword, newPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Old password and new password are required");
+        }
+        if (newPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "New password must be at least 8 characters");
+        }
+        User loginUser = getLoginUser(request);
+
+        // Check if user is a GitHub OAuth user (has password placeholder)
+        boolean isGithubUser = loginUser.getUserPassword() != null &&
+                loginUser.getUserPassword().endsWith("github_oauth") &&
+                loginUser.getGithubId() != null;
+
+        if (isGithubUser) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                    "Cannot change password for GitHub OAuth account. Your account was created using GitHub OAuth.");
+        }
+
+        // Verify old password
+        String encryptOldPassword = DigestUtils.md5DigestAsHex((SALT + oldPassword).getBytes());
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", loginUser.getId());
+        queryWrapper.eq("userPassword", encryptOldPassword);
+        User user = this.getOne(queryWrapper);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Incorrect old password");
+        }
+        // Update password
+        String encryptNewPassword = DigestUtils.md5DigestAsHex((SALT + newPassword).getBytes());
+        user.setUserPassword(encryptNewPassword);
         return this.updateById(user);
     }
 }

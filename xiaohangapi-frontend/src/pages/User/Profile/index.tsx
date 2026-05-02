@@ -7,6 +7,8 @@ import {
     bindGithubUsingPost,
     unbindGithubUsingPost,
     getLoginUserUsingGet,
+    deleteMyAccountUsingPost,
+    changePasswordUsingPost,
 } from '@/services/xiaohang-backend/userController';
 import {useModel} from '@@/exports';
 import {
@@ -24,9 +26,10 @@ import {
     DisconnectOutlined,
     EditOutlined,
     SaveOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import {PageContainer, ProForm, ProFormInstance, ProFormText} from '@ant-design/pro-components';
-import {Button, Card, Divider, Input, message, Modal, Typography, Upload, UploadFile, UploadProps, Tag} from 'antd';
+import {Button, Card, Divider, Input, message, Modal, Typography, Upload, UploadFile, UploadProps, Tag, Popconfirm} from 'antd';
 import {RcFile, UploadChangeParam} from 'antd/es/upload';
 import React, {useEffect, useRef, useState} from 'react';
 import './index.less';
@@ -55,6 +58,18 @@ const Profile: React.FC = () => {
   const [savingUsername, setSavingUsername] = useState(false);
   const { initialState, setInitialState } = useModel('@@initialState');
   const formRef = useRef<ProFormInstance<{ userPassword: string }>>();
+
+  // Delete account modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Change password modal
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   // ── Restore user from sessionStorage on mount ──────────────────────────────
   // This is a fallback for when the profile page is reached directly (e.g. via
@@ -220,6 +235,70 @@ const Profile: React.FC = () => {
       }
     } catch (e: any) {
       console.log(e);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!oldPassword) {
+      message.error('Please enter your current password');
+      return;
+    }
+    if (!newPassword) {
+      message.error('Please enter a new password');
+      return;
+    }
+    if (newPassword.length < 8) {
+      message.error('New password must be at least 8 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      message.error('New passwords do not match');
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const res = await changePasswordUsingPost({
+        userPassword: oldPassword,
+        newPassword: newPassword,
+      });
+      if (res.code === 0) {
+        message.success('Password changed successfully!');
+        setPasswordModalOpen(false);
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (e: any) {
+      message.error(e?.message || 'Failed to change password');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword && !data?.userAccount?.startsWith('github_')) {
+      message.error('Please enter your password to confirm');
+      return;
+    }
+    setDeleteLoading(true);
+    try {
+      const res = await deleteMyAccountUsingPost({
+        userPassword: deletePassword || '',
+      });
+      if (res.code === 0) {
+        message.success('Account deleted successfully');
+        // Clear local storage
+        localStorage.removeItem('oauth_token');
+        sessionStorage.removeItem(SESSION_USER_KEY);
+        // Redirect to home page
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+      }
+    } catch (e: any) {
+      message.error(e?.message || 'Failed to delete account');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -394,6 +473,31 @@ const Profile: React.FC = () => {
                 )}
               </span>
             </div>
+
+            {/* Password and Account Actions */}
+            <div className="info-row" style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+              <span className="info-icon" />
+              <span className="info-value" style={{ paddingLeft: 0, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {/* Only show Change Password for non-GitHub OAuth users */}
+                {!data?.userAccount?.startsWith('github_') && (
+                  <Button
+                    size="small"
+                    icon={<LockOutlined />}
+                    onClick={() => setPasswordModalOpen(true)}
+                  >
+                    Change Password
+                  </Button>
+                )}
+                <Button
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => setDeleteModalOpen(true)}
+                >
+                  Delete Account
+                </Button>
+              </span>
+            </div>
           </div>
         </Card>
 
@@ -519,6 +623,147 @@ const Profile: React.FC = () => {
             fieldProps={{ size: 'large' }}
           />
         </ProForm>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal
+        title={
+          <span className="modal-title">
+            <LockOutlined /> Change Password
+          </span>
+        }
+        open={passwordModalOpen}
+        onCancel={() => {
+          setPasswordModalOpen(false);
+          setOldPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+        }}
+        footer={null}
+        className="profile-modal"
+      >
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Current Password</label>
+          <Input.Password
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            placeholder="Enter current password"
+            size="large"
+          />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>New Password</label>
+          <Input.Password
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter new password (min 8 characters)"
+            size="large"
+          />
+        </div>
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Confirm New Password</label>
+          <Input.Password
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm new password"
+            size="large"
+            onPressEnter={() => handleChangePassword()}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+          <Button onClick={() => {
+            setPasswordModalOpen(false);
+            setOldPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+          }}>
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            loading={passwordLoading}
+            onClick={() => handleChangePassword()}
+          >
+            Change Password
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Delete Account Modal */}
+      <Modal
+        title={
+          <span className="modal-title" style={{ color: '#ff4d4f' }}>
+            <DeleteOutlined /> Delete Account
+          </span>
+        }
+        open={deleteModalOpen}
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setDeletePassword('');
+        }}
+        footer={null}
+        className="profile-modal"
+      >
+        <div style={{
+          padding: '16px',
+          background: '#fff2f0',
+          border: '1px solid #ffccc7',
+          borderRadius: 4,
+          marginBottom: 16
+        }}>
+          <p style={{ margin: 0, color: '#ff4d4f', fontWeight: 500 }}>
+            Warning: This action is permanent and cannot be undone!
+          </p>
+          <p style={{ margin: '8px 0 0', color: '#ff4d4f' }}>
+            All your data, including API keys and account information, will be permanently deleted.
+          </p>
+        </div>
+        {!data?.userAccount?.startsWith('github_') ? (
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
+              Enter your password to confirm
+            </label>
+            <Input.Password
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Enter your password"
+              size="large"
+            />
+          </div>
+        ) : (
+          <div style={{
+            padding: '12px',
+            background: '#f6ffed',
+            border: '1px solid #b7eb8f',
+            borderRadius: 4,
+            marginBottom: 24
+          }}>
+            <p style={{ margin: 0, color: '#52c41a' }}>
+              Since you logged in via GitHub, you can delete your account without entering a password.
+            </p>
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+          <Button onClick={() => {
+            setDeleteModalOpen(false);
+            setDeletePassword('');
+          }}>
+            Cancel
+          </Button>
+          <Popconfirm
+            title="Are you sure you want to delete your account?"
+            description="This action cannot be undone. All your data will be permanently deleted."
+            onConfirm={() => handleDeleteAccount()}
+            okText="Yes, Delete"
+            cancelText="Cancel"
+            okButtonProps={{ danger: true, loading: deleteLoading }}
+          >
+            <Button type="primary" danger loading={deleteLoading}
+              disabled={!data?.userAccount?.startsWith('github_') && !deletePassword}>
+              Delete Account
+            </Button>
+          </Popconfirm>
+        </div>
       </Modal>
     </PageContainer>
   );

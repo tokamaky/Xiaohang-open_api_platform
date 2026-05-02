@@ -287,7 +287,11 @@ const Login: React.FC = () => {
         </div>
 
         {/* Hover hint — right edge */}
-        <div className="hover-hint">
+        <div
+          className="hover-hint"
+          onClick={() => setPanelOpen(true)}
+          style={{ cursor: 'pointer' }}
+        >
           <ArrowRightOutlined className="hint-arrow" />
           <span>Slide to sign in</span>
         </div>

@@ -116,4 +116,24 @@ public interface UserService extends IService<User> {
      * @return boolean
      */
     boolean updateSecretKey(Long id);
+
+    /**
+     * Delete current user's account
+     * Requires password verification for security
+     *
+     * @param userPassword User password for verification
+     * @param request     HTTP request
+     * @return boolean
+     */
+    boolean deleteMyAccount(String userPassword, HttpServletRequest request);
+
+    /**
+     * Change current user's password
+     *
+     * @param oldPassword Old password
+     * @param newPassword New password
+     * @param request     HTTP request
+     * @return boolean
+     */
+    boolean changePassword(String oldPassword, String newPassword, HttpServletRequest request);
 }

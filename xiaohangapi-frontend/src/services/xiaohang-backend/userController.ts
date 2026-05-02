@@ -222,3 +222,33 @@ export async function unbindGithubUsingPost(options?: { [key: string]: any }) {
     ...(options || {}),
   });
 }
+
+/** deleteMyAccount POST /api/user/delete/account */
+export async function deleteMyAccountUsingPost(
+  body: API.UserPasswordRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/delete/account', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** changePassword POST /api/user/change/password */
+export async function changePasswordUsingPost(
+  body: API.UserPasswordRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/change/password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}

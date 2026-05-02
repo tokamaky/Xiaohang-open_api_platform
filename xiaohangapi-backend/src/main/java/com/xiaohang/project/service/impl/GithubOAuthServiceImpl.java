@@ -178,12 +178,19 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
     @Override
     public LoginUserVO unbindGithubAccount(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
+
         com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<User> wrapper =
                 new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<>();
         wrapper.eq("id", loginUser.getId());
         wrapper.set("githubId", null);
         userService.update(null, wrapper);
+
+        // Refresh user from database
         User updated = userService.getById(loginUser.getId());
+
+        // Update session if user is stored there
+        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, updated);
+
         return userService.getLoginUserVO(updated);
     }
 
