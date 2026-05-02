@@ -147,10 +147,14 @@ const Login: React.FC = () => {
           cancelText: 'Stay Here',
           okButtonProps: { icon: <GithubOutlined /> },
           onOk: () => {
+            localStorage.removeItem('oauth_pending');
+            localStorage.removeItem('oauth_user');
             setInitialState({ loginUser: user });
-            window.location.href = '/user/profile';
+            window.location.href = '/profile';
           },
           onCancel: () => {
+            localStorage.removeItem('oauth_pending');
+            localStorage.removeItem('oauth_user');
             setInitialState({ loginUser: user });
             window.location.href = '/';
           },

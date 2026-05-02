@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting...</title>
+  <script>
+    (function() {
+      var loc = window.location;
+      var pathname = loc.pathname;
+      var search = loc.search;
+
+      // GitHub OAuth callback: /user/login_xxx?__oauth_done=1&__oauth_data=...
+      if (/^\/user\/login_\d+$/.test(pathname) && search.indexOf('__oauth_done') !== -1) {
+        window.location.replace('/user/login' + search);
+        return;
+      }
+
+      // If already on a valid route, let the SPA handle it
+      // Otherwise redirect to home
+      if (pathname !== '/' && !pathname.startsWith('/user/login')) {
+        window.location.replace('/');
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>

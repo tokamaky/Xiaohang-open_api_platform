@@ -35,6 +35,7 @@
     ],
   },
   { name: 'User Center', icon: 'UserOutlined', path: '/profile', component: './User/Profile' },
+  { path: '/user/profile', redirect: '/profile' },
   { path: '/profile_*', redirect: '/profile' },
   { name: 'Devlog', icon: 'HistoryOutlined', path: '/Devlog', component: './Devlog' },
   {
