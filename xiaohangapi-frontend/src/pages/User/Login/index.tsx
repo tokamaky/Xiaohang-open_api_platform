@@ -99,6 +99,16 @@ const Login: React.FC = () => {
   // serverless containers (no session sharing needed).
   useEffect(() => {
     const params = new URL(window.location.href).searchParams;
+
+    // Handle OAuth errors (e.g. GitHub account already linked to another user)
+    const oauthError = params.get('__oauth_error');
+    if (oauthError) {
+      const cleanUrl = window.location.href.replace(/([?&])__oauth_error=1/, '$1').replace(/([?&])error=[^&]*/, '$1').replace(/[?&]$/, '');
+      window.history.replaceState(null, '', cleanUrl);
+      message.error(oauthError || 'GitHub login failed. Please try again.');
+      return;
+    }
+
     const isOauthDone = params.get('__oauth_done') === '1';
     const isProcessed = params.get('oauth_processed');
     if (!isOauthDone || isProcessed) return;
