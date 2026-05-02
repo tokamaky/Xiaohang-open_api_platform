@@ -73,10 +73,10 @@ const Profile: React.FC = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Set password modal (for GitHub OAuth users)
-  const [setPasswordModalOpen, setSetPasswordModalOpen] = useState(false);
-  const [setPasswordValue, setSetPasswordValue] = useState('');
-  const [setConfirmPasswordValue, setSetConfirmPasswordValue] = useState('');
-  const [setPasswordLoading, setSetPasswordLoading] = useState(false);
+  const [setPwdModalOpen, setSetPwdModalOpen] = useState(false);
+  const [setPwdValue, setSetPwdValue] = useState('');
+  const [setPwdConfirmValue, setSetPwdConfirmValue] = useState('');
+  const [setPwdLoading, setSetPwdLoading] = useState(false);
 
   // ── Restore user from sessionStorage on mount ──────────────────────────────
   // This is a fallback for when the profile page is reached directly (e.g. via
@@ -303,35 +303,35 @@ const Profile: React.FC = () => {
   };
 
   const handleSetPassword = async () => {
-    if (!setPasswordValue) {
+    if (!setPwdValue) {
       message.error('Please enter a password');
       return;
     }
-    if (setPasswordValue.length < 8) {
+    if (setPwdValue.length < 8) {
       message.error('Password must be at least 8 characters');
       return;
     }
-    if (setPasswordValue !== setConfirmPasswordValue) {
+    if (setPwdValue !== setPwdConfirmValue) {
       message.error('Passwords do not match');
       return;
     }
-    setSetPasswordLoading(true);
+    setSetPwdLoading(true);
     try {
       const res = await setPasswordUsingPost({
-        newPassword: setPasswordValue,
+        newPassword: setPwdValue,
       });
       if (res.code === 0) {
         message.success('Password set successfully!');
-        setSetPasswordModalOpen(false);
-        setSetPasswordValue('');
-        setSetConfirmPasswordValue('');
+        setSetPwdModalOpen(false);
+        setSetPwdValue('');
+        setSetPwdConfirmValue('');
         // Refresh user info to update the UI
         await getUserInfo();
       }
     } catch (e: any) {
       message.error(e?.message || 'Failed to set password');
     } finally {
-      setSetPasswordLoading(false);
+      setSetPwdLoading(false);
     }
   };
 
@@ -542,7 +542,7 @@ const Profile: React.FC = () => {
                   <Button
                     size="small"
                     icon={<LockOutlined />}
-                    onClick={() => setSetPasswordModalOpen(true)}
+                    onClick={() => setSetPwdModalOpen(true)}
                   >
                     Set Password
                   </Button>
@@ -763,11 +763,11 @@ const Profile: React.FC = () => {
             <LockOutlined /> Set Password
           </span>
         }
-        open={setPasswordModalOpen}
+        open={setPwdModalOpen}
         onCancel={() => {
-          setSetPasswordModalOpen(false);
-          setSetPasswordValue('');
-          setSetConfirmPasswordValue('');
+          setSetPwdModalOpen(false);
+          setSetPwdValue('');
+          setSetPwdConfirmValue('');
         }}
         footer={null}
         className="profile-modal"
@@ -786,8 +786,8 @@ const Profile: React.FC = () => {
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Password</label>
           <Input.Password
-            value={setPasswordValue}
-            onChange={(e) => setSetPasswordValue(e.target.value)}
+            value={setPwdValue}
+            onChange={(e) => setSetPwdValue(e.target.value)}
             placeholder="Enter password (min 8 characters)"
             size="large"
           />
@@ -795,8 +795,8 @@ const Profile: React.FC = () => {
         <div style={{ marginBottom: 24 }}>
           <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Confirm Password</label>
           <Input.Password
-            value={setConfirmPasswordValue}
-            onChange={(e) => setSetConfirmPasswordValue(e.target.value)}
+            value={setPwdConfirmValue}
+            onChange={(e) => setSetPwdConfirmValue(e.target.value)}
             placeholder="Confirm password"
             size="large"
             onPressEnter={() => handleSetPassword()}
@@ -804,15 +804,15 @@ const Profile: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
           <Button onClick={() => {
-            setSetPasswordModalOpen(false);
-            setSetPasswordValue('');
-            setSetConfirmPasswordValue('');
+            setSetPwdModalOpen(false);
+            setSetPwdValue('');
+            setSetPwdConfirmValue('');
           }}>
             Cancel
           </Button>
           <Button
             type="primary"
-            loading={setPasswordLoading}
+            loading={setPwdLoading}
             onClick={() => handleSetPassword()}
           >
             Set Password
