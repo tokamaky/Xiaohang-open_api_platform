@@ -1,5 +1,6 @@
 import Footer from '@/components/Footer';
 import { userLoginUsingPost, userRegisterUsingPost } from '@/services/xiaohang-backend/userController';
+import { getOAuthResultUsingGet } from '@/services/xiaohang-backend/userController';
 import {
   LockOutlined,
   UserOutlined,
@@ -10,8 +11,10 @@ import {
   CodeOutlined,
   DatabaseOutlined,
   ArrowRightOutlined,
+  GithubOutlined,
+  SmileOutlined,
 } from '@ant-design/icons';
-import { Alert, message } from 'antd';
+import { Alert, message, Modal } from 'antd';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useModel } from '@umijs/max';
 import './index.less';
@@ -90,6 +93,77 @@ const Login: React.FC = () => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [handleMouseMove]);
+
+  // ── GitHub OAuth callback ──────────────────────────────────────────────
+  // Detect ?__oauth_done=1 after GitHub redirects back, fetch session result, and complete login.
+  useEffect(() => {
+    const params = new URL(window.location.href).searchParams;
+    if (params.get('__oauth_done') !== '1') return;
+    if (params.get('oauth_processed')) return;
+
+    const doProcess = async () => {
+      // Mark as processed to avoid double-triggering on re-render
+      const markedUrl = window.location.href.replace(/([?&])__oauth_done=1/, '$1__oauth_processed=true');
+      window.history.replaceState(null, '', markedUrl);
+
+      try {
+        const res = await getOAuthResultUsingGet();
+        if (res.data) {
+          const user = res.data;
+          // If this is a newly registered GitHub user (auto-created account),
+          // show a welcome modal guiding them to set a custom username / add a password.
+          const isNewGithubUser = !!user.userAccount?.startsWith('github_');
+          if (isNewGithubUser) {
+            Modal.confirm({
+              title: (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <SmileOutlined style={{ color: '#00D4AA' }} />
+                  Welcome to Xiaohang API Platform!
+                </span>
+              ),
+              icon: null,
+              content: (
+                <div style={{ marginTop: 12 }}>
+                  <p>
+                    Your GitHub account <strong>@{user.userName}</strong> has been linked to a new account.
+                  </p>
+                  <p style={{ marginTop: 8 }}>
+                    Your auto-generated account is <code style={{ background: '#f0f0f0', padding: '1px 4px', borderRadius: 3 }}>{user.userAccount}</code>.
+                  </p>
+                  <p style={{ marginTop: 8, color: '#888' }}>
+                    Head over to{' '}
+                    <strong>Profile</strong> to customize your username and optionally set a password
+                    so you can log in without GitHub next time.
+                  </p>
+                </div>
+              ),
+              okText: 'Go to Profile',
+              cancelText: 'Stay Here',
+              okButtonProps: { icon: <GithubOutlined /> },
+              onOk: () => {
+                setInitialState({ loginUser: user });
+                window.location.href = '/user/profile';
+              },
+              onCancel: () => {
+                setInitialState({ loginUser: user });
+                window.location.href = '/';
+              },
+            });
+          } else {
+            setInitialState({ loginUser: user });
+            message.success(`Welcome back, ${user.userName}!`);
+            window.location.href = '/';
+          }
+        } else if (res.message) {
+          message.error(res.message);
+        }
+      } catch {
+        message.error('Failed to complete GitHub login. Please try again.');
+      }
+    };
+
+    doProcess();
+  }, [setInitialState]);
 
   const handleSubmit = async () => {
     const { userPassword, checkPassword, userAccount } = formValues;

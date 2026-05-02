@@ -281,11 +281,17 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
         String userAccount = "github_" + githubLogin;
         String accessKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(5));
         String secretKey = DigestUtil.md5Hex(SALT + userAccount + RandomUtil.randomNumbers(8));
+        // GitHub users have no password; use a hashed placeholder so the field is not null.
+        String hashedPassword = DigestUtil.md5Hex(SALT + githubId + "github_oauth");
+        String githubAvatarUrl = (githubAvatar != null && !githubAvatar.isEmpty())
+                ? githubAvatar
+                : "https://image-bed-ichensw.oss-cn-hangzhou.aliyuncs.com/Multiavatar-f5871c303317a4dafbf6.png";
 
         User user = new User();
         user.setUserAccount(userAccount);
+        user.setUserPassword(hashedPassword);
         user.setUserName(githubLogin);
-        user.setUserAvatar(githubAvatar);
+        user.setUserAvatar(githubAvatarUrl);
         user.setGithubId(githubId);
         user.setAccessKey(accessKey);
         user.setSecretKey(secretKey);

@@ -197,6 +197,7 @@ declare namespace API {
     id?: number;
     token?: string;
     updateTime?: string;
+    userAccount?: string;
     userAvatar?: string;
     userName?: string;
     userProfile?: string;

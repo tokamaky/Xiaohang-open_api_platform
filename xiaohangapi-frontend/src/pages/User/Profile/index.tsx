@@ -1,6 +1,7 @@
 import {
     updateSecretKeyUsingPost,
     updateUserUsingPost,
+    updateMyUserUsingPost,
     userLoginUsingPost,
     getGithubAuthUrlUsingGet,
     bindGithubUsingPost,
@@ -21,9 +22,11 @@ import {
     GithubOutlined,
     LinkOutlined,
     DisconnectOutlined,
+    EditOutlined,
+    SaveOutlined,
 } from '@ant-design/icons';
 import {PageContainer, ProForm, ProFormInstance, ProFormText} from '@ant-design/pro-components';
-import {Button, Card, Divider, message, Modal, Typography, Upload, UploadFile, UploadProps, Tag} from 'antd';
+import {Button, Card, Divider, Input, message, Modal, Typography, Upload, UploadFile, UploadProps, Tag} from 'antd';
 import {RcFile, UploadChangeParam} from 'antd/es/upload';
 import React, {useEffect, useRef, useState} from 'react';
 import './index.less';
@@ -45,8 +48,36 @@ const Profile: React.FC = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>();
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [usernameValue, setUsernameValue] = useState('');
+  const [savingUsername, setSavingUsername] = useState(false);
   const { initialState, setInitialState } = useModel('@@initialState');
   const formRef = useRef<ProFormInstance<{ userPassword: string }>>();
+
+  // ── GitHub OAuth callback ──────────────────────────────────────────────
+  // Detect ?__oauth_done=1 after GitHub redirects back (e.g. from Profile page "Link GitHub"),
+  // fetch session result, refresh user info, and show a success message.
+  useEffect(() => {
+    const params = new URL(window.location.href).searchParams;
+    if (params.get('__oauth_done') !== '1') return;
+    if (params.get('oauth_processed')) return;
+
+    const doProcess = async () => {
+      const markedUrl = window.location.href.replace(/([?&])__oauth_done=1/, '$1__oauth_processed=true');
+      window.history.replaceState(null, '', markedUrl);
+
+      try {
+        // No need to store loginUser here — session cookie already handles it.
+        // Just refresh user info so the UI reflects the new GitHub link state.
+        await getUserInfo();
+        message.success('GitHub account linked successfully!');
+      } catch {
+        message.error('GitHub link completed, but failed to refresh user info.');
+      }
+    };
+
+    doProcess();
+  }, []);
 
   const getUserInfo = async () => {
     return getLoginUserUsingGet().then((res) => {
@@ -54,8 +85,27 @@ const Profile: React.FC = () => {
         setInitialState((s: any) => ({ ...s, loginUser: res.data }));
         setData(res.data as API.UserVO);
         setImageUrl(res.data.userAvatar);
+        setUsernameValue(res.data.userName || '');
       }
     });
+  };
+
+  const saveUsername = async () => {
+    if (!usernameValue.trim()) {
+      message.error('Username cannot be empty');
+      return;
+    }
+    setSavingUsername(true);
+    try {
+      const res = await updateMyUserUsingPost({ userName: usernameValue.trim() });
+      if (res.code === 0) {
+        message.success('Username updated!');
+        setEditingUsername(false);
+        await getUserInfo();
+      }
+    } finally {
+      setSavingUsername(false);
+    }
   };
 
   useEffect(() => {
@@ -159,7 +209,49 @@ const Profile: React.FC = () => {
             <div className="info-row">
               <span className="info-icon"><UserOutlined /></span>
               <span className="info-label">Username</span>
-              <span className="info-value">{data?.userName || '—'}</span>
+              <span className="info-value">
+                {editingUsername ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Input
+                      value={usernameValue}
+                      onChange={(e) => setUsernameValue(e.target.value)}
+                      onPressEnter={saveUsername}
+                      style={{ width: 140 }}
+                      size="small"
+                      autoFocus
+                    />
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<SaveOutlined />}
+                      loading={savingUsername}
+                      onClick={saveUsername}
+                      style={{ color: '#00D4AA' }}
+                    />
+                    <Button
+                      type="text"
+                      size="small"
+                      onClick={() => {
+                        setEditingUsername(false);
+                        setUsernameValue(data?.userName || '');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </span>
+                ) : (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>{data?.userName || '—'}</span>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<EditOutlined />}
+                      onClick={() => setEditingUsername(true)}
+                      style={{ color: '#00A3FF', padding: '0 4px' }}
+                    />
+                  </span>
+                )}
+              </span>
             </div>
             <div className="info-row">
               <span className="info-icon"><UserOutlined /></span>
@@ -215,7 +307,7 @@ const Profile: React.FC = () => {
                     onClick={async () => {
                       try {
                         const res = await (window as any).fetch(
-                          `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${encodeURIComponent('https://xiaohang-openapiplatform-production.up.railway.app/profile')}`
+                          `https://backend-production-796b.up.railway.app/api/oauth/github/url?redirectUrl=${encodeURIComponent('https://xiaohang-openapiplatform-production.up.railway.app/user/profile')}`
                         ).then((r: Response) => r.json());
                         if (res.data) {
                           window.location.href = res.data;
