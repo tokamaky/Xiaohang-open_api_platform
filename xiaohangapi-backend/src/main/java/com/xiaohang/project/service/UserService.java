@@ -128,7 +128,7 @@ public interface UserService extends IService<User> {
     boolean deleteMyAccount(String userPassword, HttpServletRequest request);
 
     /**
-     * Change current user's password
+     * Change current user's password (for users who have a password)
      *
      * @param oldPassword Old password
      * @param newPassword New password
@@ -136,4 +136,13 @@ public interface UserService extends IService<User> {
      * @return boolean
      */
     boolean changePassword(String oldPassword, String newPassword, HttpServletRequest request);
+
+    /**
+     * Set password for current user (for GitHub OAuth users who don't have a password)
+     *
+     * @param newPassword New password to set
+     * @param request    HTTP request
+     * @return boolean
+     */
+    boolean setPassword(String newPassword, HttpServletRequest request);
 }

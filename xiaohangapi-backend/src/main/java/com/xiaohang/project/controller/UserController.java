@@ -354,4 +354,21 @@ public class UserController {
         boolean result = userService.changePassword(oldPassword, newPassword, request);
         return ResultUtils.success(result);
     }
+
+    /**
+     * Set password for current user (for GitHub OAuth users who don't have a password)
+     *
+     * @param passwordRequest Password request containing new password
+     * @param request        HTTP request
+     * @return Response with the result
+     */
+    @PostMapping("/set/password")
+    public BaseResponse<Boolean> setPassword(@RequestBody UserPasswordRequest passwordRequest,
+                                             HttpServletRequest request) {
+        if (passwordRequest == null || StringUtils.isBlank(passwordRequest.getNewPassword())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "New password is required");
+        }
+        boolean result = userService.setPassword(passwordRequest.getNewPassword(), request);
+        return ResultUtils.success(result);
+    }
 }

@@ -9,6 +9,7 @@ import {
     getLoginUserUsingGet,
     deleteMyAccountUsingPost,
     changePasswordUsingPost,
+    setPasswordUsingPost,
 } from '@/services/xiaohang-backend/userController';
 import {useModel} from '@@/exports';
 import {
@@ -64,12 +65,18 @@ const Profile: React.FC = () => {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Change password modal
+  // Change password modal (for regular users)
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Set password modal (for GitHub OAuth users)
+  const [setPasswordModalOpen, setSetPasswordModalOpen] = useState(false);
+  const [setPasswordValue, setSetPasswordValue] = useState('');
+  const [setConfirmPasswordValue, setSetConfirmPasswordValue] = useState('');
+  const [setPasswordLoading, setSetPasswordLoading] = useState(false);
 
   // ── Restore user from sessionStorage on mount ──────────────────────────────
   // This is a fallback for when the profile page is reached directly (e.g. via
@@ -94,28 +101,48 @@ const Profile: React.FC = () => {
   // Uses hash (#) instead of query params (?) so Railway always serves index.html.
   useEffect(() => {
     const hash = window.location.hash;
-    if (!hash || !hash.includes('__oauth_done=1')) return;
+    if (!hash || (!hash.includes('__oauth_done=1') && !hash.includes('__oauth_error=1'))) return;
 
     const doProcess = async () => {
       // Strip the hash to clean the URL
       window.history.replaceState(null, '', window.location.pathname);
+
+      // Check for error first
+      if (hash.includes('__oauth_error=1')) {
+        const hashParams = new URLSearchParams(hash.substring(1));
+        const errorMsg = hashParams.get('error');
+        if (errorMsg) {
+          try {
+            message.error(decodeURIComponent(errorMsg));
+          } catch {
+            message.error(errorMsg);
+          }
+        } else {
+          message.error('Failed to link GitHub account. Please try again.');
+        }
+        await getUserInfo();
+        return;
+      }
+
+      // Process success case
+      if (!hash.includes('__oauth_done=1')) return;
 
       const hashParams = new URLSearchParams(hash.substring(1)); // strip leading #
       const encodedData = hashParams.get('__oauth_data');
       if (encodedData) {
         try {
           const json = atob(encodedData);
-          const data = JSON.parse(json);
-          if (data.token) {
-            localStorage.setItem('oauth_token', data.token);
+          const oauthData = JSON.parse(json);
+          if (oauthData.token) {
+            localStorage.setItem('oauth_token', oauthData.token);
           }
           // Persist to sessionStorage so getUserInfo can use it as fallback
-          sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(data));
+          sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(oauthData));
 
-          setInitialState((s: any) => ({ ...s, loginUser: data }));
-          setData(data as API.UserVO);
-          setImageUrl(data.userAvatar);
-          setUsernameValue(data.userName || '');
+          setInitialState((s: any) => ({ ...s, loginUser: oauthData }));
+          setData(oauthData as API.UserVO);
+          setImageUrl(oauthData.userAvatar);
+          setUsernameValue(oauthData.userName || '');
           message.success('GitHub account linked successfully!');
         } catch (e) {
           console.error('[OAuth] Failed to decode profile callback data:', e);
@@ -272,6 +299,39 @@ const Profile: React.FC = () => {
       message.error(e?.message || 'Failed to change password');
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleSetPassword = async () => {
+    if (!setPasswordValue) {
+      message.error('Please enter a password');
+      return;
+    }
+    if (setPasswordValue.length < 8) {
+      message.error('Password must be at least 8 characters');
+      return;
+    }
+    if (setPasswordValue !== setConfirmPasswordValue) {
+      message.error('Passwords do not match');
+      return;
+    }
+    setSetPasswordLoading(true);
+    try {
+      const res = await setPasswordUsingPost({
+        newPassword: setPasswordValue,
+      });
+      if (res.code === 0) {
+        message.success('Password set successfully!');
+        setSetPasswordModalOpen(false);
+        setSetPasswordValue('');
+        setSetConfirmPasswordValue('');
+        // Refresh user info to update the UI
+        await getUserInfo();
+      }
+    } catch (e: any) {
+      message.error(e?.message || 'Failed to set password');
+    } finally {
+      setSetPasswordLoading(false);
     }
   };
 
@@ -478,8 +538,15 @@ const Profile: React.FC = () => {
             <div className="info-row" style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
               <span className="info-icon" />
               <span className="info-value" style={{ paddingLeft: 0, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {/* Only show Change Password for non-GitHub OAuth users */}
-                {!data?.userAccount?.startsWith('github_') && (
+                {data?.userAccount?.startsWith('github_') ? (
+                  <Button
+                    size="small"
+                    icon={<LockOutlined />}
+                    onClick={() => setSetPasswordModalOpen(true)}
+                  >
+                    Set Password
+                  </Button>
+                ) : (
                   <Button
                     size="small"
                     icon={<LockOutlined />}
@@ -685,6 +752,70 @@ const Profile: React.FC = () => {
             onClick={() => handleChangePassword()}
           >
             Change Password
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Set Password Modal (for GitHub OAuth users) */}
+      <Modal
+        title={
+          <span className="modal-title">
+            <LockOutlined /> Set Password
+          </span>
+        }
+        open={setPasswordModalOpen}
+        onCancel={() => {
+          setSetPasswordModalOpen(false);
+          setSetPasswordValue('');
+          setSetConfirmPasswordValue('');
+        }}
+        footer={null}
+        className="profile-modal"
+      >
+        <div style={{
+          padding: '12px',
+          background: '#e6f7ff',
+          border: '1px solid #91d5ff',
+          borderRadius: 4,
+          marginBottom: 16
+        }}>
+          <p style={{ margin: 0, color: '#1890ff' }}>
+            Set up a password for your GitHub OAuth account. This will allow you to log in without using GitHub.
+          </p>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Password</label>
+          <Input.Password
+            value={setPasswordValue}
+            onChange={(e) => setSetPasswordValue(e.target.value)}
+            placeholder="Enter password (min 8 characters)"
+            size="large"
+          />
+        </div>
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Confirm Password</label>
+          <Input.Password
+            value={setConfirmPasswordValue}
+            onChange={(e) => setSetConfirmPasswordValue(e.target.value)}
+            placeholder="Confirm password"
+            size="large"
+            onPressEnter={() => handleSetPassword()}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+          <Button onClick={() => {
+            setSetPasswordModalOpen(false);
+            setSetPasswordValue('');
+            setSetConfirmPasswordValue('');
+          }}>
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            loading={setPasswordLoading}
+            onClick={() => handleSetPassword()}
+          >
+            Set Password
           </Button>
         </div>
       </Modal>

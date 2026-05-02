@@ -252,3 +252,18 @@ export async function changePasswordUsingPost(
     ...(options || {}),
   });
 }
+
+/** setPassword POST /api/user/set/password */
+export async function setPasswordUsingPost(
+  body: API.UserPasswordRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/set/password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}

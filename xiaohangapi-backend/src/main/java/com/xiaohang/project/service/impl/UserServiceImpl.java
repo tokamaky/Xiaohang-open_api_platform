@@ -421,4 +421,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUserPassword(encryptNewPassword);
         return this.updateById(user);
     }
+
+    @Override
+    public boolean setPassword(String newPassword, HttpServletRequest request) {
+        if (StringUtils.isBlank(newPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "New password is required");
+        }
+        if (newPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Password must be at least 8 characters");
+        }
+        User loginUser = getLoginUser(request);
+
+        // Encrypt and set the new password
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + newPassword).getBytes());
+        loginUser.setUserPassword(encryptPassword);
+        return this.updateById(loginUser);
+    }
 }

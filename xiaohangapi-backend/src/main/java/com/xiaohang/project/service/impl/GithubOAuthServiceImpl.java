@@ -120,7 +120,8 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
 
         if (existingUser != null && loginUser != null && !existingUser.getId().equals(loginUser.getId())) {
             // GitHub account already bound to a different user
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "This GitHub account is already linked to another user");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                    "This GitHub account is already linked to another user. If you want to link this GitHub to a different account, please unlink it from the current account first.");
         }
 
         if (existingUser != null) {
@@ -162,7 +163,14 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
         queryWrapper.eq("githubId", githubId);
         User existing = userService.getOne(queryWrapper);
         if (existing != null && !existing.getId().equals(loginUser.getId())) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "This GitHub account is already linked to another user");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                    "This GitHub account is already linked to another user. Please use a different GitHub account or unlink the existing account first.");
+        }
+
+        // Check if this user already has a different GitHub account linked
+        if (StringUtils.isNotBlank(loginUser.getGithubId()) && !loginUser.getGithubId().equals(githubId)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,
+                    "Your account already has a GitHub account linked. Please unlink the existing GitHub account first.");
         }
 
         loginUser.setGithubId(githubId);
