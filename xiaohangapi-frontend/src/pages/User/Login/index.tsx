@@ -92,50 +92,8 @@ const Login: React.FC = () => {
   }, [handleMouseMove]);
 
   // ── GitHub OAuth callback ──────────────────────────────────────────────
-  // After GitHub redirects back, app.tsx's useClientOAuthEffect (browser-only)
-  // stores the login result in localStorage and cleans the URL.
-  // This useEffect reads it from localStorage and completes the login flow.
-  useEffect(() => {
-    const pending = localStorage.getItem('oauth_pending');
-    const userJson = localStorage.getItem('oauth_user');
-    if (!pending || !userJson) return;
-
-    localStorage.removeItem('oauth_pending');
-    localStorage.removeItem('oauth_user');
-
-    let user: API.LoginUserVO;
-    try {
-      const data = JSON.parse(userJson);
-      user = {
-        id: data.id,
-        token: data.token,
-        userAccount: data.userAccount,
-        userName: data.userName,
-        userAvatar: data.userAvatar,
-        userRole: data.userRole,
-        githubId: data.githubId,
-      };
-      const isNewGithubUser = data.isNew === true;
-
-      if (isNewGithubUser) {
-        // New GitHub user — set state and redirect to profile to complete setup
-        localStorage.removeItem('oauth_pending');
-        localStorage.removeItem('oauth_user');
-        setInitialState({ loginUser: user });
-        window.location.href = '/profile';
-      } else {
-        // Existing GitHub user — welcome back
-        localStorage.removeItem('oauth_pending');
-        localStorage.removeItem('oauth_user');
-        setInitialState({ loginUser: user });
-        message.success(`Welcome back, ${user.userName}!`);
-        window.location.href = '/';
-      }
-    } catch (e) {
-      console.error('[OAuth] Failed to parse OAuth user data:', e);
-      message.error('Failed to complete GitHub login. Please try again.');
-    }
-  }, [setInitialState]);
+  // Handled entirely by app.tsx's getInitialState + onPageChange.
+  // The Login page mounts AFTER onPageChange redirects to the final destination.
 
   const handleSubmit = async () => {
     const { userPassword, checkPassword, userAccount } = formValues;

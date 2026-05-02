@@ -1,8 +1,7 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
-import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
-import { history, Link } from '@umijs/max';
+import { history } from '@umijs/max';
 import React, { useEffect } from 'react';
 import defaultSettings from '../config/defaultSettings';
 import { getLoginUserUsingGet } from '@/services/xiaohang-backend/userController';
@@ -13,60 +12,89 @@ import { message } from 'antd';
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
-const OAUTH_TOKEN_KEY = 'oauth_token';
-const OAUTH_PENDING_KEY = 'oauth_pending';
-const OAUTH_USER_KEY = 'oauth_user';
-const OAUTH_TARGET_KEY = 'oauth_target_path';
-
-// Module-level state shared between getInitialState and onPageChange.
-// localStorage is the source of truth for surviving full page reloads.
-let pendingOAuthData: Record<string, unknown> | null = null;
+/**
+ * OAuth payload decoded from the __oauth_data URL parameter in getInitialState.
+ * Cleared from localStorage immediately after getInitialState processes it.
+ */
+interface OAuthPayload {
+  token: string;
+  userAccount: string;
+  userName: string;
+  userAvatar: string;
+  userRole: string;
+  githubId: string;
+  id: number;
+  isNew: boolean;
+}
 
 /**
- * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
- * */
+ * @see https://umijs.org/zh-CN/plugins/plugin-initial-state
+ *
+ * OAuth flow:
+ * 1. User clicks "Sign in with GitHub" on Login page
+ * 2. GitHub redirects to backend /api/oauth/github/callback
+ * 3. Backend creates/finds user, generates JWT, redirects to
+ *    /user/login?__oauth_done=1&__oauth_data=<base64-json>
+ * 4. This getInitialState detects __oauth_done, decodes the payload,
+ *    sets initialState.loginUser, and IMMEDIATELY redirects to the
+ *    final destination (/profile for new users, / for returning users).
+ *    window.location.href prevents the Login component from ever rendering.
+ *
+ * Session verification (getLoginUserUsingGet) is a SEPARATE concern — it
+ * runs after OAuth processing to populate initialState for the ProLayout
+ * avatar/name. If it fails (user not in session), loginUser stays as
+ * set by the OAuth data above.
+ */
 export async function getInitialState(): Promise<InitialState> {
-  const { location } = history;
-  console.log('[OAuth] getInitialState running, location.search:', location.search);
-
   const fetchUserInfo = async () => {
     try {
       const res = await getLoginUserUsingGet();
       return res.data;
-    } catch (error) {
+    } catch {
       history.push(loginPath);
     }
     return undefined;
   };
 
-  // --- Client-side OAuth handling ---
+  // ── OAuth callback: decode payload and redirect BEFORE any component renders ─────
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search);
-    const oauthDone = params.get('__oauth_done');
-    const encodedData = params.get('__oauth_data');
 
-    if (oauthDone === '1' && encodedData) {
+    if (params.get('__oauth_done') === '1' && params.get('__oauth_data')) {
       try {
-        const json = atob(encodedData);
-        const data = JSON.parse(json);
-        pendingOAuthData = data;
+        const json = atob(params.get('__oauth_data')!);
+        const data: OAuthPayload = JSON.parse(json);
+        console.log('[OAuth] Decoded payload, isNew:', data.isNew, 'userName:', data.userName);
 
-        if (data.token) {
-          localStorage.setItem(OAUTH_TOKEN_KEY, data.token as string);
-        }
-        localStorage.setItem(OAUTH_PENDING_KEY, '1');
-        localStorage.setItem(OAUTH_USER_KEY, JSON.stringify(data));
-
-        const basePath = window.location.pathname.replace(/^(.+?)_\d+$/, '$1') || '/';
-        localStorage.setItem(OAUTH_TARGET_KEY, basePath);
-        console.log('[OAuth] Stored OAuth data, target:', basePath);
+        // Build the final destination BEFORE setting initialState.
+        // We MUST redirect with window.location.href so the browser navigates
+        // away BEFORE the Login/ProLayout component renders (no flash).
+        const target = data.isNew ? '/profile' : '/';
+        console.log('[OAuth] Redirecting to:', target);
+        window.location.href = target;
+        // Return a placeholder — the browser is navigating away so this return
+        // value is never used. We intentionally set loginUser so that if the
+        // navigation is somehow blocked, the user ends up on the right page.
+        return {
+          fetchUserInfo,
+          loginUser: {
+            id: data.id,
+            userAccount: data.userAccount,
+            userName: data.userName,
+            userAvatar: data.userAvatar,
+            userRole: data.userRole,
+            githubId: data.githubId,
+          } as InitialState['loginUser'],
+          settings: defaultSettings as Partial<LayoutSettings>,
+        };
       } catch (e) {
         console.error('[OAuth] Failed to decode callback data:', e);
+        message.error('GitHub login failed. Please try again.');
       }
     }
   }
 
-  // --- Always verify session so initialState.loginUser is populated ---
+  // ── Normal flow: verify session ────────────────────────────────────────────────
   try {
     const loginUser = await getLoginUserUsingGet();
     return {
@@ -75,7 +103,7 @@ export async function getInitialState(): Promise<InitialState> {
       settings: defaultSettings as Partial<LayoutSettings>,
     };
   } catch {
-    // Not logged in — fall through to guest state
+    // Not logged in
   }
 
   return {
@@ -84,7 +112,7 @@ export async function getInitialState(): Promise<InitialState> {
   };
 }
 
-// ── Client-side OAuth error handler ─────────────────────────────────────────────
+// ── OAuth error handler: shows error toast on any page ──────────────────────────
 const OAuthBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -102,16 +130,14 @@ const OAuthBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// ProLayout 支持的api https://procomponents.ant.design/components/layout
+// ProLayout 配置
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
-    actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
+    actionsRender: () => [<Question key="doc" />],
     avatarProps: {
       src: initialState?.loginUser?.userAvatar,
       title: <AvatarName />,
-      render: (_, avatarChildren) => {
-        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
-      },
+      render: (_, avatarChildren) => <AvatarDropdown>{avatarChildren}</AvatarDropdown>,
     },
     waterMarkProps: {
       content: initialState?.loginUser?.userName,
@@ -119,30 +145,21 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { pathname } = history.location;
-      if (!pathname) return;
+      if (!pathname || typeof window === 'undefined') return;
 
-      if (typeof window === 'undefined') return;
-
-      // 1. If user lands on /user/login_xxx (GitHub OAuth callback URL),
-      // redirect to /user/login so the route matches.
-      const oauthStateMatch = pathname.match(/^\/user\/login_(\d+)$/);
+      // Handle OAuth callback URLs with numeric state suffix (e.g. /user/login_123456789...)
+      // Redirect to /user/login so UmiJS can match the route.
+      const oauthStateMatch = pathname.match(/^\/user\/(?:login|profile)_\d+$/);
       if (oauthStateMatch) {
         const params = new URLSearchParams(window.location.search);
-        window.location.href = '/user/login?' + params.toString();
+        const target = pathname.replace(/^(.+?)_\d+$/, '$1');
+        window.location.href = target + (params.toString() ? '?' + params.toString() : '');
         return;
       }
 
-      // 2. If OAuth data is pending, redirect to target page.
-      // This handles the case where we just redirected from /user/login_xxx
-      // to /user/login and need to move to the actual destination (/ or /profile).
-      const targetPath = localStorage.getItem(OAUTH_TARGET_KEY);
-      if (targetPath && pathname === loginPath) {
-        localStorage.removeItem(OAUTH_TARGET_KEY);
-        window.location.href = targetPath;
-        return;
-      }
-
-      // 3. Normal auth guard.
+      // Auth guard: redirect unauthenticated users away from protected pages.
+      // Note: OAuth users have initialState.loginUser set by getInitialState above,
+      // so they are NOT redirected here.
       if (!initialState?.loginUser && pathname !== loginPath) {
         history.push(loginPath);
       }
@@ -157,41 +174,24 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     ],
     links: isDev
       ? [
-        <a key="linkedin" href="https://www.linkedin.com/in/xiaohang-ji" target="_blank" rel="noopener noreferrer">
-          <LinkedinOutlined />
-          <span>LinkedIn</span>
-        </a>,
-        <a key="personal-web" href="https://xiaohang-ji-profile.netlify.app/" target="_blank" rel="noopener noreferrer">
-          <GlobalOutlined />
-          <span>Profile</span>
-        </a>,
-        <a key="email" href="mailto:jxh186045@gmail.com">
-          <MailOutlined />
-          <span>Email Me</span>
-        </a>,
-      ]
+          <a key="linkedin" href="https://www.linkedin.com/in/xiaohang-ji" target="_blank" rel="noopener noreferrer">
+            <LinkedinOutlined />
+            <span>LinkedIn</span>
+          </a>,
+          <a key="personal-web" href="https://xiaohang-ji-profile.netlify.app/" target="_blank" rel="noopener noreferrer">
+            <GlobalOutlined />
+            <span>Profile</span>
+          </a>,
+        ]
       : [],
-
     menuHeaderRender: undefined,
-    // 自定义 403 页面
-    // unAccessible: <div>unAccessible</div>,
-    // 增加一个 loading 的状态
-    childrenRender: (children) => {
-      return (
-        <OAuthBridge>
-          {children}
-        </OAuthBridge>
-      );
-    },
+    childrenRender: (children) => (
+      <OAuthBridge>{children}</OAuthBridge>
+    ),
     ...initialState?.settings,
   };
 };
 
-/**
- * @name request 配置，可以配置错误处理
- * 它基于 axios 和 ahooks 的 useRequest 提供了一套统一的网络请求和错误处理方案。
- * @doc https://umijs.org/docs/max/request#配置
- */
 export const request = {
   ...requestConfig,
 };
