@@ -18,6 +18,11 @@ public class LoginUserVO implements Serializable {
     private Long id;
 
     /**
+     * User account (login name)
+     */
+    private String userAccount;
+
+    /**
      * User nickname
      */
     private String userName;
