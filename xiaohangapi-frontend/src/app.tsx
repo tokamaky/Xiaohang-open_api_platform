@@ -66,6 +66,11 @@ export async function getInitialState(): Promise<InitialState> {
         const data: OAuthPayload = JSON.parse(json);
         console.log('[OAuth] Decoded payload, isNew:', data.isNew, 'userName:', data.userName);
 
+        // Write token to localStorage so request interceptor sends it with every API call
+        if (data.token) {
+          localStorage.setItem('oauth_token', data.token);
+        }
+
         // Build the final destination BEFORE setting initialState.
         // We MUST redirect with window.location.href so the browser navigates
         // away BEFORE the Login/ProLayout component renders (no flash).
