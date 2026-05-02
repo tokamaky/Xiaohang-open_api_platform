@@ -62,6 +62,8 @@ public class GithubOAuthController {
             }
             // Encode token + user data as base64 JSON so any container can decode it.
             // We include only the essential fields to avoid long URLs.
+            log.info("[OAuth] Building callback payload — userAccount: {}, userName: {}, githubId: {}",
+                    vo.getUserAccount(), vo.getUserName(), vo.getGithubId());
             Map<String, Object> payload = new HashMap<>();
             payload.put("token", vo.getToken());
             payload.put("userAccount", vo.getUserAccount());

@@ -128,6 +128,7 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
             String token = jwtUtils.generateToken(existingUser.getId(), existingUser.getUserAccount());
             resultVO = userService.getLoginUserVO(existingUser);
             resultVO.setToken(token);
+            resultVO.setUserAccount(existingUser.getUserAccount());
             request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, existingUser);
         } else if (loginUser != null) {
             // Logged in user — bind GitHub account
@@ -144,6 +145,8 @@ public class GithubOAuthServiceImpl implements GithubOAuthService {
             String token = jwtUtils.generateToken(newUser.getId(), newUser.getUserAccount());
             resultVO = userService.getLoginUserVO(newUser);
             resultVO.setToken(token);
+            // newUser.getUserAccount() is "github_" + githubLogin — set it directly so it's available in callback.
+            resultVO.setUserAccount(newUser.getUserAccount());
         }
 
         storeOAuthResult(request, resultVO);
