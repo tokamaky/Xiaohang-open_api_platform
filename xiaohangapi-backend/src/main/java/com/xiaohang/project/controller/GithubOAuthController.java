@@ -1,8 +1,8 @@
 package com.xiaohang.project.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.xiaohang.project.common.UserConstant;
-import com.xiaohang.project.model.User;
+import com.xiaohang.xiaohangapicommon.constant.UserConstant;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import com.xiaohang.project.service.GithubOAuthService;
 import com.xiaohang.project.service.UserService;
 import com.xiaohang.project.service.impl.GithubOAuthServiceImpl;
