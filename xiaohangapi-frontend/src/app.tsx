@@ -45,12 +45,27 @@ const SESSION_USER_KEY = 'oauth_session_user';
  * initial state hydration after GitHub OAuth.
  */
 export async function getInitialState(): Promise<InitialState> {
-  // ── 1. Read OAuth data from URL hash (first-time callback) ─────────────────────
-  // Hash fragments are never sent to the server, so Railway always serves index.html.
-  // This handles the OAuth redirect: /user/login#__oauth_done=1&__oauth_data=...
+  // ── 1. Handle OAuth error first ────────────────────────────────────────────────
   if (typeof window !== 'undefined') {
     const hash = window.location.hash;
 
+    if (hash && hash.includes('__oauth_error=1')) {
+      // Extract error message
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const errorMsg = hashParams.get('error') || 'An error occurred during GitHub authentication.';
+      console.error('[OAuth] Error callback:', errorMsg);
+
+      // Clean URL
+      window.history.replaceState(null, '', window.location.pathname);
+
+      // Store error to show after React is ready
+      sessionStorage.setItem('oauth_error', decodeURIComponent(errorMsg));
+
+      // Don't redirect - stay on current page and show error
+      // The OAuthBridge component will display the error message
+    }
+
+    // ── 2. Read OAuth data from URL hash (success callback) ─────────────────────
     if (hash && hash.includes('__oauth_done=1')) {
       try {
         const hashParams = new URLSearchParams(hash.substring(1));
@@ -95,7 +110,7 @@ export async function getInitialState(): Promise<InitialState> {
       }
     }
 
-    // ── 2. Restore from sessionStorage (subsequent page loads / second attempt) ───
+    // ── 3. Restore from sessionStorage (subsequent page loads / second attempt) ───
     const storedUser = sessionStorage.getItem(SESSION_USER_KEY);
     if (storedUser) {
       try {
@@ -156,11 +171,25 @@ export async function getInitialState(): Promise<InitialState> {
 const OAuthBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     const hash = window.location.hash;
+
+    // Check for error in URL hash
     if (hash && hash.includes('__oauth_error=1')) {
       const hashParams = new URLSearchParams(hash.substring(1));
-      const errorMsg = hashParams.get('error') || 'GitHub login failed.';
+      const errorMsg = hashParams.get('error') || 'An error occurred during GitHub authentication.';
       window.history.replaceState(null, '', window.location.pathname);
-      message.error(decodeURIComponent(errorMsg));
+      setTimeout(() => {
+        message.error(decodeURIComponent(errorMsg));
+      }, 100);
+      return;
+    }
+
+    // Check for error stored in sessionStorage (from getInitialState)
+    const storedError = sessionStorage.getItem('oauth_error');
+    if (storedError) {
+      sessionStorage.removeItem('oauth_error');
+      setTimeout(() => {
+        message.error(storedError);
+      }, 100);
     }
   }, []);
 

@@ -97,20 +97,21 @@ const Profile: React.FC = () => {
   }, [data?.id]);
 
   // ── GitHub OAuth callback ──────────────────────────────────────────────
-  // Detect #__oauth_done=1 after GitHub redirects back (e.g. from Profile page "Link GitHub").
+  // Detect #__oauth_error=1 after GitHub redirects back.
   // Uses hash (#) instead of query params (?) so Railway always serves index.html.
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash || (!hash.includes('__oauth_done=1') && !hash.includes('__oauth_error=1'))) return;
 
-    const doProcess = async () => {
-      // Strip the hash to clean the URL
+    // Check for error first - errors should be shown immediately
+    if (hash.includes('__oauth_error=1')) {
+      const hashParams = new URLSearchParams(hash.substring(1));
+      const errorMsg = hashParams.get('error');
+      // Clean URL first
       window.history.replaceState(null, '', window.location.pathname);
 
-      // Check for error first
-      if (hash.includes('__oauth_error=1')) {
-        const hashParams = new URLSearchParams(hash.substring(1));
-        const errorMsg = hashParams.get('error');
+      // Show error message - use setTimeout to ensure message API is ready
+      setTimeout(() => {
         if (errorMsg) {
           try {
             message.error(decodeURIComponent(errorMsg));
@@ -120,15 +121,18 @@ const Profile: React.FC = () => {
         } else {
           message.error('Failed to link GitHub account. Please try again.');
         }
-        await getUserInfo();
-        return;
-      }
+        getUserInfo();
+      }, 100);
+      return;
+    }
 
-      // Process success case
-      if (!hash.includes('__oauth_done=1')) return;
-
+    // Process success case
+    if (hash.includes('__oauth_done=1')) {
       const hashParams = new URLSearchParams(hash.substring(1)); // strip leading #
       const encodedData = hashParams.get('__oauth_data');
+      // Clean URL
+      window.history.replaceState(null, '', window.location.pathname);
+
       if (encodedData) {
         try {
           const json = atob(encodedData);
@@ -150,15 +154,12 @@ const Profile: React.FC = () => {
           }
         } catch (e) {
           console.error('[OAuth] Failed to decode profile callback data:', e);
-          await getUserInfo();
-          message.success('GitHub account linked successfully!');
+          getUserInfo();
         }
       } else {
-        await getUserInfo();
+        getUserInfo();
       }
-    };
-
-    doProcess();
+    }
   }, []);
 
   const getUserInfo = async () => {
