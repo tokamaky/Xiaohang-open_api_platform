@@ -1,7 +1,10 @@
 package com.xiaohang.project.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xiaohang.project.common.UserConstant;
+import com.xiaohang.project.model.User;
 import com.xiaohang.project.service.GithubOAuthService;
+import com.xiaohang.project.service.UserService;
 import com.xiaohang.project.service.impl.GithubOAuthServiceImpl;
 import com.xiaohang.project.utils.JwtUtils;
 import com.xiaohang.xiaohangapicommon.common.BaseResponse;
@@ -31,6 +34,9 @@ public class GithubOAuthController {
 
     @Resource
     private GithubOAuthServiceImpl githubOAuthServiceImpl;
+
+    @Resource
+    private UserService userService;
 
     @Resource
     private JwtUtils jwtUtils;
