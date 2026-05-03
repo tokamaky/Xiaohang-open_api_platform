@@ -317,19 +317,31 @@ public class UserController {
 
     /**
      * Delete current user's account
-     * Requires password verification for security
+     * For GitHub users: no password required (they can delete directly)
+     * For regular users: password verification required for security
      *
-     * @param userPasswordRequest Password for verification
+     * @param userPasswordRequest Password for verification (optional for GitHub users)
      * @param request            HTTP request
      * @return Response with the result
      */
     @PostMapping("/delete/account")
-    public BaseResponse<Boolean> deleteMyAccount(@RequestBody UserPasswordRequest userPasswordRequest,
+    public BaseResponse<Boolean> deleteMyAccount(@RequestBody(required = false) UserPasswordRequest userPasswordRequest,
                                                   HttpServletRequest request) {
-        if (userPasswordRequest == null || StringUtils.isBlank(userPasswordRequest.getUserPassword())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Password is required");
+        // Get current user
+        User loginUser = userService.getLoginUser(request);
+
+        // Check if this is a GitHub user - GitHub users can delete without password
+        boolean isGithubUser = StringUtils.isNotBlank(loginUser.getGithubId());
+
+        if (!isGithubUser) {
+            // Regular user requires password verification
+            if (userPasswordRequest == null || StringUtils.isBlank(userPasswordRequest.getUserPassword())) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "Password is required");
+            }
         }
-        boolean result = userService.deleteMyAccount(userPasswordRequest.getUserPassword(), request);
+
+        String password = (userPasswordRequest != null) ? userPasswordRequest.getUserPassword() : null;
+        boolean result = userService.deleteMyAccount(password, request);
         return ResultUtils.success(result);
     }
 

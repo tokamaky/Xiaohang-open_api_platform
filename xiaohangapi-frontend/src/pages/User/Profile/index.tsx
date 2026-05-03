@@ -339,8 +339,11 @@ const Profile: React.FC = () => {
     }
   };
 
+  // Determine if this is a GitHub user
+  const isGithubUser = !!data?.githubId;
+
   const handleDeleteAccount = async () => {
-    if (!deletePassword && !data?.userAccount?.startsWith('github_')) {
+    if (!isGithubUser && !deletePassword) {
       message.error('Please enter your password to confirm');
       return;
     }
@@ -859,7 +862,7 @@ const Profile: React.FC = () => {
             All your data, including API keys and account information, will be permanently deleted.
           </p>
         </div>
-        {!data?.userAccount?.startsWith('github_') ? (
+        {!isGithubUser ? (
           <div style={{ marginBottom: 24 }}>
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
               Enter your password to confirm
@@ -900,7 +903,7 @@ const Profile: React.FC = () => {
             okButtonProps={{ danger: true, loading: deleteLoading }}
           >
             <Button type="primary" danger loading={deleteLoading}
-              disabled={!data?.userAccount?.startsWith('github_') && !deletePassword}>
+              disabled={!isGithubUser && !deletePassword}>
               Delete Account
             </Button>
           </Popconfirm>

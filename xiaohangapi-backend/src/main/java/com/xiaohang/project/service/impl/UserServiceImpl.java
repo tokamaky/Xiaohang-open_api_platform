@@ -342,28 +342,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public boolean deleteMyAccount(String userPassword, HttpServletRequest request) {
         User loginUser = getLoginUser(request);
 
-        // Check if user is a GitHub OAuth user (has password placeholder)
-        // GitHub OAuth users have password = md5(salt + githubId + "github_oauth")
-        boolean isGithubUser = loginUser.getUserPassword() != null &&
-                loginUser.getUserPassword().endsWith("github_oauth") &&
-                loginUser.getGithubId() != null;
+        // Check if user is a GitHub OAuth user
+        boolean isGithubUser = loginUser.getGithubId() != null &&
+                StringUtils.isNotBlank(loginUser.getGithubId());
 
         if (isGithubUser) {
-            // For GitHub OAuth users, verify using their GitHub account via JWT token
-            // They must be authenticated with a valid JWT token to delete
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                if (jwtUtils.validateToken(token)) {
-                    // Valid JWT token from GitHub OAuth, allow deletion without password
-                    // Clear session
-                    request.getSession().removeAttribute(USER_LOGIN_STATE);
-                    return this.removeById(loginUser.getId());
-                }
-            }
-            // If no valid JWT token, reject
-            throw new BusinessException(ErrorCode.OPERATION_ERROR,
-                    "Cannot delete GitHub OAuth account without valid authentication. Please log in via GitHub first.");
+            // For GitHub OAuth users, just delete directly.
+            // They were authenticated via GitHub OAuth to get here.
+            // Clear session
+            request.getSession().removeAttribute(USER_LOGIN_STATE);
+            return this.removeById(loginUser.getId());
         }
 
         // For regular users, verify password
