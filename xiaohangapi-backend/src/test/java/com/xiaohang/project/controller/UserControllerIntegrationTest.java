@@ -2,8 +2,8 @@ package com.xiaohang.project.controller;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.xiaohang.project.model.dto.user.UserRegisterRequest;
-import com.xiaohang.project.model.entity.User;
+import com.xiaohang.xiaohangapicommon.model.dto.user.UserRegisterRequest;
+import com.xiaohang.xiaohangapicommon.model.entity.User;
 import com.xiaohang.project.service.UserService;
 import com.xiaohang.xiaohangapiclientsdk.Client.XiaohangApiClient;
 import org.junit.jupiter.api.*;

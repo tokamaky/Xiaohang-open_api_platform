@@ -98,13 +98,11 @@ public class GatewayResilienceTest {
                 .timeoutDuration(Duration.ofMillis(100))
                 .build());
 
-        // First 5 should succeed
         for (int i = 0; i < 5; i++) {
             assertTrue(rateLimiter.acquirePermission(),
                     "Request " + (i + 1) + " should be allowed");
         }
 
-        // 6th should fail
         assertFalse(rateLimiter.acquirePermission(),
                 "6th request should be blocked");
     }
@@ -121,8 +119,8 @@ public class GatewayResilienceTest {
 
         int totalRequests = 50;
         CountDownLatch latch = new CountDownLatch(totalRequests);
-        AtomicInteger allowedCount = new AtomicInteger(0);
-        AtomicInteger blockedCount = new AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicInteger allowedCount = new java.util.concurrent.atomic.AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicInteger blockedCount = new java.util.concurrent.atomic.AtomicInteger(0);
 
         for (int i = 0; i < totalRequests; i++) {
             executorService.submit(() -> {
@@ -170,12 +168,10 @@ public class GatewayResilienceTest {
                         .minimumNumberOfCalls(5)
                         .build());
 
-        // Record failures
         for (int i = 0; i < 5; i++) {
             circuitBreaker.recordException(new RuntimeException("Test exception " + i));
         }
 
-        // Wait for state transition
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -193,12 +189,11 @@ public class GatewayResilienceTest {
     void testCircuitBreaker_RecordsSuccess() {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("testCB3");
 
-        // Record successes
         for (int i = 0; i < 10; i++) {
             circuitBreaker.recordSuccess();
         }
 
-        CircuitBreakerMetrics metrics = circuitBreaker.getMetrics();
+        io.github.resilience4j.circuitbreaker.CircuitBreakerMetrics metrics = circuitBreaker.getMetrics();
         assertEquals(10, metrics.getNumberOfSuccessfulCalls(),
                 "Should have 10 successful calls");
     }
@@ -209,12 +204,11 @@ public class GatewayResilienceTest {
     void testCircuitBreaker_RecordsFailures() {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("testCB4");
 
-        // Record failures
         for (int i = 0; i < 5; i++) {
             circuitBreaker.recordException(new RuntimeException("Failure " + i));
         }
 
-        CircuitBreakerMetrics metrics = circuitBreaker.getMetrics();
+        io.github.resilience4j.circuitbreaker.CircuitBreakerMetrics metrics = circuitBreaker.getMetrics();
         assertEquals(5, metrics.getNumberOfFailedCalls(),
                 "Should have 5 failed calls");
     }
@@ -249,7 +243,6 @@ public class GatewayResilienceTest {
                         .minimumNumberOfCalls(10)
                         .build());
 
-        // Record mix of successes and failures
         for (int i = 0; i < 5; i++) {
             circuitBreaker.recordSuccess();
         }
@@ -257,7 +250,7 @@ public class GatewayResilienceTest {
             circuitBreaker.recordException(new RuntimeException("Error"));
         }
 
-        CircuitBreakerMetrics metrics = circuitBreaker.getMetrics();
+        io.github.resilience4j.circuitbreaker.CircuitBreakerMetrics metrics = circuitBreaker.getMetrics();
         assertEquals(50.0, metrics.getFailureRate(), 0.1,
                 "Failure rate should be 50%");
     }
@@ -269,7 +262,6 @@ public class GatewayResilienceTest {
     @Test
     @Order(20)
     @DisplayName("Test Redis rate limiting (if Redis is available)")
-    @DisabledIf("isRedisNotAvailable")
     void testRedisRateLimiting() {
         if (redisTemplate == null) {
             assertTrue(true, "Redis not available, skipping test");
@@ -280,14 +272,12 @@ public class GatewayResilienceTest {
         Long increment = redisTemplate.opsForValue().increment(key);
         assertNotNull(increment, "Redis increment should work");
 
-        // Cleanup
         redisTemplate.delete(key);
     }
 
     @Test
     @Order(21)
     @DisplayName("Test Redis circuit breaker state (if Redis is available)")
-    @DisabledIf("isRedisNotAvailable")
     void testRedisCircuitBreakerState() {
         if (redisTemplate == null) {
             assertTrue(true, "Redis not available, skipping test");
@@ -300,16 +290,7 @@ public class GatewayResilienceTest {
         Object state = redisTemplate.opsForValue().get(key);
         assertEquals("CLOSED", state, "Circuit breaker state should be stored in Redis");
 
-        // Cleanup
         redisTemplate.delete(key);
-    }
-
-    boolean isRedisNotAvailable() {
-        try {
-            return redisTemplate == null;
-        } catch (Exception e) {
-            return true;
-        }
     }
 
     // ============================================
@@ -329,7 +310,7 @@ public class GatewayResilienceTest {
 
         int totalRequests = 1000;
         CountDownLatch latch = new CountDownLatch(totalRequests);
-        AtomicInteger allowedCount = new AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicInteger allowedCount = new java.util.concurrent.atomic.AtomicInteger(0);
 
         long startTime = System.currentTimeMillis();
 
@@ -347,6 +328,6 @@ public class GatewayResilienceTest {
 
         assertTrue(allowedCount.get() <= 100,
                 "Allowed requests should be at most 100, got: " + allowedCount.get());
-        log.info("Processed {} requests in {}ms", totalRequests, duration);
+        System.out.println("Processed " + totalRequests + " requests in " + duration + "ms");
     }
 }
