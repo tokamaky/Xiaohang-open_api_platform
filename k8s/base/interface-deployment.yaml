@@ -1,0 +1,95 @@
+# Interface Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interface
+  namespace: xiaohang-api
+  labels:
+    app: interface
+    tier: interface
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: interface
+      tier: interface
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: interface
+        tier: interface
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8123"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: interface
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: interface
+          image: interface:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8123
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: xiaohang-api-config
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /api/name/mock
+              port: 8123
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/name/mock
+              port: 8123
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Interface Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: interface-service
+  namespace: xiaohang-api
+  labels:
+    app: interface
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8123
+      targetPort: 8123
+      protocol: TCP
+  selector:
+    app: interface

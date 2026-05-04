@@ -1,0 +1,8 @@
+# Namespace configuration for Xiaohang API Platform
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: xiaohang-api
+  labels:
+    name: xiaohang-api
+    environment: production

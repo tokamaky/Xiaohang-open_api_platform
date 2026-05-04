@@ -1,0 +1,38 @@
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xiaohang-api-config
+  namespace: xiaohang-api
+data:
+  # Application settings
+  APP_NAME: "Xiaohang API Platform"
+  APP_VERSION: "1.0.0"
+  
+  # Spring Boot settings
+  SPRING_PROFILES_ACTIVE: "prod"
+  
+  # Backend settings
+  BACKEND_PORT: "7529"
+  BACKEND_CONTEXT_PATH: "/api"
+  
+  # Gateway settings
+  GATEWAY_PORT: "8090"
+  GATEWAY_INTERFACE_URL: "http://interface-service:8123"
+  
+  # Interface settings
+  INTERFACE_PORT: "8123"
+  
+  # Rate limiting
+  RATE_LIMIT_USER_MAX: "100"
+  RATE_LIMIT_USER_WINDOW: "60"
+  RATE_LIMIT_INTERFACE_MAX: "50"
+  RATE_LIMIT_INTERFACE_WINDOW: "60"
+  RATE_LIMIT_GLOBAL_MAX: "1000"
+  RATE_LIMIT_GLOBAL_WINDOW: "60"
+  
+  # Circuit breaker
+  CIRCUIT_BREAKER_FAILURE_RATE: "50"
+  CIRCUIT_BREAKER_SLOW_CALL_DURATION: "2s"
+  CIRCUIT_BREAKER_WAIT_DURATION: "30s"
+  CIRCUIT_BREAKER_SLIDING_WINDOW_SIZE: "10"

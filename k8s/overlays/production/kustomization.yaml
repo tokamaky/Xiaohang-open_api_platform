@@ -1,0 +1,50 @@
+# Production environment overlay
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: xiaohang-api
+
+bases:
+  - ../../base
+
+images:
+  - name: backend
+    newTag: v1.0.0
+  - name: gateway
+    newTag: v1.0.0
+  - name: interface
+    newTag: v1.0.0
+
+commonLabels:
+  environment: production
+
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DEBUG=false
+
+replicas:
+  - name: backend
+    count: 3
+  - name: gateway
+    count: 3
+  - name: interface
+    count: 2
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Deployment
+      name: backend
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+    target:
+      kind: Deployment
+      name: gateway

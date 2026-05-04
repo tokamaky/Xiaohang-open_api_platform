@@ -1,0 +1,42 @@
+# Kustomization.yaml - Base configuration for Xiaohang API Platform
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - backend-deployment.yaml
+  - gateway-deployment.yaml
+  - interface-deployment.yaml
+  - mysql-deployment.yaml
+  - redis-deployment.yaml
+  - backend-service.yaml
+  - gateway-service.yaml
+  - interface-service.yaml
+  - mysql-service.yaml
+  - redis-service.yaml
+  - ingress.yaml
+  - hpa.yaml
+
+commonLabels:
+  app.kubernetes.io/name: xiaohang-api
+  app.kubernetes.io/part-of: xiaohang-api-platform
+  app.kubernetes.io/managed-by: kustomize
+
+configMapGenerator:
+  - name: app-config
+    literals:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xmx512m -Xms256m -XX:+UseG1GC
+
+images:
+  - name: backend
+    newName: ghcr.io/xiaohang/xiaohang-api-platform/backend
+    newTag: latest
+  - name: gateway
+    newName: ghcr.io/xiaohang/xiaohang-api-platform/gateway
+    newTag: latest
+  - name: interface
+    newName: ghcr.io/xiaohang/xiaohang-api-platform/interface
+    newTag: latest
