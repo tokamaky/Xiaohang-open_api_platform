@@ -1,0 +1,51 @@
+# Test environment configuration for CI/CD
+# Used by GitHub Actions for running tests
+
+spring:
+  application:
+    name: xiaohang-api-backend-test
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQLHOST:127.0.0.1}:${MYSQLPORT:3306}/${MYSQLDATABASE:xiaohang_api}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQLUSER:root}
+    password: ${MYSQLPASSWORD:test_password}
+  
+  redis:
+    host: ${SPRING_REDIS_HOST:127.0.0.1}
+    port: ${SPRING_REDIS_PORT:6379}
+    password: ${SPRING_REDIS_PASSWORD:}
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.xiaohang.xiaohangapicommon.model.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: isDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: xiaohang-api-platform-test-secret-key-for-ci-only
+  expiration: 86400000
+
+server:
+  port: 7529
+
+logging:
+  level:
+    root: INFO
+    com.xiaohang: DEBUG
+    org.springframework.test: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

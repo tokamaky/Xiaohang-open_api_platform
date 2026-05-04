@@ -1,0 +1,213 @@
+name: CD - Continuous Deployment
+
+on:
+  workflow_run:
+    workflows: ["CI - Continuous Integration"]
+    types: [completed]
+    branches: [main, develop]
+
+env:
+  JAVA_VERSION: '17'
+  KUBECONFIG: ${{ secrets.KUBECONFIG }}
+
+jobs:
+  # ============================================
+  # Deployment to Staging Environment
+  # ============================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: builds/
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl for staging
+        run: |
+          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > kubeconfig.yaml
+          echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
+
+      - name: Deploy to Staging
+        run: |
+          kubectl apply -k k8s/overlays/staging --dry-run=client | head -20
+          kubectl set image deployment/backend backend=ghcr.io/${{ github.repository }}/backend:develop-${{ github.sha }} -n staging
+          kubectl set image deployment/gateway gateway=ghcr.io/${{ github.repository }}/gateway:develop-${{ github.sha }} -n staging
+          kubectl set image deployment/interface interface=ghcr.io/${{ github.repository }}/interface:develop-${{ github.sha }} -n staging
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/backend -n staging --timeout=300s
+          kubectl rollout status deployment/gateway -n staging --timeout=300s
+          kubectl rollout status deployment/interface -n staging --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n staging
+          kubectl get svc -n staging
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests against staging..."
+          curl -f https://staging-api.xiaohang.com/health || exit 1
+          curl -f https://staging-gateway.xiaohang.com/health || exit 1
+
+  # ============================================
+  # Deployment to Production Environment
+  # ============================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main'
+    needs: deploy-staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: builds/
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl for production
+        run: |
+          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > kubeconfig.yaml
+          echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
+
+      - name: Run backup before deployment
+        if: always()
+        run: |
+          echo "Creating database backup..."
+          kubectl exec -n production deployment/mysql -- \
+            mysqldump -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }} xiaohang_api > backup-$(date +%Y%m%d-%H%M%S).sql
+        continue-on-error: true
+
+      - name: Deploy to Production
+        run: |
+          # Blue-Green deployment strategy
+          kubectl apply -f k8s/base/production-blue.yaml -n production
+          kubectl wait --for=condition=available deployment/backend-blue -n production --timeout=300s
+          
+          # Switch traffic
+          kubectl patch service gateway -n production -p '{"spec":{"selector":{"version":"green"}}}'
+          
+          # Verify new deployment
+          curl -f https://api.xiaohang.com/health || exit 1
+          
+          # Scale down old deployment
+          kubectl scale deployment/backend-blue --replicas=0 -n production
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/backend-green -n production --timeout=600s
+          kubectl rollout status deployment/gateway-green -n production --timeout=600s
+          kubectl rollout status deployment/interface-green -n production --timeout=600s
+
+      - name: Verify production deployment
+        run: |
+          kubectl get pods -n production
+          kubectl get svc -n production
+
+      - name: Run integration tests
+        run: |
+          echo "Running integration tests..."
+          mvn verify -Dspring.profiles.active=production -Dtest=IntegrationTest
+
+      - name: Notify deployment success
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 Deployment to Production Complete!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Xiaohang API Platform* deployed to *Production* :white_check_mark:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {"type": "mrkdwn", "text": "*Commit:* `${{ github.sha }}`"},
+                    {"type": "mrkdwn", "text": "*Author:* ${{ github.actor }}"},
+                    {"type": "mrkdwn", "text": "*Branch:* `${{ github.ref_name }}`"},
+                    {"type": "mrkdwn", "text": "*Workflow:* ${{ github.workflow }}"}
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        continue-on-error: true
+
+  # ============================================
+  # Helm Deployment (Alternative)
+  # ============================================
+  helm-deploy:
+    name: Helm Deployment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.13.0'
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig.yaml
+          echo "KUBECONFIG=$(pwd)/kubeconfig.yaml" >> $GITHUB_ENV
+
+      - name: Add repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install xiaohang-api ./helm/xiaohang-api \
+            --namespace ${{ github.event.inputs.environment }} \
+            --create-namespace \
+            --values ./helm/xiaohang-api/values-${{ github.event.inputs.environment }}.yaml \
+            --set image.tag=${{ github.event.inputs.version }} \
+            --wait --timeout 10m \
+            --atomic
+
+      - name: Verify Helm release
+        run: |
+          helm list -n ${{ github.event.inputs.environment }}
+          kubectl get all -n ${{ github.event.inputs.environment }}
