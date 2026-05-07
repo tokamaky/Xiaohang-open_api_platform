@@ -219,6 +219,87 @@ const phases: Phase[] = [
       'Storing githubId as a nullable unique column on the User table works cleanly for both password-based and OAuth-only accounts. Just ensure the uniqueness constraint handles NULL values correctly (MySQL treats multiple NULLs as non-conflicting in unique indexes).',
     ],
   },
+  {
+    key: 'phase-4',
+    phase: 'Phase 4',
+    date: '2026/05/06',
+    title: 'CI/CD Pipeline & Testing Infrastructure',
+    subtitle: 'End-to-end automation from code to production deployment',
+    icon: <CloudOutlined />,
+    color: '#7C3AED',
+    features: [
+      {
+        title: 'GitHub Actions CI Pipeline',
+        description:
+          'Implemented a comprehensive CI pipeline with five parallel jobs: code quality analysis via SonarQube, Maven build, unit tests with MySQL/Redis services, OWASP security scanning, and Docker image building. The pipeline triggers on push and pull requests to main/develop/feature branches, with Maven caching for faster builds and JaCoCo coverage reports uploaded to Codecov.',
+        tag: 'GitHub Actions',
+        tagColor: '#FF6B6B',
+      },
+      {
+        title: 'Multi-Environment CD Pipeline',
+        description:
+          'Designed a staged deployment pipeline that automatically deploys to Staging on develop branch merges and Production on main branch merges. The CD workflow waits for CI completion via workflow_run trigger, ensuring only passing builds reach deployment. Each environment uses independent Kubernetes configurations and secrets.',
+        tag: 'CD Pipeline',
+        tagColor: '#4ECDC4',
+      },
+      {
+        title: 'Blue-Green Deployment Strategy',
+        description:
+          'Implemented zero-downtime production deployments using a blue-green strategy. The new deployment (green) is provisioned alongside the current one (blue), health-checked, then traffic is switched via a single kubectl patch command. If anything goes wrong, traffic can be reverted instantly by switching back to blue.',
+        tag: 'Blue-Green',
+        tagColor: '#F0B429',
+      },
+      {
+        title: 'Kubernetes Deployment Configuration',
+        description:
+          'Created Kubernetes manifests for backend, gateway, and interface services with proper resource limits, health checks (liveness/readiness probes), and environment-specific configurations. The overlay structure allows environment-specific customization while sharing common base templates.',
+        tag: 'Kubernetes',
+        tagColor: '#45B7D1',
+      },
+      {
+        title: 'Helm Chart Deployment Support',
+        description:
+          'Added Helm chart support for flexible deployments via workflow_dispatch trigger. Users can manually deploy to any environment with custom image tags, enabling hotfixes and emergency deployments without merging code. The atomic flag ensures automatic rollback on failure.',
+        tag: 'Helm Charts',
+        tagColor: '#9B59B6',
+      },
+      {
+        title: 'Comprehensive Unit Test Coverage',
+        description:
+          'Added unit tests across service layers (UserService, InterfaceInfoService), utilities (SqlUtils), circuit breaker resilience, and exception handling. Tests use Mockito for dependency injection without database coupling, enabling fast, reliable test execution in CI. SQL injection prevention was explicitly tested with various attack vectors.',
+        tag: 'Unit Testing',
+        tagColor: '#96CEB4',
+      },
+      {
+        title: 'SBOM Generation & Security Compliance',
+        description:
+          'Integrated Anchore SBOM action to generate SPDX-formatted Software Bill of Materials for each Docker image. SBOMs capture all dependencies and their versions, enabling vulnerability tracking and compliance reporting. Artifacts are retained for 365 days.',
+        tag: 'SBOM',
+        tagColor: '#00D4AA',
+      },
+      {
+        title: 'Slack Deployment Notifications',
+        description:
+          'Added Slack webhook integration to notify the team of deployment status. Notifications include commit SHA, author, branch, and workflow name in a structured format, enabling the team to track what changed and who deployed it without checking GitHub.',
+        tag: 'Slack Notify',
+        tagColor: '#E84C5A',
+      },
+      {
+        title: 'Database Backup Before Production Deployments',
+        description:
+          'Implemented automatic MySQL backup before production deployments using kubectl exec to run mysqldump inside the production pod. Backups are timestamped and stored, providing a recovery point before any breaking changes. The backup step uses continue-on-error to ensure it never blocks deployment.',
+        tag: 'DB Backup',
+        tagColor: '#F0B429',
+      },
+    ],
+    learnings: [
+      'workflow_run triggers run in a separate context with limited access to the triggering workflow\'s artifacts. Always upload what you need in the CI workflow, or use a composite action to share logic between pipelines.',
+      'Blue-green deployments require your application to handle multiple versions running simultaneously — specifically, database migrations must be backward-compatible. If you need destructive changes, use rolling updates instead.',
+      'Kubernetes health probes (liveness/readiness) are not optional for production. Without them, Kubernetes will route traffic to pods that are starting, crashing, or overloaded, causing unpredictable failures.',
+      'Maven test caching with mvn test -Dspring.profiles.active=test works well, but remember that test containers (MySQL, Redis) still need to start. Use container health checks to avoid flaky tests from services that haven\'t finished initializing.',
+      'SBOM generation adds minimal build time but provides massive security value. In a breach scenario, you can immediately query which images contain a vulnerable dependency instead of playing archaeology across multiple repositories.',
+    ],
+  },
 ];
 
 const Changelog: React.FC = () => {
@@ -245,17 +326,17 @@ const Changelog: React.FC = () => {
             <Divider className="cl-header-divider" />
             <div className="cl-header-stats">
               <div className="cl-stat">
-                <span className="cl-stat-number">3</span>
+                <span className="cl-stat-number">4</span>
                 <span className="cl-stat-label">Phase Completed</span>
               </div>
               <div className="cl-stat-sep" />
               <div className="cl-stat">
-                <span className="cl-stat-number">18</span>
+                <span className="cl-stat-number">27</span>
                 <span className="cl-stat-label">Features Added</span>
               </div>
               <div className="cl-stat-sep" />
               <div className="cl-stat">
-                <span className="cl-stat-number">15</span>
+                <span className="cl-stat-number">20</span>
                 <span className="cl-stat-label">Key Learnings</span>
               </div>
             </div>
@@ -358,19 +439,14 @@ const Changelog: React.FC = () => {
               </Title>
             </div>
             <Paragraph className="cl-future-desc">
-              Phases 4 and 5 are planned. Each will follow the same structure: a
+              Phase 5 is planned and will follow the same structure: a
               problem statement, implementation details, and real technical insights gained
               from building.
             </Paragraph>
             <div className="cl-future-list">
               <div className="cl-future-item">
-                <span className="cl-future-item-num">04</span>
-                <span className="cl-future-item-name">SkyWalking Distributed Tracing</span>
-                <Tag color="default">Planned</Tag>
-              </div>
-              <div className="cl-future-item">
                 <span className="cl-future-item-num">05</span>
-                <span className="cl-future-item-name">RabbitMQ Async Processing</span>
+                <span className="cl-future-item-name">SkyWalking Distributed Tracing</span>
                 <Tag color="default">Planned</Tag>
               </div>
             </div>
